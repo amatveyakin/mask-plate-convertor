@@ -18,6 +18,10 @@ private:
     QLineEdit* m_fileNameLineedit = 0;
     QPushButton* m_browseButton = 0;
     QPushButton* m_convertButton = 0;
+
+private slots:
+    void browse();
+    void convert();
 };
 
 #endif // MAINWINDOW_H
