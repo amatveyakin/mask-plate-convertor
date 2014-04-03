@@ -7,8 +7,10 @@
 #include <QPushButton>
 #include <QTextStream>
 
+#include "blueprint.h"
 #include "mainwindow.h"
-#include "maskplateprogram.h"
+#include "program.h"
+#include "programparser.h"
 
 const QString appName = "Mask plate convertor";
 
@@ -62,13 +64,16 @@ void MainWindow::convert()
         return;
     }
 
-    MaskPlateProgram program;
+    Program program;
+    ProgramParser parser(&program);
 
     QTextStream in(&file);
     while (!in.atEnd()) {
         QString line = in.readLine();
-        program.processLine(line);
+        parser.processLine(line);
     }
 
-    QApplication::clipboard()->setText(program.convert());
+    Blueprint blueprint = program.execute();
+    QString output = blueprint.toAutocadCommandLineCommands();
+    QApplication::clipboard()->setText(output);
 }
