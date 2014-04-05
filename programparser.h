@@ -33,8 +33,10 @@ private:
         MainHeader1,
         MainHeader2,
         MainBody,
-        SubroutinesHeader,
-        SubroutinesBody,
+        FirstSubroutineHeader,
+        SuccessiveSubroutineHeader,
+        SubroutineBody,
+        End,
     };
 
 private:
@@ -52,7 +54,7 @@ private:
 
     void setPosition(TextPosition position);
     void setCurrentRoutineIndex(int newIndex);
-    void startNextSection();
+    void setSection(Section newSection);
     bool atEol() const;
     QStringRef line() const;
     QStringRef prefix(int length) const;
@@ -72,10 +74,13 @@ private:
     void parseStatement();
     void parseSubroutineCall();
     void parseCommand();
-    void parseLaserSwitchCommand();
+    void parseControlCommand(bool &subroutineFinished);
     void parseSetWidthCommand();
     void parseMovementCommand();
-    void parseFixedLine(const QString& expected);
+    void parseSubroutineEnd();
+
+private:
+    friend class EolChecker;
 };
 
 #endif // PROGRAMPARSER_H

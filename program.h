@@ -19,6 +19,7 @@ class Program
 public:
     static const int mainRoutineIndex = -1;
     static const int maxRecursionDepth = 16;  // 5 by specification
+    static const int startingLineWidth = 100;
 
     Program();
     ~Program();

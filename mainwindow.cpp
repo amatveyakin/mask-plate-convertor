@@ -14,10 +14,11 @@
 #include "program.h"
 #include "programparser.h"
 
+
 const QString appName = "Mask plate convertor";
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(QWidget* parentArg)
+    : QMainWindow(parentArg)
 {
     setWindowTitle(appName);
     setCentralWidget(new QWidget(this));
@@ -78,10 +79,11 @@ void MainWindow::convert()
         std::unique_ptr<Program> program = parser.finish();
         std::unique_ptr<Blueprint> blueprint = program->execute();
         QString output = blueprint->toAutocadCommandLineCommands();
+
         QApplication::clipboard()->setText(output);
+        QMessageBox::information(this, appName, "Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)");
     }
     catch (const std::exception &error) {
-        QMessageBox::critical(this, "Ошибка преобразования", error.what());
-        // TODO
+        QMessageBox::critical(this, QString("%1 — Ошибка").arg(appName), error.what());
     }
 }

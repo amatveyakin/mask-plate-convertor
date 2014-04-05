@@ -1,3 +1,5 @@
+// TODO: Add function make_command that acts like make unique, but also saves current positino to command; use it in execution error messages
+
 #include <assert.h>
 
 #include "cpp_extensions.h"
@@ -9,7 +11,16 @@ class ParseError : public std::runtime_error
 {
 public:
     ParseError(TextPosition position, const QString& what_arg)
-        : std::runtime_error(QString("[%1:%2] %3").arg(QString::number(position.line), QString::number(position.column), what_arg).toStdString()) {}
+        : std::runtime_error(QString("[%1:%2] %3").arg(QString::number(position.line + 1), QString::number(position.column + 1), what_arg).toStdString()) {}
+};
+
+class EolChecker
+{
+public:
+    EolChecker(ProgramParser *parser) : m_parser(parser) {}
+    ~EolChecker() noexcept(false)  { if (!m_parser->atEol())  throw m_parser->frustratedExpectations("конец строки"); }
+private:
+    ProgramParser *m_parser = nullptr;
 };
 
 
@@ -28,44 +39,47 @@ void ProgramParser::processLine(const QString& nextLine)
     assert(m_program);
     setPosition({m_position.line + 1, 0});
     m_line = nextLine.trimmed();
+    EolChecker eolChecker(this);
     if (atEol())
         return;
     switch (m_section)
     {
     case Section::MainHeader1:
-        parseFixedLine("%1G01G91G92M77");
-        startNextSection();
+        eat("%1G01G91G92M77");
+        setSection(Section::MainHeader2);
         return;
     case Section::MainHeader2:
         eatLineNo();
-        parseFixedLine("F1200");
-        startNextSection();
+        eat("F1200");
+        setSection(Section::MainBody);
         return;
     case Section::MainBody:
         eatLineNo();
-        if (line().startsWith("M02"))
-            startNextSection();
+        if (tryToEat("M02"))
+            setSection(Section::FirstSubroutineHeader);
         else
             parseStatement();
         return;
-    case Section::SubroutinesHeader:
-        parseFixedLine("%2L51");
-        startNextSection();
+    case Section::FirstSubroutineHeader:
+        eat("%2");
+        parseSubroutineHeader();
         return;
-    case Section::SubroutinesBody:
-        if (nextChar() == 'L')
-            parseSubroutineHeader();
-        else {
-            eatLineNo();
-            parseStatement();
-        }
+    case Section::SuccessiveSubroutineHeader:
+        parseSubroutineHeader();
+        return;
+    case Section::SubroutineBody:
+        eatLineNo();
+        parseStatement();
+        return;
+    case Section::End:
+        throw ParseError(m_position, "Неожиданный текст после конца программы");
         return;
     }
 }
 
 std::unique_ptr<Program> ProgramParser::finish()
 {
-    if (m_section != Section::SubroutinesBody)
+    if (m_section != Section::End)
         throw ParseError(m_position, QString("Неожиданный конец программы"));
     return std::move(m_program);
 }
@@ -85,9 +99,9 @@ void ProgramParser::setCurrentRoutineIndex(int newIndex)
     m_currentRoutineIndex = newIndex;
 }
 
-void ProgramParser::startNextSection()
+void ProgramParser::setSection(Section newSection)
 {
-    m_section = Section(int(m_section) + 1);
+    m_section = newSection;
 }
 
 bool ProgramParser::atEol() const
@@ -158,9 +172,9 @@ int ProgramParser::eatUnsignedInteger(int length)
 
 Number ProgramParser::eatNumber()
 {
-    if (nextChar() != '+' && nextChar() != '-')
-        throw frustratedExpectations("\"+\" или \"-\"");
-    int sign = (eatChar() == '-') ? -1 : 1;
+    int sign = 1;
+    if (nextChar() == '+' || nextChar() == '-')
+        sign = (eatChar() == '-') ? -1 : 1;
     if (tryToEat("R"))
         return Number::variable(eatUnsignedInteger() * sign);
     return Number::literal(eatUnsignedInteger() * sign);
@@ -179,9 +193,18 @@ void ProgramParser::pushCommand(std::unique_ptr<ProgramCommand> newCommand)
 
 void ProgramParser::parseSubroutineHeader()
 {
-    eat("L");
-    int subroutineIndex = eatUnsignedInteger();
-    setCurrentRoutineIndex(subroutineIndex);
+    if (nextChar() == 'L') {
+        eat("L");
+        int subroutineIndex = eatUnsignedInteger();
+        setCurrentRoutineIndex(subroutineIndex);
+        setSection(Section::SubroutineBody);
+    }
+    else {
+        eatLineNo();
+        eat("M30");
+        setSection(Section::End);
+        return;
+    }
 }
 
 void ProgramParser::parseStatement()
@@ -211,23 +234,30 @@ void ProgramParser::parseSubroutineCall()
 void ProgramParser::parseCommand()
 {
     while (nextChar() == 'M' || nextChar() == '(') {
+        bool subroutineFinished = false;
         if (nextChar() == 'M')
-            parseLaserSwitchCommand();
+            parseControlCommand(subroutineFinished);
         else if (nextChar() == '(')
             parseSetWidthCommand();
+        if (subroutineFinished)
+            return;
     }
     parseMovementCommand();
 }
 
-void ProgramParser::parseLaserSwitchCommand()
+void ProgramParser::parseControlCommand(bool& subroutineFinished)
 {
-    eat("M");
-    if (tryToEat("77"))
+    subroutineFinished = false;
+    if (tryToEat("M77"))
         pushCommand(std::make_unique<DisableLaserCommand>());
-    else if (tryToEat("78"))
+    else if (tryToEat("M78"))
         pushCommand(std::make_unique<EnableLaserCommand>());
+    else if (m_section == Section::SubroutineBody && tryToEat("M17")) {
+        subroutineFinished = true;
+        setSection(Section::SuccessiveSubroutineHeader);
+    }
     else
-        throw frustratedExpectations("\"77\" или \"78\"");
+        throw frustratedExpectations("\"M77\", \"M78\" или \"M17\"");
 }
 
 void ProgramParser::parseSetWidthCommand()
@@ -260,11 +290,4 @@ void ProgramParser::parseMovementCommand()
             throw frustratedExpectations("\"X\" или \"Y\"");
     }
     pushCommand(std::make_unique<MoveToCommand>(movement));
-}
-
-void ProgramParser::parseFixedLine(const QString& expected)
-{
-    eat(expected);
-    if (!atEol())
-        throw ParseError(m_position, QString("Неожиданный текст: \"%1\"").arg(line().toString()));
 }

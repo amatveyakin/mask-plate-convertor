@@ -10,7 +10,7 @@
 class ExecutionError : public std::runtime_error
 {
 public:
-    ExecutionError(const std::string& what_arg) : std::runtime_error(what_arg) {}
+    ExecutionError(const std::string& what_arg) : std::runtime_error(what_arg) {}  // TODO: Print callstack
 };
 
 
@@ -44,14 +44,15 @@ struct ProgramState
 {
     std::stack<Call> callStack;
     bool laserEnabled   = false;
-    int lineWidth       = 100;
+    int lineWidth       = Program::startingLineWidth;
     QPoint position     = {0, 0};
 };
 
 struct RunningProgram
 {
-    RunningProgram(const Program *program)
-        : program(program)
+    RunningProgram(const Program *programArg)
+        : program(programArg)
+        , output(new Blueprint)
     {
     }
 
@@ -157,6 +158,7 @@ DisableLaserCommand::DisableLaserCommand()
 void DisableLaserCommand::execute(RunningProgram& instance)
 {
     instance.state.laserEnabled = false;
+    instance.output->finishElement();
 }
 
 
@@ -167,6 +169,8 @@ SetLineWidthCommand::SetLineWidthCommand(int newWidth)
 
 void SetLineWidthCommand::execute(RunningProgram& instance)
 {
+    if (instance.state.laserEnabled)
+        throw ExecutionError("Попытка изменения ширины зазора при включённом лазере");
     instance.state.lineWidth = m_newWidth;
 }
 
@@ -178,7 +182,10 @@ MoveToCommand::MoveToCommand(Movement movement)
 
 void MoveToCommand::execute(RunningProgram& instance)
 {
+    QPoint oldPosition = instance.state.position;
     instance.state.position += m_movement.value(instance.state.callStack.top().arguments);
+    if (instance.state.laserEnabled)
+        instance.output->appendLineTo(oldPosition, instance.state.position, instance.state.lineWidth);
 }
 
 
@@ -194,9 +201,9 @@ void CallSubroutineCommand::execute(RunningProgram& instance)
     // TODO: in case of error:  print stack;  always print 2 digits for index
     const Routine* subroutine = instance.program->subroutine(m_subroutineIndex);
     if (!subroutine)
-        throw ExecutionError("Ошибка вызова подпрограммы: подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
+        throw ExecutionError("Подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
     if (instance.state.callStack.size() >= Program::maxRecursionDepth)  // TODO: +-1 ?
-        throw ExecutionError("Ошибка вызова подпрограммы: превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
+        throw ExecutionError("Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
     for (int i = 0; i < m_repeatCount; ++i)
         subroutine->execute(instance, m_arguments);
 }
