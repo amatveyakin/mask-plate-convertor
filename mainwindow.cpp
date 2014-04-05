@@ -1,3 +1,5 @@
+#include <exception>
+
 #include <QApplication>
 #include <QBoxLayout>
 #include <QClipboard>
@@ -57,23 +59,29 @@ void MainWindow::browse()
 
 void MainWindow::convert()
 {
-    QString fileName = m_fileNameLineedit->text();
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, appName, QString("Не удалось открыть файл: \"%1\"").arg(fileName));
-        return;
+    try {
+        QString fileName = m_fileNameLineedit->text();
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, appName, QString("Не удалось открыть файл: \"%1\"").arg(fileName));
+            return;
+        }
+
+        ProgramParser parser;
+
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            parser.processLine(line);
+        }
+
+        std::unique_ptr<Program> program = parser.finish();
+        std::unique_ptr<Blueprint> blueprint = program->execute();
+        QString output = blueprint->toAutocadCommandLineCommands();
+        QApplication::clipboard()->setText(output);
     }
-
-    Program program;
-    ProgramParser parser(&program);
-
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        parser.processLine(line);
+    catch (const std::exception &error) {
+        QMessageBox::critical(this, "Ошибка преобразования", error.what());
+        // TODO
     }
-
-    Blueprint blueprint = program.execute();
-    QString output = blueprint.toAutocadCommandLineCommands();
-    QApplication::clipboard()->setText(output);
 }

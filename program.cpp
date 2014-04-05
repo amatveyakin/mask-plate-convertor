@@ -7,61 +7,32 @@
 #include "program.h"
 
 
-class ProgramCommand;
-
-static const int mainRoutineIndex = -1;
-static const int maxRecursionDepth = 5;
-
-
 class ExecutionError : public std::runtime_error
 {
 public:
     ExecutionError(const std::string& what_arg) : std::runtime_error(what_arg) {}
 };
 
-struct Arguments
-{
-    void set(int index, int value)      { m_data[index] = value; }
-    bool isSet(int index) const         { return m_data.count(index); }
-    int get(int index) const            { auto it = m_data.find(index);  if (it == m_data.end()) abort();  return it->second; }
-private:
-    std::map<int, int> m_data;
-};
 
-class Number
+int Number::value(const Arguments& arguments) const
 {
-public:
-    static Number literal(int value)    { return {Literal,  value}; }
-    static Number variable(int value)   { return {Variable, value}; }
-    int value(const Arguments& arguments) const
-    {
-        switch (m_type) {
-        case Literal:
-            return m_data;
-        case Variable:
-            if (!arguments.isSet(m_data))
-                throw ExecutionError("Параметр " + std::to_string(m_data) + " использован, но не задан.");  // TODO: Context
-            return arguments.get(m_data);
-        }
-        abort();
+    switch (m_type) {
+    case Literal:
+        return m_data;
+    case Variable:
+        if (!arguments.isSet(m_data))
+            throw ExecutionError("Параметр " + std::to_string(m_data) + " использован, но не задан.");  // TODO: Context
+        return arguments.get(m_data);
     }
-private:
-    enum Type { Literal, Variable };
-private:
-    Type m_type;
-    int m_data;
-private:
-    Number(Type type, int data) : m_type(type), m_data(data) {}
-};
+    assert(false);
+}
 
-struct Movement
+
+QPoint Movement::value(const Arguments& arguments)
 {
-    Number x, y;
-    QPoint value(const Arguments& arguments)
-    {
-        return {x.value(arguments), y.value(arguments)};
-    }
-};
+    return {x.value(arguments), y.value(arguments)};
+}
+
 
 struct Call
 {
@@ -86,7 +57,7 @@ struct RunningProgram
 
     const Program *program = nullptr;
     ProgramState state;
-    Blueprint output;
+    std::unique_ptr<Blueprint> output;
 };
 
 class Routine
@@ -104,94 +75,6 @@ private:
 };
 
 
-class ProgramCommand
-{
-public:
-    virtual ~ProgramCommand() {}
-    virtual void execute(RunningProgram& instance) = 0;
-};
-
-class EnableLaserCommand : public ProgramCommand
-{
-public:
-    EnableLaserCommand()
-    {
-    }
-    virtual void execute(RunningProgram& instance) override
-    {
-        instance.state.laserEnabled = true;
-    }
-};
-
-class DisableLaserCommand : public ProgramCommand
-{
-public:
-    DisableLaserCommand()
-    {
-    }
-    virtual void execute(RunningProgram& instance) override
-    {
-        instance.state.laserEnabled = false;
-    }
-};
-
-class SetLineWidthCommand : public ProgramCommand
-{
-public:
-    SetLineWidthCommand(int newWidth)
-        : m_newWidth(newWidth)
-    {
-    }
-    virtual void execute(RunningProgram& instance) override
-    {
-        instance.state.lineWidth = m_newWidth;
-    }
-private:
-    int m_newWidth;
-};
-
-class MoveToCommand : public ProgramCommand
-{
-public:
-    MoveToCommand(Movement movement)
-        : m_movement(movement)
-    {
-    }
-    virtual void execute(RunningProgram& instance) override
-    {
-        instance.state.position += m_movement.value(instance.state.callStack.top().arguments);
-    }
-private:
-    Movement m_movement;
-};
-
-class CallSubroutineCommand : public ProgramCommand
-{
-public:
-    CallSubroutineCommand(int programIndex, int repeatCount, const Arguments &arguments)
-        : m_programIndex(programIndex)
-        , m_repeatCount(repeatCount)
-        , m_arguments(arguments)
-    {
-    }
-    virtual void execute(RunningProgram& instance) override
-    {
-        // TODO: in case of error:  print stack;  always print 2 digits for index
-        const Routine* subroutine = instance.program->subroutine(m_programIndex);
-        if (!subroutine)
-            throw ExecutionError("Ошибка вызова подпрограммы: подпрограмма " + std::to_string(m_programIndex) + "не существует");
-        if (instance.state.callStack.size() >= maxRecursionDepth)  // TODO: +-1 ?
-            throw ExecutionError("Ошибка вызова подпрограммы: превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_programIndex));
-        for (int i = 0; i < m_repeatCount; ++i)
-            subroutine->execute(instance, m_arguments);
-    }
-private:
-    int m_programIndex;
-    int m_repeatCount;
-    Arguments m_arguments;
-};
-
-
 void Routine::pushBack(std::unique_ptr<ProgramCommand> newCommand)
 {
     m_commands.push_back(std::move(newCommand));
@@ -205,6 +88,13 @@ void Routine::execute(RunningProgram& instance, const Arguments &arguments) cons
 }
 
 
+Routine *nonnullRoutine(std::unique_ptr<Routine>& routine, int index)
+{
+    if (!routine)
+        routine.reset(new Routine(index));
+    return routine.get();
+}
+
 Program::Program()
 {
 }
@@ -213,9 +103,29 @@ Program::~Program()
 {
 }
 
+void Program::pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newCommand)
+{
+    if (routineIndex == mainRoutineIndex)
+        mainRoutine()->pushBack(std::move(newCommand));
+    else
+        subroutine(routineIndex)->pushBack(std::move(newCommand));
+}
+
+std::unique_ptr<Blueprint> Program::execute() const
+{
+    RunningProgram instance(this);
+    mainRoutine()->execute(instance, {});
+    return std::move(instance.output);
+}
+
 const Routine* Program::mainRoutine() const
 {
     return m_mainRoutine.get();
+}
+
+Routine* Program::mainRoutine()
+{
+    return nonnullRoutine(m_mainRoutine, mainRoutineIndex);
 }
 
 const Routine* Program::subroutine(int index) const
@@ -224,9 +134,69 @@ const Routine* Program::subroutine(int index) const
     return it == m_subroutines.end() ? nullptr : it->second.get();
 }
 
-Blueprint Program::execute() const
+Routine* Program::subroutine(int index)
 {
-    RunningProgram instance(this);
-    mainRoutine()->execute(instance, {});
-    return instance.output;
+    return nonnullRoutine(m_subroutines[index], index);
+}
+
+
+EnableLaserCommand::EnableLaserCommand()
+{
+}
+
+void EnableLaserCommand::execute(RunningProgram& instance)
+{
+    instance.state.laserEnabled = true;
+}
+
+
+DisableLaserCommand::DisableLaserCommand()
+{
+}
+
+void DisableLaserCommand::execute(RunningProgram& instance)
+{
+    instance.state.laserEnabled = false;
+}
+
+
+SetLineWidthCommand::SetLineWidthCommand(int newWidth)
+    : m_newWidth(newWidth)
+{
+}
+
+void SetLineWidthCommand::execute(RunningProgram& instance)
+{
+    instance.state.lineWidth = m_newWidth;
+}
+
+
+MoveToCommand::MoveToCommand(Movement movement)
+    : m_movement(movement)
+{
+}
+
+void MoveToCommand::execute(RunningProgram& instance)
+{
+    instance.state.position += m_movement.value(instance.state.callStack.top().arguments);
+}
+
+
+CallSubroutineCommand::CallSubroutineCommand(int subroutineIndex, int repeatCount, const Arguments& arguments)
+    : m_subroutineIndex(subroutineIndex)
+    , m_repeatCount(repeatCount)
+    , m_arguments(arguments)
+{
+}
+
+void CallSubroutineCommand::execute(RunningProgram& instance)
+{
+    // TODO: in case of error:  print stack;  always print 2 digits for index
+    const Routine* subroutine = instance.program->subroutine(m_subroutineIndex);
+    if (!subroutine)
+        throw ExecutionError("Ошибка вызова подпрограммы: подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
+    if (instance.state.callStack.size() >= Program::maxRecursionDepth)  // TODO: +-1 ?
+        throw ExecutionError("Ошибка вызова подпрограммы: превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
+    for (int i = 0; i < m_repeatCount; ++i)
+        subroutine->execute(instance, m_arguments);
 }
