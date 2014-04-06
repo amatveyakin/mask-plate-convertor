@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
     m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
-    m_convertAction = new QAction("Конвертировать", this);
+    m_convertAction = new QAction(QIcon(":/images/go.png"), "Конвертировать", this);
 
     m_openAction->setShortcut(QKeySequence::Open);
     m_openAction->setShortcut(QKeySequence::Save);

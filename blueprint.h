@@ -21,15 +21,17 @@ public:
     ~Blueprint();
 
     const std::vector<Element> &elements() const    { return m_elements; }
+    QRect boundingRect() const                      { return m_boundingRect; }
 
     void appendLine(QPoint from, QPoint to, int width);
     void finishElement();
-    void cleanUp();
+    void postProcess();
 
     QString toAutocadCommandLineCommands() const;
 
 private:
     std::vector<Element> m_elements;
+    QRect m_boundingRect;
 };
 
 #endif // BLUEPRINT_H

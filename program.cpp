@@ -52,7 +52,7 @@ std::unique_ptr<Blueprint> Program::execute() const
 {
     RunningProgram instance(this);
     routine(mainRoutineIndex)->execute(instance, Arguments());
-    instance.output->cleanUp();
+    instance.output->postProcess();
     return std::move(instance.output);
 }
 

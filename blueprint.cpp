@@ -34,11 +34,20 @@ void Blueprint::finishElement()
         m_elements.emplace_back();
 }
 
-void Blueprint::cleanUp()
+static QRect elementBoundingRect(const Element& element)
+{
+    int bonus = (element.width + 1) / 2;
+    return element.polygon.boundingRect().adjusted(-bonus, -bonus, bonus, bonus);
+}
+
+void Blueprint::postProcess()
 {
     assert(!m_elements.empty());
     if (m_elements.back().polygon.empty())
         m_elements.pop_back();
+    m_boundingRect = elementBoundingRect(m_elements.front());
+    for (const Element& element : m_elements)
+        m_boundingRect |= elementBoundingRect(element);
 }
 
 QString Blueprint::toAutocadCommandLineCommands() const

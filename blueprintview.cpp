@@ -18,13 +18,18 @@ void BlueprintView::setBlueprint(const Blueprint* blueprint)
 
 void BlueprintView::paintEvent(QPaintEvent*)
 {
-    const double sizeCoeff = 0.01;  // TODO: fix
-
     QPainter painter(this);
+//    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing);
     painter.fillRect(rect(), Qt::white);
     if (!m_blueprint)
         return;
+    const int margin = 4;
+    QRect blueprintBounds = m_blueprint->boundingRect();
+    QRect canvasRect = rect().adjusted(margin, margin, -margin, -margin);
+    double sizeCoeff = qMin(double(canvasRect.width()) / blueprintBounds.width(), double(canvasRect.height()) / blueprintBounds.height());
+    painter.translate(margin, margin);
     painter.scale(sizeCoeff, sizeCoeff);
+    painter.translate(-blueprintBounds.left(), -blueprintBounds.top());
     painter.setBrush(Qt::NoBrush);
     for (const Element& element : m_blueprint->elements()) {
         painter.setPen(QPen(Qt::black, element.width));  // TODO: PenCapStyle, PenJoinStyle - ?
