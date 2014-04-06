@@ -6,6 +6,8 @@
 #include <memory>
 #include <map>
 
+#include "programbasic.h"
+
 class QPoint;
 
 class Blueprint;
@@ -20,6 +22,8 @@ public:
     static const int mainRoutineIndex;
     static const int maxRecursionDepth;
     static const int startingLineWidth;
+
+    static ExecutionError executionError(const RunningProgram& instance, const std::string& whatArg);
 
     Program();
     ~Program();
@@ -38,39 +42,6 @@ private:
 private:
     friend class ProgramCommand;
     friend class CallSubroutineCommand;
-};
-
-
-struct Arguments
-{
-    void set(int index, int value)      { m_data[index] = value; }
-    bool isSet(int index) const         { return m_data.count(index); }
-    int get(int index) const            { auto it = m_data.find(index);  assert(it != m_data.end());  return it->second; }
-private:
-    std::map<int, int> m_data;
-};
-
-class Number
-{
-public:
-    Number() : Number(Literal, 0, 1) {}
-    static Number literal(int value)            { return {Literal,  value, 1}; }
-    static Number variable(int value, int mult) { return {Variable, value, mult}; }
-    int value(const Arguments& arguments, const RunningProgram& instance) const;
-private:
-    enum Type { Literal, Variable };
-private:
-    Type m_type;
-    int m_data;
-    int m_mult;
-private:
-    Number(Type type, int data, int mult) : m_type(type), m_data(data), m_mult(mult) {}
-};
-
-struct Movement
-{
-    Number x, y;
-    QPoint value(const Arguments& arguments, const RunningProgram& instance);
 };
 
 

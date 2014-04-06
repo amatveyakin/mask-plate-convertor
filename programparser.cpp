@@ -10,8 +10,8 @@
 class ParseError : public std::runtime_error
 {
 public:
-    ParseError(TextPosition position, const QString& what_arg)
-        : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(position.line + 1), QString::number(position.column + 1), what_arg).toStdString()) {}
+    ParseError(TextPosition position, const QString& whatArg)
+        : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(position.line + 1), QString::number(position.column + 1), whatArg).toStdString()) {}
 };
 
 class EolChecker

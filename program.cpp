@@ -13,14 +13,6 @@ const int Program::maxRecursionDepth = 16;  // 5 by specification
 const int Program::startingLineWidth = 100;
 
 
-class CallStack;
-
-class ExecutionError : public std::runtime_error
-{
-public:
-    ExecutionError(const CallStack& callStack, const std::string& what_arg);
-};
-
 struct Call
 {
     int routineIndex;
@@ -46,7 +38,6 @@ struct RunningProgram
     RunningProgram(const Program *programArg)
         : program(programArg)
         , output(new Blueprint) {}
-    ExecutionError executionError(const std::string& what_arg) const { return ExecutionError(state.callStack, what_arg); }
 
     const Program *program = nullptr;
     ProgramState state;
@@ -68,26 +59,9 @@ private:
 };
 
 
-int Number::value(const Arguments& arguments, const RunningProgram& instance) const
-{
-    switch (m_type) {
-    case Literal:
-        return m_data * m_mult;
-    case Variable:
-        if (!arguments.isSet(m_data))
-            throw instance.executionError("Параметр " + std::to_string(m_data) + " использован, но не задан.");  // TODO: Context
-        return arguments.get(m_data) * m_mult;
-    }
-    assert(false);
-}
-
-QPoint Movement::value(const Arguments& arguments, const RunningProgram& instance)
-{
-    return {x.value(arguments, instance), y.value(arguments, instance)};
-}
-
 std::string CallStack::dump() const
 {
+    // TODO: Also print line numbers
     assert(!empty());
     std::string result;
     for (auto it = rbegin(); it != rend(); ++it) {
@@ -113,6 +87,11 @@ void Routine::execute(RunningProgram& instance, const Arguments &arguments) cons
     instance.state.callStack.pop_back();
 }
 
+
+ExecutionError Program::executionError(const RunningProgram& instance, const std::string& whatArg)
+{
+    return ExecutionError(instance.state.callStack.dump(), whatArg);
+}
 
 Program::Program()
 {
@@ -180,7 +159,7 @@ SetLineWidthCommand::SetLineWidthCommand(int newWidth)
 void SetLineWidthCommand::execute(RunningProgram& instance)
 {
     if (instance.state.laserEnabled)
-        throw ExecutionError(instance.state.callStack, "Попытка изменения ширины зазора при включённом лазере");
+        throw Program::executionError(instance, "Попытка изменения ширины зазора при включённом лазере");
     instance.state.lineWidth = m_newWidth;
 }
 
@@ -211,13 +190,9 @@ void CallSubroutineCommand::execute(RunningProgram& instance)
     // TODO: in case of error: always print 2 digits for index
     const Routine* subroutine = instance.program->routine(m_subroutineIndex);
     if (!subroutine)
-        throw instance.executionError("Подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
+        throw Program::executionError(instance, "Подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
     if (instance.state.callStack.size() >= Program::maxRecursionDepth)  // TODO: +-1 ?
-        throw instance.executionError("Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
+        throw Program::executionError(instance, "Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
     for (int i = 0; i < m_repeatCount; ++i)
         subroutine->execute(instance, m_arguments);
 }
-
-
-ExecutionError::ExecutionError(const CallStack& callStack, const std::string& what_arg)
-    : std::runtime_error(what_arg + "\n\n" + callStack.dump()) {}

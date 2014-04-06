@@ -30,5 +30,8 @@ SOURCES += mainwindow.cpp
 HEADERS += program.h
 SOURCES += program.cpp
 
+HEADERS += programbasic.h
+SOURCES += programbasic.cpp
+
 HEADERS += programparser.h
 SOURCES += programparser.cpp
