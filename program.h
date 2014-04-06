@@ -17,9 +17,9 @@ struct RunningProgram;
 class Program
 {
 public:
-    static const int mainRoutineIndex = -1;
-    static const int maxRecursionDepth = 16;  // 5 by specification
-    static const int startingLineWidth = 100;
+    static const int mainRoutineIndex;
+    static const int maxRecursionDepth;
+    static const int startingLineWidth;
 
     Program();
     ~Program();
@@ -29,14 +29,11 @@ public:
     std::unique_ptr<Blueprint> execute() const;
 
 private:
-    std::unique_ptr<Routine> m_mainRoutine;
-    std::map<int, std::unique_ptr<Routine>> m_subroutines;
+    std::map<int, std::unique_ptr<Routine>> m_routines;
 
 private:
-    const Routine* mainRoutine() const;
-    Routine* mainRoutine();
-    const Routine* subroutine(int index) const;
-    Routine* subroutine(int index);
+    const Routine* routine(int index) const;
+    Routine* nonnullRoutine(int index);
 
 private:
     friend class ProgramCommand;
@@ -56,23 +53,24 @@ private:
 class Number
 {
 public:
-    Number() : Number(Literal, 0) {}
-    static Number literal(int value)    { return {Literal,  value}; }
-    static Number variable(int value)   { return {Variable, value}; }
-    int value(const Arguments& arguments) const;
+    Number() : Number(Literal, 0, 1) {}
+    static Number literal(int value)            { return {Literal,  value, 1}; }
+    static Number variable(int value, int mult) { return {Variable, value, mult}; }
+    int value(const Arguments& arguments, const RunningProgram& instance) const;
 private:
     enum Type { Literal, Variable };
 private:
     Type m_type;
     int m_data;
+    int m_mult;
 private:
-    Number(Type type, int data) : m_type(type), m_data(data) {}
+    Number(Type type, int data, int mult) : m_type(type), m_data(data), m_mult(mult) {}
 };
 
 struct Movement
 {
     Number x, y;
-    QPoint value(const Arguments& arguments);
+    QPoint value(const Arguments& arguments, const RunningProgram& instance);
 };
 
 

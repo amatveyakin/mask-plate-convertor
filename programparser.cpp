@@ -11,7 +11,7 @@ class ParseError : public std::runtime_error
 {
 public:
     ParseError(TextPosition position, const QString& what_arg)
-        : std::runtime_error(QString("[%1:%2] %3").arg(QString::number(position.line + 1), QString::number(position.column + 1), what_arg).toStdString()) {}
+        : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(position.line + 1), QString::number(position.column + 1), what_arg).toStdString()) {}
 };
 
 class EolChecker
@@ -176,7 +176,7 @@ Number ProgramParser::eatNumber()
     if (nextChar() == '+' || nextChar() == '-')
         sign = (eatChar() == '-') ? -1 : 1;
     if (tryToEat("R"))
-        return Number::variable(eatUnsignedInteger() * sign);
+        return Number::variable(eatUnsignedInteger(), sign);
     return Number::literal(eatUnsignedInteger() * sign);
 }
 
