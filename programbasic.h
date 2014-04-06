@@ -31,7 +31,7 @@ struct Arguments
     void set(int index, int value)      { m_data[index] = value; }
     bool isSet(int index) const         { return m_data.count(index); }
     int get(int index) const            { auto it = m_data.find(index);  assert(it != m_data.end());  return it->second; }
-    Arguments united(const Arguments& newArguments) const;
+    Arguments replaced(const Arguments& newArguments) const;
 
 private:
     std::map<int, int> m_data;

@@ -46,7 +46,7 @@ MoveToCommand::MoveToCommand(Movement movement)
 void MoveToCommand::execute(RunningProgram& instance)
 {
     QPoint oldPosition = instance.state.position;
-    instance.state.position += m_movement.value(instance.state.callStack.back().arguments, instance);
+    instance.state.position += m_movement.value(instance.state.arguments, instance);
     if (instance.state.laserEnabled)
         instance.output->appendLine(oldPosition, instance.state.position, instance.state.lineWidth);
 }
@@ -68,5 +68,5 @@ void CallSubroutineCommand::execute(RunningProgram& instance)
     if ((int)instance.state.callStack.size() >= maxRecursionDepth)  // TODO: +-1 ?
         throw instance.executionError("Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
     for (int i = 0; i < m_repeatCount; ++i)
-        subroutine->execute(instance, instance.state.callStack.back().arguments.united(m_arguments));
+        subroutine->execute(instance, m_arguments);
 }

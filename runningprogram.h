@@ -12,10 +12,9 @@ class Program;
 
 struct Call
 {
-    Call(int routineIndexArg, const Arguments &argumentsArg) : routineIndex(routineIndexArg), arguments(argumentsArg) {}
+    Call(int routineIndexArg) : routineIndex(routineIndexArg) {}
 
     int routineIndex;
-    const Arguments &arguments;
 };
 
 
@@ -31,6 +30,7 @@ struct ProgramState
     ProgramState() : laserEnabled(false), lineWidth(startingLineWidth) {}
 
     CallStack callStack;
+    Arguments arguments;
     bool laserEnabled;
     int lineWidth;
     QPoint position;

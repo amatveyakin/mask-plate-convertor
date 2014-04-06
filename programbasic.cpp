@@ -9,7 +9,7 @@ ExecutionError::ExecutionError(const std::string& callStackDump, const std::stri
     : std::runtime_error(whatArg + "\n\n" + callStackDump) {}
 
 
-Arguments Arguments::united(const Arguments& newArguments) const
+Arguments Arguments::replaced(const Arguments& newArguments) const
 {
     Arguments result(newArguments);
     result.m_data.insert(m_data.begin(), m_data.end());
