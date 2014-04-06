@@ -17,14 +17,14 @@ Arguments Arguments::replaced(const Arguments& newArguments) const
 }
 
 
-int Number::value(const Arguments& arguments, const RunningProgram& /*instance*/) const
+int Number::value(const Arguments& arguments, const RunningProgram& instance) const
 {
     switch (m_type) {
     case Literal:
         return m_data * m_mult;
     case Variable:
         if (!arguments.isSet(m_data))
-            return 0; // TODO FIXME // throw instance.executionError("Параметр " + std::to_string(m_data) + " использован, но не задан.");
+            throw instance.executionError("Параметр " + std::to_string(m_data) + " использован, но не задан.");
         return arguments.get(m_data) * m_mult;
     }
     assert(false);
