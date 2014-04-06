@@ -68,5 +68,5 @@ void CallSubroutineCommand::execute(RunningProgram& instance)
     if ((int)instance.state.callStack.size() >= maxRecursionDepth)  // TODO: +-1 ?
         throw instance.executionError("Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
     for (int i = 0; i < m_repeatCount; ++i)
-        subroutine->execute(instance, m_arguments);
+        subroutine->execute(instance, instance.state.callStack.back().arguments.united(m_arguments));
 }
