@@ -1,26 +1,43 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
+
 #include <QMainWindow>
 
 class QLineEdit;
+class QPlainTextEdit;
 class QPushButton;
+
+class Blueprint;
+class BlueprintView;
+
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* parentArg = 0);
+    MainWindow(QWidget* parentArg = nullptr);
     ~MainWindow();
 
 private:
-    QLineEdit* m_fileNameLineedit = 0;
-    QPushButton* m_browseButton = 0;
-    QPushButton* m_convertButton = 0;
+    QString m_fileName;
+    std::unique_ptr<Blueprint> m_blueprint;
+
+    QPlainTextEdit* m_programTextEdit = nullptr;
+    BlueprintView* m_blueprintView = nullptr;
+
+    QAction* m_openAction = nullptr;
+    QAction* m_saveAction = nullptr;
+    QAction* m_convertAction = nullptr;
+
+private:
+    void updateWindowTitle();
 
 private slots:
-    void browse();
+    void open();
+    void save();
     void convert();
 };
 

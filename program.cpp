@@ -45,7 +45,6 @@ Program::~Program()
 
 void Program::pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newCommand)
 {
-//    qDebug("@@ pushing to subroutine %d", routineIndex); // TODO: Delete
     nonnullRoutine(routineIndex)->pushBack(std::move(newCommand));
 }
 
@@ -53,6 +52,7 @@ std::unique_ptr<Blueprint> Program::execute() const
 {
     RunningProgram instance(this);
     routine(mainRoutineIndex)->execute(instance, {});
+    instance.output->cleanUp();
     return std::move(instance.output);
 }
 

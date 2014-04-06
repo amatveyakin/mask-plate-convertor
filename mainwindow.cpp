@@ -1,15 +1,19 @@
 #include <exception>
 
+#include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
 #include <QClipboard>
 #include <QFileDialog>
-#include <QLineEdit>
 #include <QMessageBox>
-#include <QPushButton>
+#include <QPlainTextEdit>
+#include <QSplitter>
+#include <QStyle>
 #include <QTextStream>
+#include <QToolBar>
 
 #include "blueprint.h"
+#include "blueprintview.h"
 #include "mainwindow.h"
 #include "program.h"
 #include "programparser.h"
@@ -23,62 +27,85 @@ MainWindow::MainWindow(QWidget* parentArg)
     setWindowTitle(appName);
     setCentralWidget(new QWidget(this));
 
-    m_fileNameLineedit = new QLineEdit(this);
-    m_fileNameLineedit->setPlaceholderText("Входной файл");
-    m_browseButton = new QPushButton("Обзор...", this);
-    m_convertButton = new QPushButton("Конвертировать", this);
-    m_convertButton->setDefault(true);
+    m_programTextEdit = new QPlainTextEdit(this);
+    m_blueprintView = new BlueprintView(this);
 
-    QBoxLayout* fileNameLayout = new QHBoxLayout;
-    fileNameLayout->addWidget(m_fileNameLineedit);
-    fileNameLayout->addWidget(m_browseButton);
+    m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
+    m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
+    m_convertAction = new QAction("Конвертировать", this);
 
-    QBoxLayout* bottomLayout = new QHBoxLayout;
-    bottomLayout->addStretch();
-    bottomLayout->addWidget(m_convertButton);
+    m_openAction->setShortcut(QKeySequence::Open);
+    m_openAction->setShortcut(QKeySequence::Save);
 
-    QBoxLayout* mainLayout = new QVBoxLayout(centralWidget());
-    mainLayout->addLayout(fileNameLayout);
-    mainLayout->addLayout(bottomLayout);
+    QToolBar* toolbar = new QToolBar(this);
+    toolbar->addActions({m_openAction, m_convertAction});
+    addToolBar(toolbar);
 
-    resize(600, sizeHint().height());
+    QSplitter* splitter = new QSplitter(this);
+    splitter->addWidget(m_programTextEdit);
+    splitter->addWidget(m_blueprintView);
+    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(1, 4);
 
-    connect(m_browseButton, SIGNAL(clicked()), this, SLOT(browse()));
-    connect(m_convertButton, SIGNAL(clicked()), this, SLOT(convert()));
+    QLayout* mainLayout = new QVBoxLayout(centralWidget());
+    mainLayout->addWidget(splitter);
+
+    resize(sizeHint().expandedTo(QSize(640, 480)));
+
+    connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
+    connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+    connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
+
+    updateWindowTitle();
 }
 
 MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::browse()
+void MainWindow::updateWindowTitle()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Введите имя входного файла", QString(), "Текстовые файлы (.txt);;Все файлы (*)");
-    if (!fileName.isEmpty())
-        m_fileNameLineedit->setText(fileName);
+    if (m_fileName.isEmpty())
+        setWindowTitle(appName);
+    else
+        setWindowTitle(QString("%1 — %2").arg(m_fileName, appName));
+}
+
+void MainWindow::open()
+{
+    QString newFileName = QFileDialog::getOpenFileName(this, "Введите имя входного файла", QString(), "Текстовые файлы (.txt);;Все файлы (*)");
+    if (newFileName.isEmpty())
+        return;
+
+    QFile file(newFileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, appName, QString("Не удалось открыть файл: \"%1\"").arg(newFileName));
+        return;
+    }
+
+    m_programTextEdit->setPlainText(file.readAll());
+    m_fileName = newFileName;
+    updateWindowTitle();
+}
+
+void MainWindow::save()
+{
+    // TODO
 }
 
 void MainWindow::convert()
 {
     try {
-        QString fileName = m_fileNameLineedit->text();
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox::warning(this, appName, QString("Не удалось открыть файл: \"%1\"").arg(fileName));
-            return;
-        }
-
+        m_blueprintView->setBlueprint(nullptr);
+        QStringList programLines = m_programTextEdit->toPlainText().split('\n');
         ProgramParser parser;
-
-        QTextStream in(&file);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
+        for (const QString& line : programLines)
             parser.processLine(line);
-        }
 
         std::unique_ptr<Program> program = parser.finish();
-        std::unique_ptr<Blueprint> blueprint = program->execute();
-        QString output = blueprint->toAutocadCommandLineCommands();
+        m_blueprint = program->execute();
+        m_blueprintView->setBlueprint(m_blueprint.get());
+        QString output = m_blueprint->toAutocadCommandLineCommands();
 
         QApplication::clipboard()->setText(output);
         QMessageBox::information(this, appName, "Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)");

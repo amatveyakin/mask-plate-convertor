@@ -18,15 +18,13 @@ public:
     Blueprint();
     ~Blueprint();
 
-    int nElements() const               { return m_elements.size(); }
-    const Element& element(int index)   { return m_elements.at(index); }
+    const std::vector<Element> &elements() const    { return m_elements; }
 
-    void appendLineTo(QPoint from, QPoint to, int width);
+    void appendLine(QPoint from, QPoint to, int width);
     void finishElement();
     void cleanUp();
 
     QString toAutocadCommandLineCommands() const;
-    // TODO: Also convert to something that QPainter can draw
 
 private:
     std::vector<Element> m_elements;

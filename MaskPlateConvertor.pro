@@ -20,6 +20,9 @@ QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -Wformat=2 -Woverloaded-virtual -Wsha
 HEADERS += blueprint.h
 SOURCES += blueprint.cpp
 
+HEADERS += blueprintview.h
+SOURCES += blueprintview.cpp
+
 HEADERS += cpp_extensions.h
 
 SOURCES += main.cpp

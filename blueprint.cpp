@@ -12,7 +12,7 @@ Blueprint::~Blueprint()
 {
 }
 
-void Blueprint::appendLineTo(QPoint from, QPoint to, int width)
+void Blueprint::appendLine(QPoint from, QPoint to, int width)
 {
     assert(!m_elements.empty());
     Element& curElement = m_elements.back();
@@ -43,7 +43,7 @@ void Blueprint::cleanUp()
 
 QString Blueprint::toAutocadCommandLineCommands() const
 {
-    const double sizeCoeff = 0.01;
+    const double sizeCoeff = 0.001;
     QString result;
     for (const Element& curElement : m_elements) {
         for (int i = 0; i < curElement.polygon.size(); ++i) {
