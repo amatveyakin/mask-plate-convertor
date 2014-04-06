@@ -22,6 +22,17 @@ struct TextPosition
 };
 
 
+class ParseError : public std::runtime_error
+{
+public:
+    ParseError(TextPosition positionArg, const QString& whatArg);
+    TextPosition position() const   { return m_position; }
+
+private:
+    TextPosition m_position;
+};
+
+
 class ProgramParser
 {
 public:
@@ -43,7 +54,7 @@ private:
     };
 
 private:
-    static const int infinity; //TODO// = std::numeric_limits<int>::max();
+    static const int infinity;
 
 private:
     TextPosition m_position;

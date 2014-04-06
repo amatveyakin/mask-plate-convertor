@@ -34,12 +34,4 @@ std::unique_ptr<T> make_unique(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
 }
 }
 
-#ifndef _MSC_VER
-#define NOEXCEPT noexcept
-#define NOEXCEPTFALSE noexcept(false)
-#else
-#define NOEXCEPT
-#define NOEXCEPTFALSE
-#endif
-
 #endif // __cplusplus <= 201103L

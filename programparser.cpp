@@ -11,26 +11,11 @@
 const int ProgramParser::infinity = std::numeric_limits<int>::max();
 
 
-class ParseError : public std::runtime_error
+ParseError::ParseError(TextPosition positionArg, const QString& whatArg)
+    : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(positionArg.line + 1), QString::number(positionArg.column + 1), whatArg).toStdString())
+    , m_position(positionArg)
 {
-public:
-    ParseError(TextPosition position, const QString& whatArg)
-        : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(position.line + 1), QString::number(position.column + 1), whatArg).toStdString()) {}
-};
-
-class EolChecker
-{
-public:
-    EolChecker(ProgramParser *parser) : m_parser(parser) {}
-    ~EolChecker() NOEXCEPTFALSE
-    {
-        if (!m_parser->atEol())
-            throw m_parser->frustratedExpectations("конец строки");
-    }
-
-private:
-    ProgramParser *m_parser;
-};
+}
 
 
 ProgramParser::ProgramParser()
@@ -49,42 +34,49 @@ void ProgramParser::processLine(const QString& nextLine)
     assert(m_program);
     setPosition(TextPosition(m_position.line + 1, 0));
     m_line = nextLine.trimmed();
-    EolChecker eolChecker(this);
     if (atEol())
         return;
+
     switch (m_section)
     {
     case Section::MainHeader1:
         eat("%1G01G91G92M77");
         setSection(Section::MainHeader2);
-        return;
+        break;
     case Section::MainHeader2:
         eatLineNo();
         eat("F1200");
         setSection(Section::MainBody);
-        return;
+        break;
     case Section::MainBody:
         eatLineNo();
         if (tryToEat("M02"))
             setSection(Section::FirstSubroutineHeader);
         else
             parseStatement();
-        return;
+        break;
     case Section::FirstSubroutineHeader:
         eat("%2");
+        if (atEol()) {
+            setSection(Section::SuccessiveSubroutineHeader);
+            break;
+        }
         parseSubroutineHeader();
-        return;
+        break;
     case Section::SuccessiveSubroutineHeader:
         parseSubroutineHeader();
-        return;
+        break;
     case Section::SubroutineBody:
         eatLineNo();
         parseStatement();
-        return;
+        break;
     case Section::End:
         throw ParseError(m_position, "Неожиданный текст после конца программы");
-        return;
+        break;
     }
+
+    if (!atEol())
+        throw frustratedExpectations("конец строки");
 }
 
 std::unique_ptr<Program> ProgramParser::finish()

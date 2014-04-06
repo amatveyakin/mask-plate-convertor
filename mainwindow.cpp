@@ -9,7 +9,7 @@
 #include <QPlainTextEdit>
 #include <QSplitter>
 #include <QStyle>
-#include <QTextStream>
+#include <QTextBlock>
 #include <QToolBar>
 
 #include "blueprint.h"
@@ -96,6 +96,7 @@ void MainWindow::save()
 
 void MainWindow::convert()
 {
+    QString errorHeader = QString("%1 — Ошибка").arg(appName);
     try {
         m_blueprintView->setBlueprint(nullptr);
         QStringList programLines = m_programTextEdit->toPlainText().split('\n');
@@ -111,7 +112,13 @@ void MainWindow::convert()
         QApplication::clipboard()->setText(output);
         QMessageBox::information(this, appName, "Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)");
     }
+    catch (const ParseError &error) {
+        QTextCursor newCursor(m_programTextEdit->document()->findBlockByLineNumber(error.position().line));
+        newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, error.position().column);
+        m_programTextEdit->setTextCursor(newCursor);
+        QMessageBox::critical(this, errorHeader, error.what());
+    }
     catch (const std::exception &error) {
-        QMessageBox::critical(this, QString("%1 — Ошибка").arg(appName), error.what());
+        QMessageBox::critical(this, errorHeader, error.what());
     }
 }
