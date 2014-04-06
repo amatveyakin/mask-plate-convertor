@@ -11,13 +11,18 @@
 class RunningProgram;
 
 
+extern const int mainRoutineIndex;
+extern const int maxRecursionDepth;
+extern const int startingLineWidth;
+
+
 class ExecutionError : public std::runtime_error
 {
 private:
     ExecutionError(const std::string& callStackDump, const std::string& whatArg);
 
 private:
-    friend class Program;
+    friend class RunningProgram;
 };
 
 

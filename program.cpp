@@ -6,71 +6,17 @@
 #include "blueprint.h"
 #include "cpp_extensions.h"
 #include "program.h"
+#include "programcommands.h"
+#include "runningprogram.h"
 
 
-const int Program::mainRoutineIndex = -1;
-const int Program::maxRecursionDepth = 16;  // 5 by specification
-const int Program::startingLineWidth = 100;
-
-
-struct Call
+Routine::Routine(int index)
+    : m_index(index)
 {
-    int routineIndex;
-    const Arguments &arguments;
-};
+}
 
-class CallStack : public std::vector<Call>
+Routine::~Routine()
 {
-public:
-    std::string dump() const;
-};
-
-struct ProgramState
-{
-    CallStack callStack;
-    bool laserEnabled   = false;
-    int lineWidth       = Program::startingLineWidth;
-    QPoint position     = {0, 0};
-};
-
-struct RunningProgram
-{
-    RunningProgram(const Program *programArg)
-        : program(programArg)
-        , output(new Blueprint) {}
-
-    const Program *program = nullptr;
-    ProgramState state;
-    std::unique_ptr<Blueprint> output;
-};
-
-class Routine
-{
-public:
-    Routine(int index) : m_index(index) {}
-    ~Routine() {}
-
-    void pushBack(std::unique_ptr<ProgramCommand> newCommand);
-    void execute(RunningProgram& instance, const Arguments &arguments) const;
-
-private:
-    int m_index;
-    std::vector<std::unique_ptr<ProgramCommand>> m_commands;
-};
-
-
-std::string CallStack::dump() const
-{
-    // TODO: Also print line numbers
-    assert(!empty());
-    std::string result;
-    for (auto it = rbegin(); it != rend(); ++it) {
-        if (it == rbegin())
-            result += (it->routineIndex == Program::mainRoutineIndex ? "В главной программе" : "В подпрограмме " + std::to_string(it->routineIndex)) + "\n";
-        else
-            result += (it->routineIndex == Program::mainRoutineIndex ? "вызванной из главной программы" : "вызванной из подпрограммы " + std::to_string(it->routineIndex)) + "\n";
-    }
-    return result;
 }
 
 void Routine::pushBack(std::unique_ptr<ProgramCommand> newCommand)
@@ -87,11 +33,6 @@ void Routine::execute(RunningProgram& instance, const Arguments &arguments) cons
     instance.state.callStack.pop_back();
 }
 
-
-ExecutionError Program::executionError(const RunningProgram& instance, const std::string& whatArg)
-{
-    return ExecutionError(instance.state.callStack.dump(), whatArg);
-}
 
 Program::Program()
 {
@@ -127,72 +68,4 @@ Routine* Program::nonnullRoutine(int index)
     if (it == m_routines.end())
         it = m_routines.emplace(index, std::make_unique<Routine>(index)).first;
     return it->second.get();
-}
-
-
-EnableLaserCommand::EnableLaserCommand()
-{
-}
-
-void EnableLaserCommand::execute(RunningProgram& instance)
-{
-    instance.state.laserEnabled = true;
-}
-
-
-DisableLaserCommand::DisableLaserCommand()
-{
-}
-
-void DisableLaserCommand::execute(RunningProgram& instance)
-{
-    instance.state.laserEnabled = false;
-    instance.output->finishElement();
-}
-
-
-SetLineWidthCommand::SetLineWidthCommand(int newWidth)
-    : m_newWidth(newWidth)
-{
-}
-
-void SetLineWidthCommand::execute(RunningProgram& instance)
-{
-    if (instance.state.laserEnabled)
-        throw Program::executionError(instance, "Попытка изменения ширины зазора при включённом лазере");
-    instance.state.lineWidth = m_newWidth;
-}
-
-
-MoveToCommand::MoveToCommand(Movement movement)
-    : m_movement(movement)
-{
-}
-
-void MoveToCommand::execute(RunningProgram& instance)
-{
-    QPoint oldPosition = instance.state.position;
-    instance.state.position += m_movement.value(instance.state.callStack.back().arguments, instance);
-    if (instance.state.laserEnabled)
-        instance.output->appendLineTo(oldPosition, instance.state.position, instance.state.lineWidth);
-}
-
-
-CallSubroutineCommand::CallSubroutineCommand(int subroutineIndex, int repeatCount, const Arguments& arguments)
-    : m_subroutineIndex(subroutineIndex)
-    , m_repeatCount(repeatCount)
-    , m_arguments(arguments)
-{
-}
-
-void CallSubroutineCommand::execute(RunningProgram& instance)
-{
-    // TODO: in case of error: always print 2 digits for index
-    const Routine* subroutine = instance.program->routine(m_subroutineIndex);
-    if (!subroutine)
-        throw Program::executionError(instance, "Подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
-    if (instance.state.callStack.size() >= Program::maxRecursionDepth)  // TODO: +-1 ?
-        throw Program::executionError(instance, "Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
-    for (int i = 0; i < m_repeatCount; ++i)
-        subroutine->execute(instance, m_arguments);
 }

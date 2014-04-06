@@ -1,5 +1,6 @@
 #include "program.h"
 #include "programbasic.h"
+#include "runningprogram.h"
 
 
 ExecutionError::ExecutionError(const std::string& callStackDump, const std::string& whatArg)
@@ -12,7 +13,7 @@ int Number::value(const Arguments& arguments, const RunningProgram& instance) co
         return m_data * m_mult;
     case Variable:
         if (!arguments.isSet(m_data))
-            throw Program::executionError(instance, "Параметр " + std::to_string(m_data) + " использован, но не задан.");
+            throw instance.executionError("Параметр " + std::to_string(m_data) + " использован, но не задан.");
         return arguments.get(m_data) * m_mult;
     }
     assert(false);

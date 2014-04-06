@@ -33,5 +33,11 @@ SOURCES += program.cpp
 HEADERS += programbasic.h
 SOURCES += programbasic.cpp
 
+HEADERS += programcommands.h
+SOURCES += programcommands.cpp
+
 HEADERS += programparser.h
 SOURCES += programparser.cpp
+
+HEADERS += runningprogram.h
+SOURCES += runningprogram.cpp

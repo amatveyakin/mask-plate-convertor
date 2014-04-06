@@ -5,6 +5,7 @@
 #include "cpp_extensions.h"
 #include "program.h"
 #include "programparser.h"
+#include "programcommands.h"
 
 
 class ParseError : public std::runtime_error
@@ -26,7 +27,7 @@ private:
 
 ProgramParser::ProgramParser()
     : m_program(new Program)
-    , m_currentRoutineIndex(Program::mainRoutineIndex)
+    , m_currentRoutineIndex(mainRoutineIndex)
 {
 }
 
