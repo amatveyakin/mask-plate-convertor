@@ -19,7 +19,7 @@ protected:
     virtual void paintEvent(QPaintEvent *) override;
 
 private:
-    const Blueprint* m_blueprint = nullptr;
+    const Blueprint* m_blueprint;
 };
 
 #endif // BLUEPRINTVIEW_H

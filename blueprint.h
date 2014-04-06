@@ -8,8 +8,10 @@
 
 struct Element
 {
+    Element() : width(-1) {}
+
     QPolygon polygon;
-    int width = -1;
+    int width;
 };
 
 class Blueprint

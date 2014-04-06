@@ -8,6 +8,9 @@
 #include "programcommands.h"
 
 
+const int ProgramParser::infinity = std::numeric_limits<int>::max();
+
+
 class ParseError : public std::runtime_error
 {
 public:
@@ -19,14 +22,20 @@ class EolChecker
 {
 public:
     EolChecker(ProgramParser *parser) : m_parser(parser) {}
-    ~EolChecker() noexcept(false)  { if (!m_parser->atEol())  throw m_parser->frustratedExpectations("конец строки"); }
+    ~EolChecker() NOEXCEPTFALSE
+    {
+        if (!m_parser->atEol())
+            throw m_parser->frustratedExpectations("конец строки");
+    }
+
 private:
-    ProgramParser *m_parser = nullptr;
+    ProgramParser *m_parser;
 };
 
 
 ProgramParser::ProgramParser()
-    : m_program(new Program)
+    : m_section(Section::MainHeader1)
+    , m_program(new Program)
     , m_currentRoutineIndex(mainRoutineIndex)
 {
 }
@@ -38,7 +47,7 @@ ProgramParser::~ProgramParser()
 void ProgramParser::processLine(const QString& nextLine)
 {
     assert(m_program);
-    setPosition({m_position.line + 1, 0});
+    setPosition(TextPosition(m_position.line + 1, 0));
     m_line = nextLine.trimmed();
     EolChecker eolChecker(this);
     if (atEol())
@@ -127,7 +136,7 @@ QChar ProgramParser::nextChar() const
 
 void ProgramParser::advance(int nChars)
 {
-    setPosition({m_position.line, m_position.column + nChars});
+    setPosition(TextPosition(m_position.line, m_position.column + nChars));
     if (m_position.column > m_line.length())
         throw ParseError(m_position, "Неожиданный конец строки");
 }

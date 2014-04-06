@@ -38,7 +38,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_openAction->setShortcut(QKeySequence::Save);
 
     QToolBar* toolbar = new QToolBar(this);
-    toolbar->addActions({m_openAction, m_convertAction});
+    toolbar->addAction(m_openAction);
+    toolbar->addAction(m_convertAction);
     addToolBar(toolbar);
 
     QSplitter* splitter = new QSplitter(this);

@@ -2,6 +2,7 @@
 #define RUNNINGPROGRAM_H
 
 #include <memory>
+#include <vector>
 
 #include "programbasic.h"
 
@@ -11,6 +12,8 @@ class Program;
 
 struct Call
 {
+    Call(int routineIndexArg, const Arguments &argumentsArg) : routineIndex(routineIndexArg), arguments(argumentsArg) {}
+
     int routineIndex;
     const Arguments &arguments;
 };
@@ -25,10 +28,12 @@ public:
 
 struct ProgramState
 {
+    ProgramState() : laserEnabled(false), lineWidth(startingLineWidth) {}
+
     CallStack callStack;
-    bool laserEnabled   = false;
-    int lineWidth       = startingLineWidth;
-    QPoint position     = {0, 0};
+    bool laserEnabled;
+    int lineWidth;
+    QPoint position;
 };
 
 
@@ -37,7 +42,7 @@ struct RunningProgram
     RunningProgram(const Program *programArg);
     ExecutionError executionError(const std::string& whatArg) const;
 
-    const Program *program = nullptr;
+    const Program *program;
     ProgramState state;
     std::unique_ptr<Blueprint> output;
 };

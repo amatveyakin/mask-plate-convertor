@@ -1,3 +1,5 @@
+#include <string>
+
 #include "program.h"
 #include "programbasic.h"
 #include "runningprogram.h"
@@ -31,5 +33,5 @@ int Number::value(const Arguments& arguments, const RunningProgram& /*instance*/
 
 QPoint Movement::value(const Arguments& arguments, const RunningProgram& instance)
 {
-    return {x.value(arguments, instance), y.value(arguments, instance)};
+    return QPoint(x.value(arguments, instance), y.value(arguments, instance));
 }

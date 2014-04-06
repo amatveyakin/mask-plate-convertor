@@ -8,7 +8,7 @@
 
 #include <QPoint>
 
-class RunningProgram;
+struct RunningProgram;
 
 
 extern const int mainRoutineIndex;
@@ -22,7 +22,7 @@ private:
     ExecutionError(const std::string& callStackDump, const std::string& whatArg);
 
 private:
-    friend class RunningProgram;
+    friend struct RunningProgram;
 };
 
 
@@ -41,9 +41,9 @@ private:
 class Number
 {
 public:
-    Number() : Number(Literal, 0, 1) {}
-    static Number literal(int value)            { return {Literal,  value, 1}; }
-    static Number variable(int value, int mult) { return {Variable, value, mult}; }
+    Number() : m_type(Literal), m_data(0), m_mult(1) {}
+    static Number literal(int value)            { return Number(Literal,  value, 1); }
+    static Number variable(int value, int mult) { return Number(Variable, value, mult); }
     int value(const Arguments& arguments, const RunningProgram& instance) const;
 
 private:

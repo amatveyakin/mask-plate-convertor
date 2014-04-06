@@ -4,8 +4,9 @@
 #include "blueprintview.h"
 
 
-BlueprintView::BlueprintView(QWidget *parentArg) :
-    QWidget(parentArg)
+BlueprintView::BlueprintView(QWidget *parentArg)
+    : QWidget(parentArg)
+    , m_blueprint(nullptr)
 {
 }
 

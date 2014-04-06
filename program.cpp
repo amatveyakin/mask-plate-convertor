@@ -27,7 +27,7 @@ void Routine::pushBack(std::unique_ptr<ProgramCommand> newCommand)
 
 void Routine::execute(RunningProgram& instance, const Arguments &arguments) const
 {
-    instance.state.callStack.push_back({m_index, arguments});
+    instance.state.callStack.push_back(Call(m_index, arguments));
     for (auto&& command : m_commands)
         command->execute(instance);
     instance.state.callStack.pop_back();
@@ -51,7 +51,7 @@ void Program::pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newComm
 std::unique_ptr<Blueprint> Program::execute() const
 {
     RunningProgram instance(this);
-    routine(mainRoutineIndex)->execute(instance, {});
+    routine(mainRoutineIndex)->execute(instance, Arguments());
     instance.output->cleanUp();
     return std::move(instance.output);
 }

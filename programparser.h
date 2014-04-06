@@ -11,13 +11,16 @@ class Program;
 class ProgramCommand;
 class Routine;
 
+
 struct TextPosition
 {
-    TextPosition() {}
+    TextPosition() : line(-1), column(0) {}
     TextPosition(int line_, int column_) : line(line_), column(column_) {}
-    int line = -1;
-    int column = 0;
+
+    int line;
+    int column;
 };
+
 
 class ProgramParser
 {
@@ -40,12 +43,12 @@ private:
     };
 
 private:
-    static const int infinity = std::numeric_limits<int>::max();
+    static const int infinity; //TODO// = std::numeric_limits<int>::max();
 
 private:
     TextPosition m_position;
     QString m_line;
-    Section m_section = Section::MainHeader1;
+    Section m_section;
     std::unique_ptr<Program> m_program;
     int m_currentRoutineIndex;
 

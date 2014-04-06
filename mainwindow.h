@@ -25,12 +25,12 @@ private:
     QString m_fileName;
     std::unique_ptr<Blueprint> m_blueprint;
 
-    QPlainTextEdit* m_programTextEdit = nullptr;
-    BlueprintView* m_blueprintView = nullptr;
+    QPlainTextEdit* m_programTextEdit;
+    BlueprintView* m_blueprintView;
 
-    QAction* m_openAction = nullptr;
-    QAction* m_saveAction = nullptr;
-    QAction* m_convertAction = nullptr;
+    QAction* m_openAction;
+    QAction* m_saveAction;
+    QAction* m_convertAction;
 
 private:
     void updateWindowTitle();
