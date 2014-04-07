@@ -38,16 +38,23 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_newAction = new QAction(QIcon(":/images/new_document.png"), "Новый", this);
     m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
     m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
+    m_undoAction = new QAction(QIcon(":/images/undo.png"), "Отменить", this);
+    m_redoAction = new QAction(QIcon(":/images/redo.png"), "Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "Конвертировать", this);
 
     m_newAction->setShortcut(QKeySequence::New);
     m_openAction->setShortcut(QKeySequence::Open);
     m_openAction->setShortcut(QKeySequence::Save);
+    m_undoAction->setShortcut(QKeySequence::Undo);
+    m_redoAction->setShortcut(QKeySequence::Redo);
 
     QToolBar* toolbar = new QToolBar(this);
     toolbar->addAction(m_newAction);
     toolbar->addAction(m_openAction);
     toolbar->addAction(m_saveAction);
+    toolbar->addSeparator();
+    toolbar->addAction(m_undoAction);
+    toolbar->addAction(m_redoAction);
     toolbar->addSeparator();
     toolbar->addAction(m_convertAction);
     addToolBar(toolbar);
@@ -63,11 +70,22 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     resize(sizeHint().expandedTo(QSize(800, 600)));
 
+    QTextDocument* document = m_programTextEdit->document();
+
+    m_undoAction->setEnabled(document->isUndoAvailable());
+    m_redoAction->setEnabled(document->isRedoAvailable());
+
     connect(m_newAction, SIGNAL(triggered()), this, SLOT(newDocument()));
     connect(m_openAction, SIGNAL(triggered()), this, SLOT(openDocument()));
     connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveDocument()));
+
+    connect(m_undoAction, SIGNAL(triggered()), document, SLOT(undo()));
+    connect(m_redoAction, SIGNAL(triggered()), document, SLOT(redo()));
+    connect(document, SIGNAL(undoAvailable(bool)), m_undoAction, SLOT(setEnabled(bool)));
+    connect(document, SIGNAL(redoAvailable(bool)), m_redoAction, SLOT(setEnabled(bool)));
+    connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
+
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
-    connect(m_programTextEdit->document(), SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
     updateWindowTitle();
 }
@@ -82,6 +100,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->accept();
     else
         event->ignore();
+}
+
+void MainWindow::setBlueprint(std::unique_ptr<Blueprint> newBlueprint)
+{
+    m_blueprint = std::move(newBlueprint);
+    m_blueprintView->setBlueprint(m_blueprint.get());
 }
 
 bool MainWindow::confirmClose()
@@ -119,6 +143,7 @@ bool MainWindow::newDocument()
         return false;
     m_programTextEdit->clear();
     m_fileName.clear();
+    setBlueprint(nullptr);
     updateWindowTitle();
     return true;
 }
@@ -140,6 +165,7 @@ bool MainWindow::openDocument()
 
     m_programTextEdit->setPlainText(file.readAll());
     m_fileName = newFileName;
+    setBlueprint(nullptr);
     updateWindowTitle();
     return true;
 }
@@ -186,8 +212,7 @@ void MainWindow::convert()
             parser.processLine(line);
 
         std::unique_ptr<Program> program = parser.finish();
-        m_blueprint = program->execute();
-        m_blueprintView->setBlueprint(m_blueprint.get());
+        setBlueprint(program->execute());
         QString output = m_blueprint->toAutocadCommandLineCommands();
 
         QApplication::clipboard()->setText(output);

@@ -2,5 +2,7 @@
 <qresource>
     <file>images/go.png</file>
     <file>images/new_document.png</file>
+    <file>images/redo.png</file>
+    <file>images/undo.png</file>
 </qresource>
 </RCC>

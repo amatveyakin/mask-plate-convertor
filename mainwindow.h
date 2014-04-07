@@ -31,12 +31,15 @@ private:
     QAction* m_newAction;
     QAction* m_openAction;
     QAction* m_saveAction;
+    QAction* m_undoAction;
+    QAction* m_redoAction;
     QAction* m_convertAction;
 
 protected:
     void closeEvent(QCloseEvent* event);
 
 private:
+    void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();
 
 private slots:

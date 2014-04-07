@@ -21,7 +21,7 @@ BlueprintView::BlueprintView(QWidget *parentArg)
 void BlueprintView::setBlueprint(const Blueprint* blueprint)
 {
     m_blueprint = blueprint;
-    updateScrollBars();
+    updateAll();
 }
 
 void BlueprintView::paintEvent(QPaintEvent*)
@@ -54,7 +54,7 @@ void BlueprintView::wheelEvent(QWheelEvent* ev)
 
 void BlueprintView::resizeEvent(QResizeEvent*)
 {
-    updateScrollBars();
+    updateAll();
 }
 
 QRect BlueprintView::blueprintBounds() const
@@ -77,7 +77,7 @@ void BlueprintView::zoom(double factor, QPoint /*fixedPoint*/)
 {
     // TODO: preserve fixed point
     m_scale = qMax(m_scale * factor, 1.);
-    updateScrollBars();
+    updateAll();
 }
 
 void BlueprintView::updateScrollBars()
@@ -90,5 +90,10 @@ void BlueprintView::updateScrollBars()
     double totalScale = builtInSizeCoeff() * m_scale;
     horizontalScrollBar()->setMaximum(qMax(0., blueprintBounds().width() * totalScale - canvasRect().width()));
     verticalScrollBar()->setMaximum(qMax(0., blueprintBounds().height() * totalScale - canvasRect().height()));
+}
+
+void BlueprintView::updateAll()
+{
+    updateScrollBars();
     viewport()->update();
 }

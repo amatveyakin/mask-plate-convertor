@@ -64,7 +64,7 @@ void CallSubroutineCommand::execute(RunningProgram& instance)
     // TODO: in case of error: always print 2 digits for index
     const Routine* subroutine = instance.program->routine(m_subroutineIndex);
     if (!subroutine)
-        throw instance.executionError("Подпрограмма " + std::to_string(m_subroutineIndex) + "не существует");
+        throw instance.executionError("Подпрограмма " + std::to_string(m_subroutineIndex) + " не существует");
     if ((int)instance.state.callStack.size() >= maxRecursionDepth)  // TODO: +-1 ?
         throw instance.executionError("Превышена максимальная глубина рекурсии при попытке вызвать подпрограмму " + std::to_string(m_subroutineIndex));
     for (int i = 0; i < m_repeatCount; ++i)

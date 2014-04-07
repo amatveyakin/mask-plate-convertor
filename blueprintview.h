@@ -31,6 +31,7 @@ private:
     double builtInSizeCoeff() const;
     void zoom(double factor, QPoint fixedPoint);
     void updateScrollBars();
+    void updateAll();
 };
 
 #endif // BLUEPRINTVIEW_H
