@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QSplitter>
+#include <QStatusBar>
 #include <QStyle>
 #include <QTextBlock>
 #include <QToolBar>
@@ -19,13 +20,16 @@
 #include "programparser.h"
 
 
-const QString appName = "Mask plate convertor";
+static const QString appName = "Mask plate convertor";
+static const int statusMessageDuration = 5000;  // ms
+
 
 MainWindow::MainWindow(QWidget* parentArg)
     : QMainWindow(parentArg)
 {
     setWindowTitle(appName);
     setCentralWidget(new QWidget(this));
+    statusBar();  // show status bar
 
     m_programTextEdit = new QPlainTextEdit(this);
     m_blueprintView = new BlueprintView(this);
@@ -46,12 +50,12 @@ MainWindow::MainWindow(QWidget* parentArg)
     splitter->addWidget(m_programTextEdit);
     splitter->addWidget(m_blueprintView);
     splitter->setStretchFactor(0, 1);
-    splitter->setStretchFactor(1, 4);
+    splitter->setStretchFactor(1, 3);
 
     QLayout* mainLayout = new QVBoxLayout(centralWidget());
     mainLayout->addWidget(splitter);
 
-    resize(sizeHint().expandedTo(QSize(640, 480)));
+    resize(sizeHint().expandedTo(QSize(800, 600)));
 
     connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
     connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
@@ -110,7 +114,7 @@ void MainWindow::convert()
         QString output = m_blueprint->toAutocadCommandLineCommands();
 
         QApplication::clipboard()->setText(output);
-        QMessageBox::information(this, appName, "Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)");
+        statusBar()->showMessage("Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)", statusMessageDuration);
     }
     catch (const ParseError &error) {
         QTextCursor newCursor(m_programTextEdit->document()->findBlockByLineNumber(error.position().line));
