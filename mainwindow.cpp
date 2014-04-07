@@ -74,7 +74,7 @@ void MainWindow::updateWindowTitle()
 
 void MainWindow::open()
 {
-    QString newFileName = QFileDialog::getOpenFileName(this, "Введите имя входного файла", QString(), "Текстовые файлы (.txt);;Все файлы (*)");
+    QString newFileName = QFileDialog::getOpenFileName(this, "Введите имя входного файла", QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
     if (newFileName.isEmpty())
         return;
 
