@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>images/go.png</file>
+    <file>images/new_document.png</file>
 </qresource>
 </RCC>

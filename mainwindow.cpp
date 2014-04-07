@@ -32,17 +32,23 @@ MainWindow::MainWindow(QWidget* parentArg)
     statusBar();  // show status bar
 
     m_programTextEdit = new QPlainTextEdit(this);
+    m_programTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
     m_blueprintView = new BlueprintView(this);
 
+    m_newAction = new QAction(QIcon(":/images/new_document.png"), "Новый", this);
     m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
     m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "Конвертировать", this);
 
+    m_newAction->setShortcut(QKeySequence::New);
     m_openAction->setShortcut(QKeySequence::Open);
     m_openAction->setShortcut(QKeySequence::Save);
 
     QToolBar* toolbar = new QToolBar(this);
+    toolbar->addAction(m_newAction);
     toolbar->addAction(m_openAction);
+    toolbar->addAction(m_saveAction);
+    toolbar->addSeparator();
     toolbar->addAction(m_convertAction);
     addToolBar(toolbar);
 
@@ -57,9 +63,11 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     resize(sizeHint().expandedTo(QSize(800, 600)));
 
-    connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
-    connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+    connect(m_newAction, SIGNAL(triggered()), this, SLOT(newDocument()));
+    connect(m_openAction, SIGNAL(triggered()), this, SLOT(openDocument()));
+    connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveDocument()));
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
+    connect(m_programTextEdit->document(), SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
     updateWindowTitle();
 }
@@ -68,34 +76,103 @@ MainWindow::~MainWindow()
 {
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (confirmClose())
+        event->accept();
+    else
+        event->ignore();
+}
+
+bool MainWindow::confirmClose()
+{
+    assert(m_programTextEdit->document());
+    if (!m_programTextEdit->document()->isModified())
+        return true;
+
+    int res = QMessageBox::warning(this, QString("%1 — Сохранить?").arg(appName), "Файл содержит несохранённые изменения. Сохранить?",
+                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel);
+    switch (res) {
+    case QMessageBox::Yes:
+        return saveDocument();
+    case QMessageBox::No:
+        return true;
+    case QMessageBox::Cancel:
+        return false;
+    }
+    assert(false);
+}
+
 void MainWindow::updateWindowTitle()
 {
     if (m_fileName.isEmpty())
         setWindowTitle(appName);
-    else
-        setWindowTitle(QString("%1 — %2").arg(m_fileName, appName));
+    else {
+        QString modificationMarker = m_programTextEdit->document()->isModified() ? "*" : "";
+        setWindowTitle(QString("%1%2 — %3").arg(m_fileName, modificationMarker, appName));
+    }
 }
 
-void MainWindow::open()
+bool MainWindow::newDocument()
 {
-    QString newFileName = QFileDialog::getOpenFileName(this, "Введите имя входного файла", QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
+    if (!confirmClose())
+        return false;
+    m_programTextEdit->clear();
+    m_fileName.clear();
+    updateWindowTitle();
+    return true;
+}
+
+bool MainWindow::openDocument()
+{
+    if (!confirmClose())
+        return false;
+
+    QString newFileName = QFileDialog::getOpenFileName(this, QString("%1 — открыть файл").arg(appName), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
     if (newFileName.isEmpty())
-        return;
+        return false;
 
     QFile file(newFileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::warning(this, appName, QString("Не удалось открыть файл: \"%1\"").arg(newFileName));
-        return;
+        return false;
     }
 
     m_programTextEdit->setPlainText(file.readAll());
     m_fileName = newFileName;
     updateWindowTitle();
+    return true;
 }
 
-void MainWindow::save()
+bool MainWindow::saveDocument()
 {
-    // TODO
+    if (m_fileName.isEmpty())
+        return saveDocumentAs();
+    return doSaveDocument(m_fileName);
+}
+
+bool MainWindow::saveDocumentAs()
+{
+    QString newFileName = QFileDialog::getSaveFileName(this, QString("%1 — сохранить файл").arg(appName), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
+    if (newFileName.isEmpty())
+        return false;
+    return doSaveDocument(newFileName);
+}
+
+bool MainWindow::doSaveDocument(const QString& target)
+{
+    QFile file(target);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, appName, QString("Не удалось открыть на запись файл: \"%1\"").arg(target));
+        return false;
+    }
+
+    file.write(m_programTextEdit->toPlainText().toUtf8());
+    m_programTextEdit->document()->clearUndoRedoStacks();
+    m_programTextEdit->document()->setModified(false);
+    m_fileName = target;
+    updateWindowTitle();
+    return true;
 }
 
 void MainWindow::convert()

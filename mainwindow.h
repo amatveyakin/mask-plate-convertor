@@ -28,16 +28,24 @@ private:
     QPlainTextEdit* m_programTextEdit;
     BlueprintView* m_blueprintView;
 
+    QAction* m_newAction;
     QAction* m_openAction;
     QAction* m_saveAction;
     QAction* m_convertAction;
 
+protected:
+    void closeEvent(QCloseEvent* event);
+
 private:
-    void updateWindowTitle();
+    bool confirmClose();
 
 private slots:
-    void open();
-    void save();
+    void updateWindowTitle();
+    bool newDocument();
+    bool openDocument();
+    bool saveDocument();
+    bool saveDocumentAs();
+    bool doSaveDocument(const QString& target);
     void convert();
 };
 
