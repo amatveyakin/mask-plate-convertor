@@ -52,6 +52,7 @@ void Blueprint::postProcess()
 
 QString Blueprint::toAutocadCommandLineCommands() const
 {
+    // TODO: Should closed polygons be finished by a special command?
     const double sizeCoeff = 0.001;
     QString result;
     for (const Element& curElement : m_elements) {
