@@ -6,9 +6,6 @@
 #include "blueprintview.h"
 
 
-static const int canvasMargin = 8;
-
-
 BlueprintView::BlueprintView(QWidget *parentArg)
     : ParentT(parentArg)
     , m_blueprint(nullptr)
@@ -32,11 +29,9 @@ void BlueprintView::paintEvent(QPaintEvent*)
     painter.fillRect(viewportRect, Qt::white);
     if (!m_blueprint)
         return;
-    double sizeCoeff = builtInSizeCoeff();
-    sizeCoeff *= m_scale;
-    painter.translate(canvasMargin, canvasMargin);
+    painter.translate(canvasRect().left(), canvasRect().top());
     painter.translate(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
-    painter.scale(sizeCoeff, sizeCoeff);
+    painter.scale(sizeCoeff(), sizeCoeff());
     painter.translate(-blueprintBounds().left(), -blueprintBounds().top());
     painter.setBrush(Qt::NoBrush);
     for (const Element& element : m_blueprint->elements()) {
@@ -64,6 +59,7 @@ QRect BlueprintView::blueprintBounds() const
 
 QRect BlueprintView::canvasRect() const
 {
+    const int canvasMargin = 8;
     QRect viewportRect = viewport()->rect();
     return viewportRect.adjusted(canvasMargin, canvasMargin, -canvasMargin, -canvasMargin);
 }
@@ -71,6 +67,11 @@ QRect BlueprintView::canvasRect() const
 double BlueprintView::builtInSizeCoeff() const
 {
     return qMin(double(canvasRect().width()) / blueprintBounds().width(), double(canvasRect().height()) / blueprintBounds().height());
+}
+
+double BlueprintView::sizeCoeff() const
+{
+    return  builtInSizeCoeff() * m_scale;
 }
 
 void BlueprintView::zoom(double factor, QPoint /*fixedPoint*/)
@@ -87,11 +88,10 @@ void BlueprintView::updateScrollBars()
         verticalScrollBar()->setMaximum(0);
         return;
     }
-    double totalScale = builtInSizeCoeff() * m_scale;
     horizontalScrollBar()->setPageStep(canvasRect().width());
     verticalScrollBar()->setPageStep(canvasRect().height());
-    horizontalScrollBar()->setMaximum(qMax(0., blueprintBounds().width() * totalScale - canvasRect().width()));
-    verticalScrollBar()->setMaximum(qMax(0., blueprintBounds().height() * totalScale - canvasRect().height()));
+    horizontalScrollBar()->setMaximum(qMax(0., blueprintBounds().width() * sizeCoeff() - canvasRect().width()));
+    verticalScrollBar()->setMaximum(qMax(0., blueprintBounds().height() * sizeCoeff() - canvasRect().height()));
 }
 
 void BlueprintView::updateAll()

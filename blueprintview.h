@@ -29,6 +29,7 @@ private:
     QRect blueprintBounds() const;
     QRect canvasRect() const;
     double builtInSizeCoeff() const;
+    double sizeCoeff() const;
     void zoom(double factor, QPoint fixedPoint);
     void updateScrollBars();
     void updateAll();
