@@ -88,6 +88,8 @@ void BlueprintView::updateScrollBars()
         return;
     }
     double totalScale = builtInSizeCoeff() * m_scale;
+    horizontalScrollBar()->setPageStep(canvasRect().width());
+    verticalScrollBar()->setPageStep(canvasRect().height());
     horizontalScrollBar()->setMaximum(qMax(0., blueprintBounds().width() * totalScale - canvasRect().width()));
     verticalScrollBar()->setMaximum(qMax(0., blueprintBounds().height() * totalScale - canvasRect().height()));
 }
