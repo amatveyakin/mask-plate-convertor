@@ -4,6 +4,7 @@
 #include <QScrollBar>
 #include <QWheelEvent>
 
+#include "agilescrollbar.h"
 #include "blueprint.h"
 #include "blueprintview.h"
 
@@ -19,6 +20,8 @@ BlueprintView::BlueprintView(QWidget *parentArg)
     , m_blueprint(nullptr)
     , m_scale(1.)
 {
+    setHorizontalScrollBar(new AgileScrollBar(this));
+    setVerticalScrollBar(new AgileScrollBar(this));
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 }
@@ -34,7 +37,6 @@ void BlueprintView::setBlueprint(const Blueprint* blueprint)
 void BlueprintView::paintEvent(QPaintEvent*)
 {
     QPainter painter(viewport());
-//    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing);
     painter.fillRect(viewport()->rect(), Qt::white);
     if (!m_blueprint)
         return;
@@ -65,12 +67,22 @@ void BlueprintView::resizeEvent(QResizeEvent* /*ev*/)
     coLocatePoints(blueprintFixedPoint, goalScreenPoint);
 }
 
+AgileScrollBar* BlueprintView::myHorizontalScrollBar() const
+{
+    return static_cast<AgileScrollBar *>(horizontalScrollBar());
+}
+
+AgileScrollBar* BlueprintView::myVerticalScrollBar() const
+{
+    return static_cast<AgileScrollBar *>(verticalScrollBar());
+}
+
 QTransform BlueprintView::blueprintToScreenTransform() const
 {
     QTransform result;
     result.translate(m_canvasRect.center().x(), m_canvasRect.center().y());
-    result.translate(horizontalScrollBar()->maximum() / 2 - horizontalScrollBar()->value(),
-                     verticalScrollBar()->maximum() / 2 - verticalScrollBar()->value());
+    result.translate(myHorizontalScrollBar()->goalRangeMiddle() - myHorizontalScrollBar()->value(),
+                     myVerticalScrollBar()->goalRangeMiddle() - myVerticalScrollBar()->value());
     result.scale(sizeCoeff(), sizeCoeff());
     result.translate(-blueprintRect().center().x(), -blueprintRect().center().y());
     return result;
@@ -118,15 +130,17 @@ void BlueprintView::updateCanvasRect()
 
 void BlueprintView::updateScrollBarRanges()
 {
+    myHorizontalScrollBar()->setGoalMinimum(0);
+    myVerticalScrollBar()->setGoalMinimum(0);
     if (!m_blueprint) {
-        horizontalScrollBar()->setMaximum(0);
-        verticalScrollBar()->setMaximum(0);
+        myHorizontalScrollBar()->setGoalMaximum(0);
+        myVerticalScrollBar()->setGoalMaximum(0);
         return;
     }
-    horizontalScrollBar()->setPageStep(m_canvasRect.width());
-    verticalScrollBar()->setPageStep(m_canvasRect.height());
-    horizontalScrollBar()->setMaximum(qMax(0., blueprintRect().width() * sizeCoeff() - m_canvasRect.width()));
-    verticalScrollBar()->setMaximum(qMax(0., blueprintRect().height() * sizeCoeff() - m_canvasRect.height()));
+    myHorizontalScrollBar()->setPageStep(m_canvasRect.width());
+    myVerticalScrollBar()->setPageStep(m_canvasRect.height());
+    myHorizontalScrollBar()->setGoalMaximum(qMax(0., blueprintRect().width() * sizeCoeff() - m_canvasRect.width()));
+    myVerticalScrollBar()->setGoalMaximum(qMax(0., blueprintRect().height() * sizeCoeff() - m_canvasRect.height()));
 }
 
 void BlueprintView::updateViewportGeometry()
@@ -139,7 +153,7 @@ void BlueprintView::updateViewportGeometry()
 void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint)
 {
     QPoint scroll = blueprintToScreen(blueprintPoint) - screenPoint;
-    horizontalScrollBar()->setValue(horizontalScrollBar()->value() + scroll.x());
-    verticalScrollBar()->setValue(verticalScrollBar()->value() + scroll.y());
+    myHorizontalScrollBar()->forceValue(myHorizontalScrollBar()->value() + scroll.x());
+    myVerticalScrollBar()->forceValue(myVerticalScrollBar()->value() + scroll.y());
     viewport()->update();
 }

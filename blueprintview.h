@@ -3,6 +3,7 @@
 
 #include <QAbstractScrollArea>
 
+class AgileScrollBar;
 class Blueprint;
 
 
@@ -27,6 +28,8 @@ private:
     double m_scale;
 
 private:
+    AgileScrollBar* myHorizontalScrollBar() const;
+    AgileScrollBar* myVerticalScrollBar() const;
     QTransform blueprintToScreenTransform() const;
     QPoint screenToBlueprint(QPoint pos) const;
     QPoint blueprintToScreen(QPoint pos) const;

@@ -18,6 +18,9 @@ RESOURCES = images.qrc
 }
 
 
+HEADERS += agilescrollbar.h
+SOURCES += agilescrollbar.cpp
+
 HEADERS += blueprint.h
 SOURCES += blueprint.cpp
 
