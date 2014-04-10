@@ -123,9 +123,18 @@ void BlueprintView::zoom(double factor, QPoint fixedScreenPoint)
 
 void BlueprintView::updateCanvasRect()
 {
-    // TODO: Fix negative rects
     const int canvasMargin = 8;
-    m_canvasRect = viewport()->rect().adjusted(canvasMargin, canvasMargin, -canvasMargin, -canvasMargin);
+    const int minSize = 4;
+    QRect viewportRect = viewport()->rect();
+    m_canvasRect = viewportRect.adjusted(canvasMargin, canvasMargin, -canvasMargin, -canvasMargin);
+    if (m_canvasRect.width() < minSize) {
+        m_canvasRect.setLeft(viewportRect.center().x() - minSize / 2);
+        m_canvasRect.setWidth(minSize);
+    }
+    if (m_canvasRect.height() < minSize) {
+        m_canvasRect.setTop(viewportRect.center().y() - minSize / 2);
+        m_canvasRect.setHeight(minSize);
+    }
 }
 
 void BlueprintView::updateScrollBarRanges()
