@@ -4,5 +4,7 @@
     <file>images/new_document.png</file>
     <file>images/redo.png</file>
     <file>images/undo.png</file>
+    <file>images/flip_horizontally.png</file>
+    <file>images/flip_vertically.png</file>
 </qresource>
 </RCC>

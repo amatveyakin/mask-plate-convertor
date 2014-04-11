@@ -34,6 +34,8 @@ private:
     QAction* m_undoAction;
     QAction* m_redoAction;
     QAction* m_convertAction;
+    QAction* m_flipHorizontallyAction;
+    QAction* m_flipVerticallyAction;
 
 protected:
     void closeEvent(QCloseEvent* event);

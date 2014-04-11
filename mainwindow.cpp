@@ -41,6 +41,11 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "Конвертировать", this);
+    m_flipHorizontallyAction = new QAction(QIcon(":/images/flip_horizontally.png"), "Отразить по горизонтали", this);
+    m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по вертикали", this);
+
+    m_flipHorizontallyAction->setCheckable(true);
+    m_flipVerticallyAction->setCheckable(true);
 
     m_newAction->setShortcut(QKeySequence::New);
     m_openAction->setShortcut(QKeySequence::Open);
@@ -57,6 +62,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     toolbar->addAction(m_redoAction);
     toolbar->addSeparator();
     toolbar->addAction(m_convertAction);
+    toolbar->addSeparator();
+    toolbar->addAction(m_flipHorizontallyAction);
+    toolbar->addAction(m_flipVerticallyAction);
     addToolBar(toolbar);
 
     QSplitter* splitter = new QSplitter(this);
@@ -75,7 +83,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_undoAction->setEnabled(document->isUndoAvailable());
     m_redoAction->setEnabled(document->isRedoAvailable());
 
-    connect(m_newAction, SIGNAL(triggered()), this, SLOT(newDocument()));
+    connect(m_newAction,  SIGNAL(triggered()), this, SLOT(newDocument()));
     connect(m_openAction, SIGNAL(triggered()), this, SLOT(openDocument()));
     connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveDocument()));
 
@@ -86,6 +94,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
+
+    connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipHorizontally(bool)));
+    connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipVertically(bool)));
 
     updateWindowTitle();
 }

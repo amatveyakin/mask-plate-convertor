@@ -17,6 +17,10 @@ public:
 
     void setBlueprint(const Blueprint* blueprint);
 
+public slots:
+    void setflipHorizontally(bool flip);
+    void setflipVertically(bool flip);
+
 protected:
     virtual void paintEvent(QPaintEvent*) override;
     virtual void wheelEvent(QWheelEvent*) override;
@@ -26,6 +30,8 @@ private:
     const Blueprint* m_blueprint;
     QRect m_canvasRect;
     double m_scale;
+    bool m_flipHorizontally;
+    bool m_flipVertically;
 
 private:
     AgileScrollBar* myHorizontalScrollBar() const;

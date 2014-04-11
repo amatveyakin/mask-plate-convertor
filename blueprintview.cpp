@@ -19,6 +19,8 @@ BlueprintView::BlueprintView(QWidget *parentArg)
     : ParentT(parentArg)
     , m_blueprint(nullptr)
     , m_scale(1.)
+    , m_flipHorizontally(false)
+    , m_flipVertically(false)
 {
     setHorizontalScrollBar(new AgileScrollBar(this));
     setVerticalScrollBar(new AgileScrollBar(this));
@@ -32,6 +34,18 @@ void BlueprintView::setBlueprint(const Blueprint* blueprint)
     m_scale = 1.;
     updateViewportGeometry();
     coLocatePoints(blueprintRect().center(), m_canvasRect.center());
+}
+
+void BlueprintView::setflipHorizontally(bool flip)
+{
+    m_flipHorizontally = flip;
+    viewport()->update();
+}
+
+void BlueprintView::setflipVertically(bool flip)
+{
+    m_flipVertically = flip;
+    viewport()->update();
 }
 
 void BlueprintView::paintEvent(QPaintEvent*)
@@ -84,6 +98,10 @@ QTransform BlueprintView::blueprintToScreenTransform() const
     result.translate(myHorizontalScrollBar()->goalRangeMiddle() - myHorizontalScrollBar()->value(),
                      myVerticalScrollBar()->goalRangeMiddle() - myVerticalScrollBar()->value());
     result.scale(sizeCoeff(), sizeCoeff());
+    if (m_flipHorizontally)
+        result.scale(-1., 1.);
+    if (!m_flipVertically)   // we use other coordinate system
+        result.scale(1., -1.);
     result.translate(-blueprintRect().center().x(), -blueprintRect().center().y());
     return result;
 }
