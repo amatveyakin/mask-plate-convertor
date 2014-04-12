@@ -25,8 +25,8 @@ public slots:
     void forceValue(int newValue);
 
 private:
-    int m_goalMinimum = 0;
-    int m_goalMaximum = 0;
+    int m_goalMinimum;
+    int m_goalMaximum;
 
 private:
     using QScrollBar::setMinimum;

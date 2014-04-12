@@ -1,2 +1,6 @@
 *~
 *.pro.user*
+*.sdf
+*.suo
+*.vcxproj*
+images/work
