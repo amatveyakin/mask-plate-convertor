@@ -1,4 +1,4 @@
-QT += core gui
+QT += core gui printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,6 +20,9 @@ RESOURCES = images.qrc
 
 HEADERS += agilescrollbar.h
 SOURCES += agilescrollbar.cpp
+
+HEADERS += appinfo.h
+SOURCES += appinfo.cpp
 
 HEADERS += blueprint.h
 SOURCES += blueprint.cpp
@@ -48,3 +51,6 @@ SOURCES += programparser.cpp
 
 HEADERS += runningprogram.h
 SOURCES += runningprogram.cpp
+
+HEADERS += saveimagedialog.h
+SOURCES += saveimagedialog.cpp

@@ -1,6 +1,9 @@
+// TODO: May be, use placeholder empty blueprint when there is not blueprint (here and in main window)?
+
 #include <assert.h>
 
 #include <QPainter>
+#include <QPrinter>
 #include <QScrollBar>
 #include <QWheelEvent>
 
@@ -15,7 +18,7 @@ static inline double rectToRectSizeCoeff(const QRect& rect1, const QRect& rect2)
 }
 
 
-BlueprintView::BlueprintView(QWidget *parentArg)
+BlueprintView::BlueprintView(QWidget* parentArg)
     : ParentT(parentArg)
     , m_blueprint(nullptr)
     , m_scale(1.)
@@ -48,18 +51,23 @@ void BlueprintView::setflipVertically(bool flip)
     viewport()->update();
 }
 
+void BlueprintView::renderBlueprint(QPaintDevice* target, const QRect& targetRect)
+{
+    QPainter painter(target);
+    doRenderBlueprint(painter, targetRect, blueprintToRectTransform(targetRect));
+}
+
+void BlueprintView::renderBlueprint(QPrinter* printer)
+{
+    QRect targetRect = printer->pageRect();
+    targetRect.moveTopLeft(QPoint(0, 0));
+    renderBlueprint(printer, targetRect);
+}
+
 void BlueprintView::paintEvent(QPaintEvent*)
 {
     QPainter painter(viewport());
-    painter.fillRect(viewport()->rect(), Qt::white);
-    if (!m_blueprint)
-        return;
-    painter.setTransform(blueprintToScreenTransform());
-    painter.setBrush(Qt::NoBrush);
-    for (const Element& element : m_blueprint->elements()) {
-        painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));  // TODO: PenCapStyle, PenJoinStyle - ?
-        painter.drawPolyline(element.polygon);
-    }
+    doRenderBlueprint(painter, viewport()->rect(), blueprintToScreenTransform());
 }
 
 void BlueprintView::wheelEvent(QWheelEvent* ev)
@@ -83,12 +91,33 @@ void BlueprintView::resizeEvent(QResizeEvent* /*ev*/)
 
 AgileScrollBar* BlueprintView::myHorizontalScrollBar() const
 {
-    return static_cast<AgileScrollBar *>(horizontalScrollBar());
+    return static_cast<AgileScrollBar*>(horizontalScrollBar());
 }
 
 AgileScrollBar* BlueprintView::myVerticalScrollBar() const
 {
-    return static_cast<AgileScrollBar *>(verticalScrollBar());
+    return static_cast<AgileScrollBar*>(verticalScrollBar());
+}
+
+QTransform BlueprintView::flipTransform() const
+{
+    QTransform result;
+    if (m_flipHorizontally)
+        result.scale(-1., 1.);
+    if (!m_flipVertically)   // we use other coordinate system
+        result.scale(1., -1.);
+    return result;
+}
+
+QTransform BlueprintView::blueprintToRectTransform(const QRect& targetRect) const
+{
+    QTransform result;
+    result.translate(targetRect.center().x(), targetRect.center().y());
+    double transformSizeCoeff = rectToRectSizeCoeff(blueprintRect(), targetRect);
+    result.scale(transformSizeCoeff, transformSizeCoeff);
+    result = flipTransform() * result;
+    result.translate(-blueprintRect().center().x(), -blueprintRect().center().y());
+    return result;
 }
 
 QTransform BlueprintView::blueprintToScreenTransform() const
@@ -98,22 +127,19 @@ QTransform BlueprintView::blueprintToScreenTransform() const
     result.translate(myHorizontalScrollBar()->goalRangeMiddle() - myHorizontalScrollBar()->value(),
                      myVerticalScrollBar()->goalRangeMiddle() - myVerticalScrollBar()->value());
     result.scale(sizeCoeff(), sizeCoeff());
-    if (m_flipHorizontally)
-        result.scale(-1., 1.);
-    if (!m_flipVertically)   // we use other coordinate system
-        result.scale(1., -1.);
+    result = flipTransform() * result;
     result.translate(-blueprintRect().center().x(), -blueprintRect().center().y());
     return result;
 }
 
-QPoint BlueprintView::screenToBlueprint(QPoint pos) const
+QPoint BlueprintView::screenToBlueprint(QPoint point) const
 {
-    return blueprintToScreenTransform().inverted().map(pos);
+    return blueprintToScreenTransform().inverted().map(point);
 }
 
-QPoint BlueprintView::blueprintToScreen(QPoint pos) const
+QPoint BlueprintView::blueprintToScreen(QPoint point) const
 {
-    return blueprintToScreenTransform().map(pos);
+    return blueprintToScreenTransform().map(point);
 }
 
 QRect BlueprintView::blueprintRect() const
@@ -179,8 +205,21 @@ void BlueprintView::updateViewportGeometry()
 
 void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint)
 {
-    QPoint scroll = blueprintToScreen(blueprintPoint) - screenPoint;
-    myHorizontalScrollBar()->forceValue(myHorizontalScrollBar()->value() + scroll.x());
-    myVerticalScrollBar()->forceValue(myVerticalScrollBar()->value() + scroll.y());
+    QPoint scrollValue = blueprintToScreen(blueprintPoint) - screenPoint;
+    myHorizontalScrollBar()->forceValue(myHorizontalScrollBar()->value() + scrollValue.x());
+    myVerticalScrollBar()->forceValue(myVerticalScrollBar()->value() + scrollValue.y());
     viewport()->update();
+}
+
+void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const
+{
+    painter.fillRect(targetRect, Qt::white);  // TODO: Should we do it here? It will spoil SVG for example
+    if (!m_blueprint)
+        return;
+    painter.setTransform(transform);
+    painter.setBrush(Qt::NoBrush);
+    for (const Element& element : m_blueprint->elements()) {
+        painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));  // TODO: PenCapStyle, PenJoinStyle - ?
+        painter.drawPolyline(element.polygon);
+    }
 }

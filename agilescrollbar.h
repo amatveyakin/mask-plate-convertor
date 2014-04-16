@@ -11,7 +11,7 @@ class AgileScrollBar : public QScrollBar
 {
     Q_OBJECT
 public:
-    explicit AgileScrollBar(QWidget *parent = 0);
+    explicit AgileScrollBar(QWidget *parentArg = 0);
 
     int goalMinimum() const;
     void setGoalMinimum(int newMinimum);

@@ -1,3 +1,5 @@
+// TODO: blink status bar background when showing message
+
 #include <exception>
 
 #include <QAction>
@@ -7,27 +9,29 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QPrintPreviewDialog>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QStyle>
 #include <QTextBlock>
 #include <QToolBar>
 
+#include "appinfo.h"
 #include "blueprint.h"
 #include "blueprintview.h"
 #include "mainwindow.h"
 #include "program.h"
 #include "programparser.h"
+#include "saveimagedialog.h"
 
 
-static const QString appName = "Mask plate convertor";
 static const int statusMessageDuration = 5000;  // ms
 
 
 MainWindow::MainWindow(QWidget* parentArg)
     : QMainWindow(parentArg)
 {
-    setWindowTitle(appName);
+    setWindowTitle(titleText());
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
 
@@ -38,11 +42,14 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_newAction = new QAction(QIcon(":/images/new_document.png"), "Новый", this);
     m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
     m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
+    // TODO: Add ``Save as...''
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "Конвертировать", this);
     m_flipHorizontallyAction = new QAction(QIcon(":/images/flip_horizontally.png"), "Отразить по горизонтали", this);
     m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по вертикали", this);
+    m_saveImageAction = new QAction(QIcon(":/images/save_image.png"), "Сохранить изображение...", this);
+    m_printImageAction = new QAction(QIcon(":/images/print_image.png"), "Распечатать изображение...", this);
 
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);
@@ -52,6 +59,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_openAction->setShortcut(QKeySequence::Save);
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_redoAction->setShortcut(QKeySequence::Redo);
+    m_printImageAction->setShortcut(QKeySequence::Print);
 
     QToolBar* toolbar = new QToolBar(this);
     toolbar->addAction(m_newAction);
@@ -65,6 +73,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     toolbar->addSeparator();
     toolbar->addAction(m_flipHorizontallyAction);
     toolbar->addAction(m_flipVerticallyAction);
+    toolbar->addSeparator();
+    toolbar->addAction(m_saveImageAction);
+    toolbar->addAction(m_printImageAction);
     addToolBar(toolbar);
 
     QSplitter* splitter = new QSplitter(this);
@@ -94,6 +105,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
+    connect(m_saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
+    connect(m_printImageAction, SIGNAL(triggered()), this, SLOT(printImage()));
 
     connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipHorizontally(bool)));
     connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipVertically(bool)));
@@ -105,12 +118,12 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::closeEvent(QCloseEvent* ev)
 {
     if (confirmClose())
-        event->accept();
+        ev->accept();
     else
-        event->ignore();
+        ev->ignore();
 }
 
 void MainWindow::setBlueprint(std::unique_ptr<Blueprint> newBlueprint)
@@ -125,7 +138,7 @@ bool MainWindow::confirmClose()
     if (!m_programTextEdit->document()->isModified())
         return true;
 
-    int res = QMessageBox::warning(this, QString("%1 — Сохранить?").arg(appName), "Файл содержит несохранённые изменения. Сохранить?",
+    int res = QMessageBox::warning(this, titleText("Сохранить?"), "Файл содержит несохранённые изменения. Сохранить?",
                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel);
     switch (res) {
     case QMessageBox::Yes:
@@ -141,10 +154,10 @@ bool MainWindow::confirmClose()
 void MainWindow::updateWindowTitle()
 {
     if (m_fileName.isEmpty())
-        setWindowTitle(appName);
+        setWindowTitle(titleText());
     else {
         QString modificationMarker = m_programTextEdit->document()->isModified() ? "*" : "";
-        setWindowTitle(QString("%1%2 — %3").arg(m_fileName, modificationMarker, appName));
+        setWindowTitle(titleText(QString("%1%2").arg(m_fileName, modificationMarker)));
     }
 }
 
@@ -164,13 +177,13 @@ bool MainWindow::openDocument()
     if (!confirmClose())
         return false;
 
-    QString newFileName = QFileDialog::getOpenFileName(this, QString("%1 — открыть файл").arg(appName), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
+    QString newFileName = QFileDialog::getOpenFileName(this, titleText("Открыть файл"), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
     if (newFileName.isEmpty())
         return false;
 
     QFile file(newFileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, appName, QString("Не удалось открыть файл: \"%1\"").arg(newFileName));
+        QMessageBox::warning(this, titleErrorText(), QString("Не удалось открыть файл: \"%1\"").arg(newFileName));
         return false;
     }
 
@@ -190,7 +203,7 @@ bool MainWindow::saveDocument()
 
 bool MainWindow::saveDocumentAs()
 {
-    QString newFileName = QFileDialog::getSaveFileName(this, QString("%1 — сохранить файл").arg(appName), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
+    QString newFileName = QFileDialog::getSaveFileName(this, titleText("Сохранить файл"), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
     if (newFileName.isEmpty())
         return false;
     return doSaveDocument(newFileName);
@@ -200,7 +213,7 @@ bool MainWindow::doSaveDocument(const QString& target)
 {
     QFile file(target);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, appName, QString("Не удалось открыть на запись файл: \"%1\"").arg(target));
+        QMessageBox::warning(this, titleErrorText(), QString("Не удалось открыть на запись файл: \"%1\"").arg(target));
         return false;
     }
 
@@ -214,7 +227,6 @@ bool MainWindow::doSaveDocument(const QString& target)
 
 void MainWindow::convert()
 {
-    QString errorHeader = QString("%1 — Ошибка").arg(appName);
     try {
         m_blueprintView->setBlueprint(nullptr);
         QStringList programLines = m_programTextEdit->toPlainText().split('\n');
@@ -229,13 +241,44 @@ void MainWindow::convert()
         QApplication::clipboard()->setText(output);
         statusBar()->showMessage("Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)", statusMessageDuration);
     }
-    catch (const ParseError &error) {
+    catch (const ParseError& error) {
         QTextCursor newCursor(m_programTextEdit->document()->findBlockByLineNumber(error.position().line));
         newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, error.position().column);
         m_programTextEdit->setTextCursor(newCursor);
-        QMessageBox::critical(this, errorHeader, error.what());
+        QMessageBox::critical(this, titleErrorText(), error.what());
     }
-    catch (const std::exception &error) {
-        QMessageBox::critical(this, errorHeader, error.what());
+    catch (const std::exception& error) {
+        QMessageBox::critical(this, titleErrorText(), error.what());
     }
+}
+
+void MainWindow::saveImage()
+{
+    // TODO: save last settings accross launches
+    if (!m_blueprint)  // TODO: Disable when there is no blueprint
+        return;
+    SaveImageDialog dialog(m_blueprint->boundingRect().size(), this);
+    int ret = dialog.exec();
+    if (ret == QDialog::Accepted) {
+        SaveImageSettings imageSettings = dialog.settings();
+        imageSettings.setUnits(SaveImageSettings::Pixels);
+        // TODO: +QSvgGenerator
+        QImage outputImage(imageSettings.size().toSize(), QImage::Format_ARGB32);
+        outputImage.fill(Qt::white);
+        m_blueprintView->renderBlueprint(&outputImage, outputImage.rect());
+        bool ok = outputImage.save(imageSettings.outputFile());
+        if (ok)
+            statusBar()->showMessage(QString("Файл \"%1\" сохранён успешно").arg(imageSettings.outputFile()), statusMessageDuration);
+        else
+            QMessageBox::critical(this, titleErrorText(), QString("Не удалось сохранить файл \"%1\"").arg(imageSettings.outputFile()));
+    }
+}
+
+void MainWindow::printImage()
+{
+    if (!m_blueprint)  // TODO: Disable when there is no blueprint
+        return;
+    QPrintPreviewDialog dialog(this);
+    connect(&dialog, SIGNAL(paintRequested(QPrinter*)), m_blueprintView, SLOT(renderBlueprint(QPrinter*)));
+    dialog.exec();
 }

@@ -36,9 +36,11 @@ private:
     QAction* m_convertAction;
     QAction* m_flipHorizontallyAction;
     QAction* m_flipVerticallyAction;
+    QAction* m_saveImageAction;
+    QAction* m_printImageAction;
 
 protected:
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* ev);
 
 private:
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
@@ -52,6 +54,8 @@ private slots:
     bool saveDocumentAs();
     bool doSaveDocument(const QString& target);
     void convert();
+    void saveImage();
+    void printImage();
 };
 
 #endif // MAINWINDOW_H

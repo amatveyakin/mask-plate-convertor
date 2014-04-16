@@ -3,6 +3,8 @@
 
 #include <QAbstractScrollArea>
 
+class QPrinter;
+
 class AgileScrollBar;
 class Blueprint;
 
@@ -20,6 +22,8 @@ public:
 public slots:
     void setflipHorizontally(bool flip);
     void setflipVertically(bool flip);
+    void renderBlueprint(QPaintDevice* target, const QRect& targetRect);
+    void renderBlueprint(QPrinter* printer);
 
 protected:
     virtual void paintEvent(QPaintEvent*) override;
@@ -36,17 +40,24 @@ private:
 private:
     AgileScrollBar* myHorizontalScrollBar() const;
     AgileScrollBar* myVerticalScrollBar() const;
+
+    QTransform flipTransform() const;
+    QTransform blueprintToRectTransform(const QRect& targetRect) const;
     QTransform blueprintToScreenTransform() const;
-    QPoint screenToBlueprint(QPoint pos) const;
-    QPoint blueprintToScreen(QPoint pos) const;
+    QPoint screenToBlueprint(QPoint point) const;
+    QPoint blueprintToScreen(QPoint point) const;
+
     QRect blueprintRect() const;
     double builtInSizeCoeff() const;
     double sizeCoeff() const;
+
     void zoom(double factor, QPoint fixedScreenPoint);
     void updateCanvasRect();
     void updateScrollBarRanges();
     void updateViewportGeometry();
     void coLocatePoints(QPoint blueprintPoint, QPoint screenPoint);     ///< update geometry and co-locate specified point together
+
+    void doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const;
 };
 
 #endif // BLUEPRINTVIEW_H

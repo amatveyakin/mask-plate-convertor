@@ -1,8 +1,8 @@
 #include "agilescrollbar.h"
 
 
-AgileScrollBar::AgileScrollBar(QWidget *parent) :
-    QScrollBar(parent)
+AgileScrollBar::AgileScrollBar(QWidget *parentArg) :
+    QScrollBar(parentArg)
 {
     m_goalMinimum = 0;
     m_goalMaximum = 0;
