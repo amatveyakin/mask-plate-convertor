@@ -24,6 +24,9 @@ SOURCES += agilescrollbar.cpp
 HEADERS += appinfo.h
 SOURCES += appinfo.cpp
 
+HEADERS += autocadconvertor.h
+SOURCES += autocadconvertor.cpp
+
 HEADERS += blueprint.h
 SOURCES += blueprint.cpp
 

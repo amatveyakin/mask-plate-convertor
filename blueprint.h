@@ -27,8 +27,6 @@ public:
     void finishElement();
     void postProcess();
 
-    QString toAutocadCommandLineCommands() const;
-
 private:
     std::vector<Element> m_elements;
     QRect m_boundingRect;

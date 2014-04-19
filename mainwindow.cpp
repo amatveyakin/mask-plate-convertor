@@ -18,6 +18,7 @@
 #include <QToolBar>
 
 #include "appinfo.h"
+#include "autocadconvertor.h"
 #include "blueprint.h"
 #include "blueprintview.h"
 #include "mainwindow.h"
@@ -268,7 +269,7 @@ void MainWindow::convert()
 
         std::unique_ptr<Program> program = parser.finish();
         setBlueprint(program->execute());
-        QString output = m_blueprint->toAutocadCommandLineCommands();
+        QString output = blueprintToAutocadCommandLineCommands(m_blueprint.get());
 
         QApplication::clipboard()->setText(output);
         statusBar()->showMessage("Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)", statusMessageDuration);
