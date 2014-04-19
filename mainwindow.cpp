@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_openAction->setShortcut(QKeySequence::Save);
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_redoAction->setShortcut(QKeySequence::Redo);
+    m_convertAction->setShortcut(Qt::CTRL | Qt::Key_Return);
     m_printImageAction->setShortcut(QKeySequence::Print);
 
     QToolBar* toolbar = new QToolBar(this);
