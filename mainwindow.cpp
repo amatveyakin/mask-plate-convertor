@@ -14,6 +14,7 @@
 #include <QStatusBar>
 #include <QStyle>
 #include <QTextBlock>
+#include <QTextLayout>
 #include <QToolBar>
 
 #include "appinfo.h"
@@ -104,6 +105,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(document, SIGNAL(undoAvailable(bool)), m_undoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(redoAvailable(bool)), m_redoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
+    connect(document, SIGNAL(contentsChanged()), this, SLOT(clearAdditionalFormats()));
 
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
     connect(m_saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
@@ -160,6 +162,13 @@ void MainWindow::updateWindowTitle()
         QString modificationMarker = m_programTextEdit->document()->isModified() ? "*" : "";
         setWindowTitle(titleText(QString("%1%2").arg(m_fileName, modificationMarker)));
     }
+}
+
+void MainWindow::clearAdditionalFormats()
+{
+    QTextDocument* document = m_programTextEdit->document();
+    for (QTextBlock block = document->begin(); block != document->end(); block = block.next())
+        block.layout()->clearAdditionalFormats();
 }
 
 bool MainWindow::newDocument()
@@ -243,7 +252,16 @@ void MainWindow::convert()
         statusBar()->showMessage("Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)", statusMessageDuration);
     }
     catch (const ParseError& error) {
-        QTextCursor newCursor(m_programTextEdit->document()->findBlockByLineNumber(error.position().line));
+        QTextCharFormat errorFormat;
+        errorFormat.setUnderlineColor(Qt::red);
+        errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+        QTextBlock errorBlock = m_programTextEdit->document()->findBlockByLineNumber(error.position().line);
+        int maxSelectionStart =   errorBlock.length()
+                                - 1  // skip new line
+                                - 1; // always show at least one character
+        int selectionStart = qMin(error.position().column, maxSelectionStart);
+        errorBlock.layout()->setAdditionalFormats({{selectionStart, errorBlock.length(), errorFormat}});
+        QTextCursor newCursor(errorBlock);
         newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, error.position().column);
         m_programTextEdit->setTextCursor(newCursor);
         QMessageBox::critical(this, titleErrorText(), error.what());

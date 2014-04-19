@@ -48,6 +48,7 @@ private:
 
 private slots:
     void updateWindowTitle();
+    void clearAdditionalFormats();
     bool newDocument();
     bool openDocument();
     bool saveDocument();
