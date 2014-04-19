@@ -16,13 +16,24 @@ extern const int maxRecursionDepth;
 extern const int startingLineWidth;
 
 
-class ExecutionError : public std::runtime_error
+struct TextPosition
 {
-private:
-    ExecutionError(const std::string& callStackDump, const std::string& whatArg);
+    TextPosition() : line(-1), column(0) {}
+    TextPosition(int lineArg, int columnArg) : line(lineArg), column(columnArg) {}
 
-private:
-    friend struct RunningProgram;
+    bool valid() const  { return line >= 0 && column >= 0; }
+
+    int line;
+    int column;
+};
+
+struct TextRange
+{
+    TextRange() {}
+    TextRange(TextPosition beginArg, TextPosition endArg) : begin(beginArg), end(endArg) {}
+
+    TextPosition begin;
+    TextPosition end;
 };
 
 

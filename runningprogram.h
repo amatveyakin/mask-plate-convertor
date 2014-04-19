@@ -8,6 +8,19 @@
 
 class Blueprint;
 class Program;
+class ProgramCommand;
+
+
+class ExecutionError : public std::runtime_error
+{
+public:
+    ExecutionError(TextRange commandTextRangeArg, const std::string& callStackDump, const std::string& whatArg);
+
+    TextRange commandTextRange() const  { return m_commandTextRange; }
+
+private:
+    TextRange m_commandTextRange;
+};
 
 
 struct Call
@@ -27,8 +40,9 @@ public:
 
 struct ProgramState
 {
-    ProgramState() : laserEnabled(false), lineWidth(startingLineWidth) {}
+    ProgramState() : currentCommand(nullptr), laserEnabled(false), lineWidth(startingLineWidth) {}
 
+    const ProgramCommand *currentCommand;
     CallStack callStack;
     Arguments arguments;
     bool laserEnabled;

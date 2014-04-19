@@ -23,6 +23,7 @@
 #include "mainwindow.h"
 #include "program.h"
 #include "programparser.h"
+#include "runningprogram.h"
 #include "saveimagedialog.h"
 
 
@@ -127,6 +128,27 @@ void MainWindow::closeEvent(QCloseEvent* ev)
         ev->accept();
     else
         ev->ignore();
+}
+
+void MainWindow::showProgramError(TextPosition begin, TextPosition end, const QString& message)
+{
+    if (!end.valid())
+        end = TextPosition(begin.line, std::numeric_limits<int>::max());
+    assert(begin.line == end.line);
+    QTextCharFormat errorFormat;
+    errorFormat.setUnderlineColor(Qt::red);
+    errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+    QTextBlock errorBlock = m_programTextEdit->document()->findBlockByLineNumber(begin.line);
+    const int nNewLineCharacters = 1;
+    const int minSelectionLength = 1;
+    int selectionEnd = qMin(end.column, errorBlock.length() - nNewLineCharacters);
+    int selectionStart = qMin(begin.column, selectionEnd - minSelectionLength);
+    int selectionLength = selectionEnd - selectionStart;
+    errorBlock.layout()->setAdditionalFormats({{selectionStart, selectionLength, errorFormat}});
+    QTextCursor newCursor(errorBlock);
+    newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, begin.column);
+    m_programTextEdit->setTextCursor(newCursor);
+    QMessageBox::critical(this, titleErrorText(), message);
 }
 
 void MainWindow::setBlueprint(std::unique_ptr<Blueprint> newBlueprint)
@@ -252,19 +274,10 @@ void MainWindow::convert()
         statusBar()->showMessage("Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)", statusMessageDuration);
     }
     catch (const ParseError& error) {
-        QTextCharFormat errorFormat;
-        errorFormat.setUnderlineColor(Qt::red);
-        errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-        QTextBlock errorBlock = m_programTextEdit->document()->findBlockByLineNumber(error.position().line);
-        int maxSelectionStart =   errorBlock.length()
-                                - 1  // skip new line
-                                - 1; // always show at least one character
-        int selectionStart = qMin(error.position().column, maxSelectionStart);
-        errorBlock.layout()->setAdditionalFormats({{selectionStart, errorBlock.length(), errorFormat}});
-        QTextCursor newCursor(errorBlock);
-        newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, error.position().column);
-        m_programTextEdit->setTextCursor(newCursor);
-        QMessageBox::critical(this, titleErrorText(), error.what());
+        showProgramError(error.position(), TextPosition(), error.what());
+    }
+    catch (const ExecutionError& error) {
+        showProgramError(error.commandTextRange().begin, error.commandTextRange().end, error.what());
     }
     catch (const std::exception& error) {
         QMessageBox::critical(this, titleErrorText(), error.what());

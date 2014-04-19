@@ -11,6 +11,18 @@
 const int ProgramParser::infinity = std::numeric_limits<int>::max();
 
 
+class CursorTracker
+{
+public:
+    CursorTracker(const ProgramParser& parser) : m_parser(parser), m_begin (parser.m_position) {}
+    TextRange range() { return TextRange(m_begin, m_parser.m_position); }
+
+private:
+    const ProgramParser& m_parser;
+    TextPosition m_begin;
+};
+
+
 ParseError::ParseError(TextPosition positionArg, const QString& whatArg)
     : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(positionArg.line + 1), QString::number(positionArg.column + 1), whatArg).toStdString())
     , m_position(positionArg)
@@ -188,8 +200,9 @@ void ProgramParser::eatLineNo()
     eatUnsignedInteger();
 }
 
-void ProgramParser::pushCommand(std::unique_ptr<ProgramCommand> newCommand)
+void ProgramParser::pushCommand(TextRange textRange, std::unique_ptr<ProgramCommand> newCommand)
 {
+    newCommand->setTextRange(textRange);
     m_program->pushBack(m_currentRoutineIndex, std::move(newCommand));
 }
 
@@ -219,6 +232,7 @@ void ProgramParser::parseStatement()
 
 void ProgramParser::parseSubroutineCall()
 {
+    CursorTracker cursorTracker(*this);
     eat("L");
     int subroutineIndex = eatUnsignedInteger(2);
     int repeatCount = eatUnsignedInteger(2);
@@ -230,7 +244,7 @@ void ProgramParser::parseSubroutineCall()
         int argValue = eatUnsignedInteger();
         arguments.set(iArg, argValue);
     }
-    pushCommand(std::make_unique<CallSubroutineCommand>(subroutineIndex, repeatCount, arguments));
+    pushCommand(cursorTracker.range(), std::make_unique<CallSubroutineCommand>(subroutineIndex, repeatCount, arguments));
 }
 
 void ProgramParser::parseCommand()
@@ -249,11 +263,12 @@ void ProgramParser::parseCommand()
 
 void ProgramParser::parseControlCommand(bool& subroutineFinished)
 {
+    CursorTracker cursorTracker(*this);
     subroutineFinished = false;
     if (tryToEat("M77"))
-        pushCommand(std::make_unique<DisableLaserCommand>());
+        pushCommand(cursorTracker.range(), std::make_unique<DisableLaserCommand>());
     else if (tryToEat("M78"))
-        pushCommand(std::make_unique<EnableLaserCommand>());
+        pushCommand(cursorTracker.range(), std::make_unique<EnableLaserCommand>());
     else if (m_section == Section::SubroutineBody && tryToEat("M17")) {
         subroutineFinished = true;
         setSection(Section::SuccessiveSubroutineHeader);
@@ -264,14 +279,16 @@ void ProgramParser::parseControlCommand(bool& subroutineFinished)
 
 void ProgramParser::parseSetWidthCommand()
 {
+    CursorTracker cursorTracker(*this);
     eat("(");
     int newWidth = eatUnsignedInteger();
     eat(")");
-    pushCommand(std::make_unique<SetLineWidthCommand>(newWidth));
+    pushCommand(cursorTracker.range(), std::make_unique<SetLineWidthCommand>(newWidth));
 }
 
 void ProgramParser::parseMovementCommand()
 {
+    CursorTracker cursorTracker(*this);
     QString moveTwiceMessage("перемещание по \"%1\" задано дважды в одной операции");
     bool xSet = false, ySet = false;
     Movement movement;
@@ -291,5 +308,5 @@ void ProgramParser::parseMovementCommand()
         else
             throw frustratedExpectations("\"X\" или \"Y\"");
     }
-    pushCommand(std::make_unique<MoveToCommand>(movement));
+    pushCommand(cursorTracker.range(), std::make_unique<MoveToCommand>(movement));
 }

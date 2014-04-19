@@ -9,6 +9,12 @@ class ProgramCommand
 public:
     virtual ~ProgramCommand() {}
     virtual void execute(RunningProgram& instance) = 0;
+
+    void setTextRange(TextRange textRangeArg)   { m_textRange = textRangeArg; }
+    TextRange textRange() const                 { return m_textRange; }
+
+private:
+    TextRange m_textRange;
 };
 
 

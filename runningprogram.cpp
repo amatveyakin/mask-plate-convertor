@@ -1,10 +1,18 @@
 #include "blueprint.h"
+#include "programcommands.h"
 #include "runningprogram.h"
 
 
 const int mainRoutineIndex = -1;
 const int maxRecursionDepth = 16;  // 5 by specification
 const int startingLineWidth = 100;
+
+
+ExecutionError::ExecutionError(TextRange commandTextRangeArg, const std::string& callStackDump, const std::string& whatArg)
+    : std::runtime_error(whatArg + "\n\n" + callStackDump)
+    , m_commandTextRange(commandTextRangeArg)
+{
+}
 
 
 std::string CallStack::dump() const
@@ -30,5 +38,5 @@ RunningProgram::RunningProgram(const Program* programArg)
 
 ExecutionError RunningProgram::executionError(const std::string& whatArg) const
 {
-    return ExecutionError(state.callStack.dump(), whatArg);
+    return ExecutionError(state.currentCommand->textRange(), state.callStack.dump(), whatArg);
 }

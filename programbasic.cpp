@@ -5,10 +5,6 @@
 #include "runningprogram.h"
 
 
-ExecutionError::ExecutionError(const std::string& callStackDump, const std::string& whatArg)
-    : std::runtime_error(whatArg + "\n\n" + callStackDump) {}
-
-
 Arguments Arguments::replaced(const Arguments& newArguments) const
 {
     Arguments result(newArguments);

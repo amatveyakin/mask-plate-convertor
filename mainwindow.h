@@ -11,6 +11,7 @@ class QPushButton;
 
 class Blueprint;
 class BlueprintView;
+class TextPosition;
 
 
 class MainWindow : public QMainWindow
@@ -43,6 +44,7 @@ protected:
     void closeEvent(QCloseEvent* ev);
 
 private:
+    void showProgramError(TextPosition begin, TextPosition end, const QString& message);
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();
 

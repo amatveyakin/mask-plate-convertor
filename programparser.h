@@ -5,21 +5,14 @@
 
 #include <QString>
 
+#include "programbasic.h"
+
+class CursorTracker;
 class Number;
 class ParseError;
 class Program;
 class ProgramCommand;
 class Routine;
-
-
-struct TextPosition
-{
-    TextPosition() : line(-1), column(0) {}
-    TextPosition(int line_, int column_) : line(line_), column(column_) {}
-
-    int line;
-    int column;
-};
 
 
 class ParseError : public std::runtime_error
@@ -82,7 +75,7 @@ private:
     Number eatNumber();
     void eatLineNo();
 
-    void pushCommand(std::unique_ptr<ProgramCommand> newCommand);
+    void pushCommand(TextRange textRange, std::unique_ptr<ProgramCommand> newCommand);
 
     void parseSubroutineHeader();
     void parseStatement();
@@ -94,7 +87,7 @@ private:
     void parseSubroutineEnd();
 
 private:
-    friend class EolChecker;
+    friend class CursorTracker;
 };
 
 #endif // PROGRAMPARSER_H

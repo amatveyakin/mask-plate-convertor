@@ -29,8 +29,10 @@ void Routine::execute(RunningProgram& instance, const Arguments &arguments) cons
 {
     instance.state.callStack.push_back(Call(m_index));
     instance.state.arguments = instance.state.arguments.replaced(arguments);
-    for (auto&& command : m_commands)
+    for (auto&& command : m_commands) {
+        instance.state.currentCommand = command.get();
         command->execute(instance);
+    }
     instance.state.callStack.pop_back();
 }
 
