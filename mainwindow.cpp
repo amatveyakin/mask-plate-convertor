@@ -145,7 +145,11 @@ void MainWindow::showProgramError(TextPosition begin, TextPosition end, const QS
     int selectionEnd = qMin(end.column, errorBlock.length() - nNewLineCharacters);
     int selectionStart = qMin(begin.column, selectionEnd - minSelectionLength);
     int selectionLength = selectionEnd - selectionStart;
-    errorBlock.layout()->setAdditionalFormats({{selectionStart, selectionLength, errorFormat}});
+    QTextLayout::FormatRange errorRange;
+    errorRange.start = selectionStart;
+    errorRange.length = selectionLength;
+    errorRange.format = errorFormat;
+    errorBlock.layout()->setAdditionalFormats(QList<QTextLayout::FormatRange>() << errorRange);
     QTextCursor newCursor(errorBlock);
     newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, begin.column);
     m_programTextEdit->setTextCursor(newCursor);

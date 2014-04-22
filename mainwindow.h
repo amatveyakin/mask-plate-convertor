@@ -11,7 +11,7 @@ class QPushButton;
 
 class Blueprint;
 class BlueprintView;
-class TextPosition;
+struct TextPosition;
 
 
 class MainWindow : public QMainWindow
