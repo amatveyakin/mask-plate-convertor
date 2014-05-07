@@ -4,11 +4,19 @@
 #include "runningprogram.h"
 
 
+void ProgramCommand::execute(RunningProgram& instance)
+{
+    assert(!instance.state.callStack.empty());
+    instance.state.callStack.back().inputPosition = m_textRange.begin;
+    doExecute(instance);
+}
+
+
 EnableLaserCommand::EnableLaserCommand()
 {
 }
 
-void EnableLaserCommand::execute(RunningProgram& instance)
+void EnableLaserCommand::doExecute(RunningProgram& instance)
 {
     instance.state.laserEnabled = true;
 }
@@ -18,7 +26,7 @@ DisableLaserCommand::DisableLaserCommand()
 {
 }
 
-void DisableLaserCommand::execute(RunningProgram& instance)
+void DisableLaserCommand::doExecute(RunningProgram& instance)
 {
     instance.state.laserEnabled = false;
     instance.output->finishElement();
@@ -30,7 +38,7 @@ SetLineWidthCommand::SetLineWidthCommand(int newWidth)
 {
 }
 
-void SetLineWidthCommand::execute(RunningProgram& instance)
+void SetLineWidthCommand::doExecute(RunningProgram& instance)
 {
     if (instance.state.laserEnabled)
         throw instance.executionError("Попытка изменения ширины зазора при включённом лазере");
@@ -43,7 +51,7 @@ MoveToCommand::MoveToCommand(Movement movement)
 {
 }
 
-void MoveToCommand::execute(RunningProgram& instance)
+void MoveToCommand::doExecute(RunningProgram& instance)
 {
     QPoint oldPosition = instance.state.position;
     instance.state.position += m_movement.value(instance.state.arguments, instance);
@@ -59,7 +67,7 @@ CallSubroutineCommand::CallSubroutineCommand(int subroutineIndex, int repeatCoun
 {
 }
 
-void CallSubroutineCommand::execute(RunningProgram& instance)
+void CallSubroutineCommand::doExecute(RunningProgram& instance)
 {
     // TODO: in case of error: always print 2 digits for index
     const Routine* subroutine = instance.program->routine(m_subroutineIndex);

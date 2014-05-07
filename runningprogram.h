@@ -14,27 +14,14 @@ class ProgramCommand;
 class ExecutionError : public std::runtime_error
 {
 public:
-    ExecutionError(TextRange commandTextRangeArg, const std::string& callStackDump, const std::string& whatArg);
+    ExecutionError(TextRange commandTextRangeArg, const CallStack& callStackArg, const std::string& whatArg);
 
     TextRange commandTextRange() const  { return m_commandTextRange; }
+    CallStack callStack() const         { return m_callStack; }
 
 private:
     TextRange m_commandTextRange;
-};
-
-
-struct Call
-{
-    Call(int routineIndexArg) : routineIndex(routineIndexArg) {}
-
-    int routineIndex;
-};
-
-
-class CallStack : public std::vector<Call>
-{
-public:
-    std::string dump() const;
+    CallStack m_callStack;
 };
 
 
@@ -53,10 +40,10 @@ struct ProgramState
 
 struct RunningProgram
 {
-    RunningProgram(const Program *programArg);
+    RunningProgram(const Program* programArg);
     ExecutionError executionError(const std::string& whatArg) const;
 
-    const Program *program;
+    const Program* program;
     ProgramState state;
     std::unique_ptr<Blueprint> output;
 };

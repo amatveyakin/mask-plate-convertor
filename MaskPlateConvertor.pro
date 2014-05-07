@@ -35,6 +35,12 @@ SOURCES += blueprintview.cpp
 
 HEADERS += cpp_extensions.h
 
+HEADERS += geometry.h
+SOURCES += geometry.cpp
+
+HEADERS += logdatamodel.h
+SOURCES += logdatamodel.cpp
+
 SOURCES += main.cpp
 
 HEADERS += mainwindow.h
@@ -57,3 +63,6 @@ SOURCES += runningprogram.cpp
 
 HEADERS += saveimagedialog.h
 SOURCES += saveimagedialog.cpp
+
+HEADERS += textbasic.h
+SOURCES += textbasic.cpp

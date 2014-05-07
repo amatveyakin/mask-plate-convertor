@@ -25,7 +25,7 @@ void Routine::pushBack(std::unique_ptr<ProgramCommand> newCommand)
     m_commands.push_back(std::move(newCommand));
 }
 
-void Routine::execute(RunningProgram& instance, const Arguments &arguments) const
+void Routine::execute(RunningProgram& instance, const Arguments& arguments) const
 {
     instance.state.callStack.push_back(Call(m_index));
     instance.state.arguments = instance.state.arguments.replaced(arguments);

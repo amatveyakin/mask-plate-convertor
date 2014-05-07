@@ -1,6 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>images/go.png</file>
+    <file>images/error.png</file>
     <file>images/new_document.png</file>
     <file>images/print_image.png</file>
     <file>images/redo.png</file>
@@ -8,5 +9,6 @@
     <file>images/undo.png</file>
     <file>images/flip_horizontally.png</file>
     <file>images/flip_vertically.png</file>
+    <file>images/warning.png</file>
 </qresource>
 </RCC>

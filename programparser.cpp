@@ -1,4 +1,5 @@
 // TODO: Add function make_command that acts like make unique, but also saves current positino to command; use it in execution error messages
+// TODO: Print all expectations in error messages
 
 #include <assert.h>
 
@@ -24,7 +25,7 @@ private:
 
 
 ParseError::ParseError(TextPosition positionArg, const QString& whatArg)
-    : std::runtime_error(QString("Строка %1, символ %2: %3").arg(QString::number(positionArg.line + 1), QString::number(positionArg.column + 1), whatArg).toStdString())
+    : std::runtime_error(whatArg.toStdString())
     , m_position(positionArg)
 {
 }
