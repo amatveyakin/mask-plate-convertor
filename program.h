@@ -23,6 +23,8 @@ public:
     Program();
     ~Program();
 
+    bool hasRoutine(int index) const;
+
     void pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newCommand);
 
     std::unique_ptr<Blueprint> execute() const;

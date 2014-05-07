@@ -111,6 +111,8 @@ void ProgramParser::setPosition(TextPosition position)
 
 void ProgramParser::setCurrentRoutineIndex(int newIndex)
 {
+    if (m_program->hasRoutine(newIndex))
+        throw ParseError(m_position, QString("Переопределение подпрограммы %1").arg(newIndex));
     m_currentRoutineIndex = newIndex;
 }
 

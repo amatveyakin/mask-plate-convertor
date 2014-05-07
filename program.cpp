@@ -46,6 +46,11 @@ Program::~Program()
 {
 }
 
+bool Program::hasRoutine(int index) const
+{
+    return bool(routine(index));
+}
+
 void Program::pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newCommand)
 {
     nonnullRoutine(routineIndex)->pushBack(std::move(newCommand));
