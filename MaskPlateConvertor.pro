@@ -58,6 +58,9 @@ SOURCES += programcommands.cpp
 HEADERS += programparser.h
 SOURCES += programparser.cpp
 
+HEADERS += programtextedit.h
+SOURCES += programtextedit.cpp
+
 HEADERS += runningprogram.h
 SOURCES += runningprogram.cpp
 

@@ -14,14 +14,11 @@
 #include <QFileDialog>
 #include <QListView>
 #include <QMessageBox>
-#include <QPlainTextEdit>
 #include <QPrintPreviewDialog>
 #include <QScrollBar>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QStyle>
-#include <QTextBlock>
-#include <QTextLayout>
 #include <QToolBar>
 
 #include "appinfo.h"
@@ -32,6 +29,7 @@
 #include "mainwindow.h"
 #include "program.h"
 #include "programparser.h"
+#include "programtextedit.h"
 #include "runningprogram.h"
 #include "saveimagedialog.h"
 
@@ -46,11 +44,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
 
-    initTextFormats();
-
     m_logModel = new LogDataModel(this);
 
-    m_programTextEdit = new QPlainTextEdit(this);
+    m_programTextEdit = new ProgramTextEdit(this);
     m_programTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
 
     m_blueprintView = new BlueprintView(this);
@@ -130,7 +126,6 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(document, SIGNAL(undoAvailable(bool)), m_undoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(redoAvailable(bool)), m_redoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
-    connect(document, SIGNAL(contentsChanged()), this, SLOT(clearAdditionalFormats()));
 
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
     connect(m_saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
@@ -139,12 +134,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipHorizontally(bool)));
     connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipVertically(bool)));
 
-    connect(m_programTextEdit, SIGNAL(cursorPositionChanged()), this, SLOT(updateCurrentLineHighlighting()));
-
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 
     updateWindowTitle();
-    updateCurrentLineHighlighting();
 }
 
 MainWindow::~MainWindow()
@@ -159,37 +151,16 @@ void MainWindow::closeEvent(QCloseEvent* ev)
         ev->ignore();
 }
 
-void MainWindow::initTextFormats()
-{
-    m_currentLineFormat.setBackground(QColor::fromRgbF(0.2, 0.2, 0.6, 0.15));
-    m_currentLineFormat.setProperty(QTextFormat::FullWidthSelection, true);
-
-    m_errorFormat.setUnderlineColor(Qt::red);
-    m_errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-}
-
 void MainWindow::showProgramError(TextRange range, const QString& message, const CallStack& callStack)
 {
-    const TextPosition begin = range.begin;
-    const TextPosition end = range.end.valid() ? range.end : TextPosition(begin.line, std::numeric_limits<int>::max());
-    assert(begin.line == end.line);
+    if (!range.end.valid())
+        range.end = TextPosition(range.begin.line, std::numeric_limits<int>::max());
+    assert(range.begin.line == range.end.line);
 
-    QTextBlock errorBlock = m_programTextEdit->document()->findBlockByLineNumber(begin.line);
-    assert(errorBlock.isValid());
-    const int nNewLineCharacters = 1;
-    const int minSelectionLength = 1;
-    const int selectionEnd = qMin(end.column, errorBlock.length() - nNewLineCharacters);
-    const int selectionStart = qMin(begin.column, selectionEnd - minSelectionLength);
-    const int selectionLength = selectionEnd - selectionStart;
-    QTextLayout::FormatRange errorRange;
-    errorRange.start = selectionStart;
-    errorRange.length = selectionLength;
-    errorRange.format = m_errorFormat;
-    errorBlock.layout()->setAdditionalFormats(errorBlock.layout()->additionalFormats() << errorRange);
-    setTextCursor(begin);
+    m_programTextEdit->indicateError(range);
 
     m_logModel->clear();
-    m_logModel->addLine(LogDataModel::Error, message, begin);
+    m_logModel->addLine(LogDataModel::Error, message, range.begin);
     if (!callStack.empty()) {
         for (auto it = callStack.rbegin(); it != callStack.rend(); ++it) {
             QString text = (it == callStack.rbegin())
@@ -260,33 +231,8 @@ void MainWindow::hideLog()
 
 void MainWindow::updateOnLogItemClicked(const QModelIndex& idx)
 {
-    setTextCursor(idx.data(LogDataModel::SourceTextPositionRole).value<TextPosition>());
+    m_programTextEdit->setTextCursor(idx.data(LogDataModel::SourceTextPositionRole).value<TextPosition>());
     m_programTextEdit->setFocus();
-}
-
-void MainWindow::setTextCursor(TextPosition position)
-{
-    QTextBlock block = m_programTextEdit->document()->findBlockByLineNumber(position.line);
-    QTextCursor newCursor(block);
-    newCursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, position.column);
-    m_programTextEdit->setTextCursor(newCursor);
-}
-
-void MainWindow::updateCurrentLineHighlighting()
-{
-    QTextEdit::ExtraSelection selection;
-    selection.format = m_currentLineFormat;
-    selection.cursor = m_programTextEdit->textCursor();
-    selection.cursor.clearSelection();
-    m_programTextEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>() << selection);
-}
-
-void MainWindow::clearAdditionalFormats()
-{
-    QTextDocument* document = m_programTextEdit->document();
-    for (QTextBlock block = document->begin(); block != document->end(); block = block.next())
-        block.layout()->clearAdditionalFormats();
-    updateCurrentLineHighlighting();
 }
 
 bool MainWindow::newDocument()

@@ -10,7 +10,6 @@
 
 class QLineEdit;
 class QListView;
-class QPlainTextEdit;
 class QPushButton;
 class QModelIndex;
 
@@ -18,6 +17,7 @@ class Blueprint;
 class BlueprintView;
 class CallStack;
 class LogDataModel;
+class ProgramTextEdit;
 
 
 class MainWindow : public QMainWindow
@@ -29,14 +29,11 @@ public:
     ~MainWindow();
 
 private:
-    QTextCharFormat m_currentLineFormat;
-    QTextCharFormat m_errorFormat;
-
     QString m_fileName;
     std::unique_ptr<Blueprint> m_blueprint;
     LogDataModel* m_logModel;
 
-    QPlainTextEdit* m_programTextEdit;
+    ProgramTextEdit* m_programTextEdit;
     BlueprintView* m_blueprintView;
     QListView* m_logView;
 
@@ -55,7 +52,6 @@ protected:
     void closeEvent(QCloseEvent* ev);
 
 private:
-    void initTextFormats();
     void showProgramError(TextRange range, const QString& message, const CallStack& callStack);
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();
@@ -65,9 +61,6 @@ private slots:
     void showLog();
     void hideLog();
     void updateOnLogItemClicked(const QModelIndex& idx);
-    void setTextCursor(TextPosition position);
-    void updateCurrentLineHighlighting();
-    void clearAdditionalFormats();
     bool newDocument();
     bool openDocument();
     bool saveDocument();
