@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QMainWindow>
+#include <QTextFormat>
 
 #include "textbasic.h"
 
@@ -28,6 +29,9 @@ public:
     ~MainWindow();
 
 private:
+    QTextCharFormat m_currentLineFormat;
+    QTextCharFormat m_errorFormat;
+
     QString m_fileName;
     std::unique_ptr<Blueprint> m_blueprint;
     LogDataModel* m_logModel;
@@ -51,6 +55,7 @@ protected:
     void closeEvent(QCloseEvent* ev);
 
 private:
+    void initTextFormats();
     void showProgramError(TextRange range, const QString& message, const CallStack& callStack);
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();
@@ -61,12 +66,14 @@ private slots:
     void hideLog();
     void updateOnLogItemClicked(const QModelIndex& idx);
     void setTextCursor(TextPosition position);
+    void updateCurrentLineHighlighting();
     void clearAdditionalFormats();
     bool newDocument();
     bool openDocument();
     bool saveDocument();
     bool saveDocumentAs();
     bool doSaveDocument(const QString& target);
+    void updateOnDocumentChanged();
     void convert();
     void saveImage();
     void printImage();

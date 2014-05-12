@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
 
+    initTextFormats();
+
     m_logModel = new LogDataModel(this);
 
     m_programTextEdit = new QPlainTextEdit(this);
@@ -137,9 +139,12 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipHorizontally(bool)));
     connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipVertically(bool)));
 
+    connect(m_programTextEdit, SIGNAL(cursorPositionChanged()), this, SLOT(updateCurrentLineHighlighting()));
+
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 
     updateWindowTitle();
+    updateCurrentLineHighlighting();
 }
 
 MainWindow::~MainWindow()
@@ -154,16 +159,23 @@ void MainWindow::closeEvent(QCloseEvent* ev)
         ev->ignore();
 }
 
+void MainWindow::initTextFormats()
+{
+    m_currentLineFormat.setBackground(QColor::fromRgbF(0.2, 0.2, 0.6, 0.15));
+    m_currentLineFormat.setProperty(QTextFormat::FullWidthSelection, true);
+
+    m_errorFormat.setUnderlineColor(Qt::red);
+    m_errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+}
+
 void MainWindow::showProgramError(TextRange range, const QString& message, const CallStack& callStack)
 {
     const TextPosition begin = range.begin;
     const TextPosition end = range.end.valid() ? range.end : TextPosition(begin.line, std::numeric_limits<int>::max());
     assert(begin.line == end.line);
 
-    QTextCharFormat errorFormat;
-    errorFormat.setUnderlineColor(Qt::red);
-    errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     QTextBlock errorBlock = m_programTextEdit->document()->findBlockByLineNumber(begin.line);
+    assert(errorBlock.isValid());
     const int nNewLineCharacters = 1;
     const int minSelectionLength = 1;
     const int selectionEnd = qMin(end.column, errorBlock.length() - nNewLineCharacters);
@@ -172,8 +184,8 @@ void MainWindow::showProgramError(TextRange range, const QString& message, const
     QTextLayout::FormatRange errorRange;
     errorRange.start = selectionStart;
     errorRange.length = selectionLength;
-    errorRange.format = errorFormat;
-    errorBlock.layout()->setAdditionalFormats(QList<QTextLayout::FormatRange>() << errorRange);
+    errorRange.format = m_errorFormat;
+    errorBlock.layout()->setAdditionalFormats(errorBlock.layout()->additionalFormats() << errorRange);
     setTextCursor(begin);
 
     m_logModel->clear();
@@ -260,11 +272,21 @@ void MainWindow::setTextCursor(TextPosition position)
     m_programTextEdit->setTextCursor(newCursor);
 }
 
+void MainWindow::updateCurrentLineHighlighting()
+{
+    QTextEdit::ExtraSelection selection;
+    selection.format = m_currentLineFormat;
+    selection.cursor = m_programTextEdit->textCursor();
+    selection.cursor.clearSelection();
+    m_programTextEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>() << selection);
+}
+
 void MainWindow::clearAdditionalFormats()
 {
     QTextDocument* document = m_programTextEdit->document();
     for (QTextBlock block = document->begin(); block != document->end(); block = block.next())
         block.layout()->clearAdditionalFormats();
+    updateCurrentLineHighlighting();
 }
 
 bool MainWindow::newDocument()
@@ -273,8 +295,7 @@ bool MainWindow::newDocument()
         return false;
     m_programTextEdit->clear();
     m_fileName.clear();
-    setBlueprint(nullptr);
-    updateWindowTitle();
+    updateOnDocumentChanged();
     return true;
 }
 
@@ -295,8 +316,7 @@ bool MainWindow::openDocument()
 
     m_programTextEdit->setPlainText(file.readAll());
     m_fileName = newFileName;
-    setBlueprint(nullptr);
-    updateWindowTitle();
+    updateOnDocumentChanged();
     return true;
 }
 
@@ -329,6 +349,13 @@ bool MainWindow::doSaveDocument(const QString& target)
     m_fileName = target;
     updateWindowTitle();
     return true;
+}
+
+void MainWindow::updateOnDocumentChanged()
+{
+    hideLog();
+    setBlueprint(nullptr);
+    updateWindowTitle();
 }
 
 void MainWindow::convert()
