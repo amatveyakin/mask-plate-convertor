@@ -20,7 +20,6 @@ static inline double rectToRectSizeCoeff(const QRect& rect1, const QRect& rect2)
 
 BlueprintView::BlueprintView(QWidget* parentArg)
     : ParentT(parentArg)
-    , m_blueprint(nullptr)
     , m_scale(1.)
     , m_flipHorizontally(false)
     , m_flipVertically(false)
@@ -31,7 +30,7 @@ BlueprintView::BlueprintView(QWidget* parentArg)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 }
 
-void BlueprintView::setBlueprint(const Blueprint* blueprint)
+void BlueprintView::setBlueprint(BlueprintPtr blueprint)
 {
     m_blueprint = blueprint;
     m_scale = 1.;
@@ -72,7 +71,7 @@ void BlueprintView::paintEvent(QPaintEvent*)
 
 void BlueprintView::wheelEvent(QWheelEvent* ev)
 {
-    if (!m_blueprint)
+    if (m_blueprint.isNull())
         return;
     const double factorBase = 1.001;
     double factor = pow(factorBase, ev->delta());
@@ -81,8 +80,6 @@ void BlueprintView::wheelEvent(QWheelEvent* ev)
 
 void BlueprintView::resizeEvent(QResizeEvent* /*ev*/)
 {
-    if (!m_blueprint)
-        return;
     QPoint blueprintFixedPoint = screenToBlueprint(m_canvasRect.center());
     updateViewportGeometry();
     QPoint goalScreenPoint = m_canvasRect.center();
@@ -144,7 +141,7 @@ QPoint BlueprintView::blueprintToScreen(QPoint point) const
 
 QRect BlueprintView::blueprintRect() const
 {
-    return m_blueprint ? m_blueprint->boundingRect() : QRect();
+    return m_blueprint->boundingRect();
 }
 
 double BlueprintView::builtInSizeCoeff() const
@@ -185,11 +182,6 @@ void BlueprintView::updateScrollBarRanges()
 {
     myHorizontalScrollBar()->setGoalMinimum(0);
     myVerticalScrollBar()->setGoalMinimum(0);
-    if (!m_blueprint) {
-        myHorizontalScrollBar()->setGoalMaximum(0);
-        myVerticalScrollBar()->setGoalMaximum(0);
-        return;
-    }
     myHorizontalScrollBar()->setPageStep(m_canvasRect.width());
     myVerticalScrollBar()->setPageStep(m_canvasRect.height());
     myHorizontalScrollBar()->setGoalMaximum(qMax(0., blueprintRect().width() * sizeCoeff() - m_canvasRect.width()));
@@ -214,8 +206,6 @@ void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint)
 void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const
 {
     painter.fillRect(targetRect, Qt::white);  // TODO: Should we do it here? It will spoil SVG for example
-    if (!m_blueprint)
-        return;
     painter.setTransform(transform);
     painter.setBrush(Qt::NoBrush);
     for (const Element& element : m_blueprint->elements()) {

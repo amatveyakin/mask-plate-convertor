@@ -117,6 +117,10 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_undoAction->setEnabled(document->isUndoAvailable());
     m_redoAction->setEnabled(document->isRedoAvailable());
 
+    setBlueprintActionsEnabled(m_blueprint.isValid());
+
+    connect(&m_blueprint, SIGNAL(isValidChanged(bool)), this, SLOT(setBlueprintActionsEnabled(bool)));
+
     connect(m_newAction,  SIGNAL(triggered()), this, SLOT(newDocument()));
     connect(m_openAction, SIGNAL(triggered()), this, SLOT(openDocument()));
     connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveDocument()));
@@ -176,8 +180,8 @@ void MainWindow::showProgramError(TextRange range, const QString& message, const
 
 void MainWindow::setBlueprint(std::unique_ptr<Blueprint> newBlueprint)
 {
-    m_blueprint = std::move(newBlueprint);
-    m_blueprintView->setBlueprint(m_blueprint.get());
+    m_blueprint.reset(newBlueprint.release());
+    m_blueprintView->setBlueprint(m_blueprint);
 }
 
 bool MainWindow::confirmClose()
@@ -207,6 +211,14 @@ void MainWindow::updateWindowTitle()
         QString modificationMarker = m_programTextEdit->document()->isModified() ? "*" : "";
         setWindowTitle(titleText(QString("%1%2").arg(m_fileName, modificationMarker)));
     }
+}
+
+void MainWindow::setBlueprintActionsEnabled(bool enabled)
+{
+    m_flipHorizontallyAction->setEnabled(enabled);
+    m_flipVerticallyAction->setEnabled(enabled);
+    m_saveImageAction->setEnabled(enabled);
+    m_printImageAction->setEnabled(enabled);
 }
 
 void MainWindow::showLog()
@@ -307,7 +319,7 @@ void MainWindow::updateOnDocumentChanged()
 void MainWindow::convert()
 {
     try {
-        m_blueprintView->setBlueprint(nullptr);
+        setBlueprint(nullptr);
         QStringList programLines = m_programTextEdit->toPlainText().split('\n');
         ProgramParser parser;
         for (const QString& line : programLines)
@@ -336,8 +348,7 @@ void MainWindow::convert()
 void MainWindow::saveImage()
 {
     // TODO: save last settings accross launches
-    if (!m_blueprint)  // TODO: Disable when there is no blueprint
-        return;
+    assert(m_blueprint.isValid());
     SaveImageDialog dialog(m_blueprint->boundingRect().size(), this);
     int ret = dialog.exec();
     if (ret == QDialog::Accepted) {
@@ -357,8 +368,7 @@ void MainWindow::saveImage()
 
 void MainWindow::printImage()
 {
-    if (!m_blueprint)  // TODO: Disable when there is no blueprint
-        return;
+    assert(m_blueprint.isValid());
     QPrintPreviewDialog dialog(this);
     connect(&dialog, SIGNAL(paintRequested(QPrinter*)), m_blueprintView, SLOT(renderBlueprint(QPrinter*)));
     dialog.exec();

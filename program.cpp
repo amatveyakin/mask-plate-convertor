@@ -59,6 +59,7 @@ void Program::pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newComm
 std::unique_ptr<Blueprint> Program::execute() const
 {
     RunningProgram instance(this);
+    instance.output->preProcess();
     routine(mainRoutineIndex)->execute(instance, Arguments());
     instance.output->postProcess();
     return std::move(instance.output);

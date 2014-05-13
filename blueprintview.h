@@ -3,10 +3,11 @@
 
 #include <QAbstractScrollArea>
 
+#include "blueprint.h"
+
 class QPrinter;
 
 class AgileScrollBar;
-class Blueprint;
 
 
 class BlueprintView : public QAbstractScrollArea
@@ -17,7 +18,7 @@ class BlueprintView : public QAbstractScrollArea
 public:
     explicit BlueprintView(QWidget* parentArg = nullptr);
 
-    void setBlueprint(const Blueprint* blueprint);
+    void setBlueprint(BlueprintPtr blueprint);
 
 public slots:
     void setFlipHorizontally(bool flip);
@@ -31,7 +32,7 @@ protected:
     virtual void resizeEvent(QResizeEvent*) override;
 
 private:
-    const Blueprint* m_blueprint;
+    BlueprintPtr m_blueprint;
     QRect m_canvasRect;
     double m_scale;
     bool m_flipHorizontally;

@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QTextFormat>
 
+#include "blueprint.h"
 #include "textbasic.h"
 
 class QLineEdit;
@@ -30,7 +31,7 @@ public:
 
 private:
     QString m_fileName;
-    std::unique_ptr<Blueprint> m_blueprint;
+    BlueprintPtr m_blueprint;
     LogDataModel* m_logModel;
 
     ProgramTextEdit* m_programTextEdit;
@@ -58,6 +59,7 @@ private:
 
 private slots:
     void updateWindowTitle();
+    void setBlueprintActionsEnabled(bool enabled);
     void showLog();
     void hideLog();
     void updateOnLogItemClicked(const QModelIndex& idx);

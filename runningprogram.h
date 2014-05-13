@@ -29,7 +29,7 @@ struct ProgramState
 {
     ProgramState() : currentCommand(nullptr), laserEnabled(false), lineWidth(startingLineWidth) {}
 
-    const ProgramCommand *currentCommand;
+    const ProgramCommand* currentCommand;
     CallStack callStack;
     Arguments arguments;
     bool laserEnabled;
