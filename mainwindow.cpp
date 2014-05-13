@@ -131,8 +131,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
     connect(m_printImageAction, SIGNAL(triggered()), this, SLOT(printImage()));
 
-    connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipHorizontally(bool)));
-    connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setflipVertically(bool)));
+    connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipHorizontally(bool)));
+    connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipVertically(bool)));
 
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 

@@ -39,13 +39,13 @@ void BlueprintView::setBlueprint(const Blueprint* blueprint)
     coLocatePoints(blueprintRect().center(), m_canvasRect.center());
 }
 
-void BlueprintView::setflipHorizontally(bool flip)
+void BlueprintView::setFlipHorizontally(bool flip)
 {
     m_flipHorizontally = flip;
     viewport()->update();
 }
 
-void BlueprintView::setflipVertically(bool flip)
+void BlueprintView::setFlipVertically(bool flip)
 {
     m_flipVertically = flip;
     viewport()->update();

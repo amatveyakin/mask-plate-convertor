@@ -20,8 +20,8 @@ public:
     void setBlueprint(const Blueprint* blueprint);
 
 public slots:
-    void setflipHorizontally(bool flip);
-    void setflipVertically(bool flip);
+    void setFlipHorizontally(bool flip);
+    void setFlipVertically(bool flip);
     void renderBlueprint(QPaintDevice* target, const QRect& targetRect);
     void renderBlueprint(QPrinter* printer);
 
