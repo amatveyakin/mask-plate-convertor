@@ -1,9 +1,10 @@
 // TODO: blink status bar background when showing message
-// TODO: Increase font size
+// TODO: Save font size to settings
 // TODO: Allow to change laser width when drawing (?) (or may be, only when laser is enabled, but no when drawing)
 // TODO: Step-by-step drawing
 // TODO: Add recent documents
 // TODO: Fill menu with standard shortcuts like `copy', `paste', ...
+// TODO: Add `About'
 
 #include <exception>
 
@@ -65,6 +66,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "&Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
+    m_increaseFontSizeAction = new QAction(QIcon(":/images/increase_font.png"), "&Увеличить размер шрифта", this);
+    m_decreaseFontSizeAction = new QAction(QIcon(":/images/decrease_font.png"), "У&меньшить размер шрифта", this);
     m_flipHorizontallyAction = new QAction(QIcon(":/images/flip_horizontally.png"), "Отразить по &горизонтали", this);
     m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по &вертикали", this);
     m_saveImageAction = new QAction(QIcon(":/images/save_image.png"), "Сохранить &изображение...", this);
@@ -79,6 +82,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_redoAction->setShortcut(QKeySequence::Redo);
     m_convertAction->setShortcut(Qt::CTRL | Qt::Key_Return);
+    m_increaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Plus);
+    m_decreaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Minus);
     m_printImageAction->setShortcut(QKeySequence::Print);
 
     QMenu* fileMenu = menuBar()->addMenu("&Файл");
@@ -98,7 +103,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     editMenu->addAction(m_redoAction);
 
     QMenu* viewMenu = menuBar()->addMenu("&Вид");
-    // TODO: enlarge/reduce font
+    viewMenu->addAction(m_increaseFontSizeAction);
+    viewMenu->addAction(m_decreaseFontSizeAction);
     viewMenu->addSeparator();
     viewMenu->addAction(m_flipHorizontallyAction);
     viewMenu->addAction(m_flipVerticallyAction);
@@ -163,9 +169,12 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
 
-    connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
-    connect(m_saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
+    connect(m_convertAction,    SIGNAL(triggered()), this, SLOT(convert()));
+    connect(m_saveImageAction,  SIGNAL(triggered()), this, SLOT(saveImage()));
     connect(m_printImageAction, SIGNAL(triggered()), this, SLOT(printImage()));
+
+    connect(m_increaseFontSizeAction, SIGNAL(triggered()), this, SLOT(increaseFontSize()));
+    connect(m_decreaseFontSizeAction, SIGNAL(triggered()), this, SLOT(decreaseFontSize()));
 
     connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipHorizontally(bool)));
     connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipVertically(bool)));
@@ -258,7 +267,7 @@ void MainWindow::setBlueprintActionsEnabled(bool enabled)
     m_printImageAction->setEnabled(enabled);
 }
 
-void MainWindow::showLog()
+void MainWindow::updateLogHeight()
 {
     const int maxLogHeight = m_logView->fontMetrics().height() * 10;
     const int outerMargin = 6;  // TODO
@@ -268,6 +277,11 @@ void MainWindow::showLog()
     const int viewHeight = qMin(desiredHeight, maxLogHeight);
     m_logView->setFixedHeight(viewHeight);
     m_logModel->setIconSize(m_logView->fontMetrics().height());
+}
+
+void MainWindow::showLog()
+{
+    updateLogHeight();
     m_logView->show();
 }
 
@@ -363,6 +377,23 @@ void MainWindow::showSegmentOrigin(SegmentId segmentId)
     }
     else
         hideLog();
+}
+
+void MainWindow::increaseFontSize()
+{
+    QFont newFont = centralWidget()->font();
+    newFont.setPointSize(centralWidget()->fontInfo().pointSize() + 1);
+    centralWidget()->setFont(newFont);
+    updateLogHeight();
+}
+
+void MainWindow::decreaseFontSize()
+{
+    const int minPointSize = 4;
+    QFont newFont = centralWidget()->font();
+    newFont.setPointSize(qMax(minPointSize, centralWidget()->fontInfo().pointSize() - 1));
+    centralWidget()->setFont(newFont);
+    updateLogHeight();
 }
 
 void MainWindow::convert()

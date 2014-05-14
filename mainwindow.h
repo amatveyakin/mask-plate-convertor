@@ -46,6 +46,8 @@ private:
     QAction* m_undoAction;
     QAction* m_redoAction;
     QAction* m_convertAction;
+    QAction* m_increaseFontSizeAction;
+    QAction* m_decreaseFontSizeAction;
     QAction* m_flipHorizontallyAction;
     QAction* m_flipVerticallyAction;
     QAction* m_saveImageAction;
@@ -63,6 +65,7 @@ private:
 private slots:
     void updateWindowTitle();
     void setBlueprintActionsEnabled(bool enabled);
+    void updateLogHeight();
     void showLog();
     void hideLog();
     void updateOnLogItemClicked(const QModelIndex& idx);
@@ -73,6 +76,8 @@ private slots:
     bool doSaveDocument(const QString& target);
     void updateOnDocumentChanged();
     void showSegmentOrigin(SegmentId segmentId);
+    void increaseFontSize();
+    void decreaseFontSize();
     void convert();
     void saveImage();
     void printImage();
