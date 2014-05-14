@@ -60,8 +60,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_newAction = new QAction(QIcon(":/images/new_document.png"), "&Новый", this);
     m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "&Открыть...", this);
     m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "&Сохранить", this);
+    m_saveAsAction = new QAction("Сохранить &как...", this);
     m_exitAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), "&Выход", this);
-    // TODO: Add ``Save as...''
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "&Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     fileMenu->addAction(m_openAction);
     fileMenu->addSeparator();
     fileMenu->addAction(m_saveAction);
+    fileMenu->addAction(m_saveAsAction);
     fileMenu->addSeparator();
     fileMenu->addAction(m_saveImageAction);
     fileMenu->addAction(m_printImageAction);
@@ -148,10 +149,11 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(&m_blueprint, SIGNAL(isValidChanged(bool)), this, SLOT(setBlueprintActionsEnabled(bool)));
 
-    connect(m_newAction,  SIGNAL(triggered()), this, SLOT(newDocument()));
-    connect(m_openAction, SIGNAL(triggered()), this, SLOT(openDocument()));
-    connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveDocument()));
-    connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
+    connect(m_newAction,    SIGNAL(triggered()), this, SLOT(newDocument()));
+    connect(m_openAction,   SIGNAL(triggered()), this, SLOT(openDocument()));
+    connect(m_saveAction,   SIGNAL(triggered()), this, SLOT(saveDocument()));
+    connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveDocumentAs()));
+    connect(m_exitAction,   SIGNAL(triggered()), this, SLOT(close()));
 
     connect(m_undoAction, SIGNAL(triggered()), document, SLOT(undo()));
     connect(m_redoAction, SIGNAL(triggered()), document, SLOT(redo()));

@@ -41,6 +41,7 @@ private:
     QAction* m_newAction;
     QAction* m_openAction;
     QAction* m_saveAction;
+    QAction* m_saveAsAction;
     QAction* m_exitAction;
     QAction* m_undoAction;
     QAction* m_redoAction;
