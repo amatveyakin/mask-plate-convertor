@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     m_newAction->setShortcut(QKeySequence::New);
     m_openAction->setShortcut(QKeySequence::Open);
-    m_openAction->setShortcut(QKeySequence::Save);
+    m_saveAction->setShortcut(QKeySequence::Save);
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_redoAction->setShortcut(QKeySequence::Redo);
     m_convertAction->setShortcut(Qt::CTRL | Qt::Key_Return);
