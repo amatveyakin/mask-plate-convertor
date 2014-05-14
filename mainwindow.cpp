@@ -57,18 +57,18 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_logView->setModel(m_logModel);
     m_logView->hide();
 
-    m_newAction = new QAction(QIcon(":/images/new_document.png"), "Новый", this);
-    m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
-    m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
-    m_exitAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), "Выход", this);
+    m_newAction = new QAction(QIcon(":/images/new_document.png"), "&Новый", this);
+    m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "&Открыть...", this);
+    m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "&Сохранить", this);
+    m_exitAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), "&Выход", this);
     // TODO: Add ``Save as...''
-    m_undoAction = new QAction(QIcon(":/images/undo.png"), "Отменить", this);
-    m_redoAction = new QAction(QIcon(":/images/redo.png"), "Повторить", this);
-    m_convertAction = new QAction(QIcon(":/images/go.png"), "Конвертировать", this);
-    m_flipHorizontallyAction = new QAction(QIcon(":/images/flip_horizontally.png"), "Отразить по горизонтали", this);
-    m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по вертикали", this);
-    m_saveImageAction = new QAction(QIcon(":/images/save_image.png"), "Сохранить изображение...", this);
-    m_printImageAction = new QAction(QIcon(":/images/print_image.png"), "Распечатать изображение...", this);
+    m_undoAction = new QAction(QIcon(":/images/undo.png"), "&Отменить", this);
+    m_redoAction = new QAction(QIcon(":/images/redo.png"), "&Повторить", this);
+    m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
+    m_flipHorizontallyAction = new QAction(QIcon(":/images/flip_horizontally.png"), "Отразить по &горизонтали", this);
+    m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по &вертикали", this);
+    m_saveImageAction = new QAction(QIcon(":/images/save_image.png"), "Сохранить &изображение...", this);
+    m_printImageAction = new QAction(QIcon(":/images/print_image.png"), "&Распечатать изображение...", this);
 
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);
