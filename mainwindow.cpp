@@ -3,6 +3,7 @@
 // TODO: Allow to change laser width when drawing (?) (or may be, only when laser is enabled, but no when drawing)
 // TODO: Step-by-step drawing
 // TODO: Add recent documents
+// TODO: Fill menu with standard shortcuts like `copy', `paste', ...
 
 #include <exception>
 
@@ -13,6 +14,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QListView>
+#include <QMenuBar>
 #include <QMessageBox>
 #include <QPrintPreviewDialog>
 #include <QScrollBar>
@@ -58,6 +60,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_newAction = new QAction(QIcon(":/images/new_document.png"), "Новый", this);
     m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Открыть...", this);
     m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Сохранить", this);
+    m_exitAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), "Выход", this);
     // TODO: Add ``Save as...''
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "Повторить", this);
@@ -77,6 +80,30 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_redoAction->setShortcut(QKeySequence::Redo);
     m_convertAction->setShortcut(Qt::CTRL | Qt::Key_Return);
     m_printImageAction->setShortcut(QKeySequence::Print);
+
+    QMenu* fileMenu = menuBar()->addMenu("&Файл");
+    fileMenu->addAction(m_newAction);
+    fileMenu->addAction(m_openAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(m_saveAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(m_saveImageAction);
+    fileMenu->addAction(m_printImageAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(m_exitAction);
+
+    QMenu* editMenu = menuBar()->addMenu("&Правка");
+    editMenu->addAction(m_undoAction);
+    editMenu->addAction(m_redoAction);
+
+    QMenu* viewMenu = menuBar()->addMenu("&Вид");
+    // TODO: enlarge/reduce font
+    viewMenu->addSeparator();
+    viewMenu->addAction(m_flipHorizontallyAction);
+    viewMenu->addAction(m_flipVerticallyAction);
+
+    QMenu* developmentMenu = menuBar()->addMenu("&Разработка");
+    developmentMenu->addAction(m_convertAction);
 
     QToolBar* toolbar = new QToolBar(this);
     toolbar->addAction(m_newAction);
@@ -124,6 +151,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_newAction,  SIGNAL(triggered()), this, SLOT(newDocument()));
     connect(m_openAction, SIGNAL(triggered()), this, SLOT(openDocument()));
     connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveDocument()));
+    connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     connect(m_undoAction, SIGNAL(triggered()), document, SLOT(undo()));
     connect(m_redoAction, SIGNAL(triggered()), document, SLOT(redo()));
