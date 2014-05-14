@@ -58,10 +58,10 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_logView->hide();
 
     m_newAction = new QAction(QIcon(":/images/new_document.png"), "&Новый", this);
-    m_openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "&Открыть...", this);
-    m_saveAction = new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "&Сохранить", this);
-    m_saveAsAction = new QAction("Сохранить &как...", this);
-    m_exitAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), "&Выход", this);
+    m_openAction = new QAction(QIcon(":/images/open.ico"), "&Открыть...", this);
+    m_saveAction = new QAction(QIcon(":/images/save.ico"), "&Сохранить", this);
+    m_saveAsAction = new QAction(QIcon(":/images/save_as.ico"), "Сохранить &как...", this);
+    m_exitAction = new QAction(QIcon(":/images/exit.ico"), "&Выход", this);
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "&Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
