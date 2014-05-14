@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <QTextFormat>
 
-#include "blueprint.h"
+#include "blueprintbasic.h"
 #include "textbasic.h"
 
 class QLineEdit;
@@ -54,6 +54,7 @@ protected:
 
 private:
     void showProgramError(TextRange range, const QString& message, const CallStack& callStack);
+    void addBacktraceToLog(const CallStack& callStack);
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();
 
@@ -69,6 +70,7 @@ private slots:
     bool saveDocumentAs();
     bool doSaveDocument(const QString& target);
     void updateOnDocumentChanged();
+    void showSegmentOrigin(SegmentId segmentId);
     void convert();
     void saveImage();
     void printImage();

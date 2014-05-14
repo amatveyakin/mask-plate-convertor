@@ -1,4 +1,4 @@
-// TODO: Don't change data explicitly set by user! (it sometimes happens that width/height being entered tight now is rounded)
+// TODO: Don't change data explicitly set by user! (it sometimes happens that width/height being entered right now is rounded)
 
 #include <assert.h>
 
@@ -145,9 +145,9 @@ SaveImageDialog::SaveImageDialog(QSize blueprintSize, QWidget* parentArg)
     m_dpiSpinBox->setRange(0, maxDpi);
 
     m_unitsComboBox = new QComboBox(this);
-	QList<SaveImageSettings::Units> allUnits;
-	allUnits << SaveImageSettings::Pixels;
-	allUnits << SaveImageSettings::Millimeters;
+    QList<SaveImageSettings::Units> allUnits;
+    allUnits << SaveImageSettings::Pixels;
+    allUnits << SaveImageSettings::Millimeters;
     for (SaveImageSettings::Units units : allUnits)
         m_unitsComboBox->addItem(unitsString(units), static_cast<int>(units));
 

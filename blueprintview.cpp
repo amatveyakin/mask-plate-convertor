@@ -10,6 +10,7 @@
 #include "agilescrollbar.h"
 #include "blueprint.h"
 #include "blueprintview.h"
+#include "geometry.h"
 
 
 static inline double rectToRectSizeCoeff(const QRect& rect1, const QRect& rect2)
@@ -23,7 +24,11 @@ BlueprintView::BlueprintView(QWidget* parentArg)
     , m_scale(1.)
     , m_flipHorizontally(false)
     , m_flipVertically(false)
+    , m_hoveredSegment(SegmentId::invalid())
+    , m_selectedSegment(SegmentId::invalid())
 {
+    setMouseTracking(true);
+
     setHorizontalScrollBar(new AgileScrollBar(this));
     setVerticalScrollBar(new AgileScrollBar(this));
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -34,6 +39,8 @@ void BlueprintView::setBlueprint(BlueprintPtr blueprint)
 {
     m_blueprint = blueprint;
     m_scale = 1.;
+    m_hoveredSegment = SegmentId::invalid();
+    m_selectedSegment = SegmentId::invalid();
     updateViewportGeometry();
     coLocatePoints(blueprintRect().center(), m_canvasRect.center());
 }
@@ -41,13 +48,13 @@ void BlueprintView::setBlueprint(BlueprintPtr blueprint)
 void BlueprintView::setFlipHorizontally(bool flip)
 {
     m_flipHorizontally = flip;
-    viewport()->update();
+    updateViewport();
 }
 
 void BlueprintView::setFlipVertically(bool flip)
 {
     m_flipVertically = flip;
-    viewport()->update();
+    updateViewport();
 }
 
 void BlueprintView::renderBlueprint(QPaintDevice* target, const QRect& targetRect)
@@ -67,6 +74,23 @@ void BlueprintView::paintEvent(QPaintEvent*)
 {
     QPainter painter(viewport());
     doRenderBlueprint(painter, viewport()->rect(), blueprintToScreenTransform());
+}
+
+void BlueprintView::mousePressEvent(QMouseEvent* ev)
+{
+    if (ev->button() == Qt::LeftButton) {
+        updateHoveredSegment();
+        if (m_selectedSegment != m_hoveredSegment) {
+            m_selectedSegment = m_hoveredSegment;
+            emit selectedSegmentChanged(m_selectedSegment);
+            updateViewport();
+        }
+    }
+}
+
+void BlueprintView::mouseMoveEvent(QMouseEvent* /*ev*/)
+{
+    updateViewport();
 }
 
 void BlueprintView::wheelEvent(QWheelEvent* ev)
@@ -192,7 +216,7 @@ void BlueprintView::updateViewportGeometry()
 {
     updateCanvasRect();
     updateScrollBarRanges();
-    viewport()->update();
+    updateViewport();
 }
 
 void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint)
@@ -200,7 +224,49 @@ void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint)
     QPoint scrollValue = blueprintToScreen(blueprintPoint) - screenPoint;
     myHorizontalScrollBar()->forceValue(myHorizontalScrollBar()->value() + scrollValue.x());
     myVerticalScrollBar()->forceValue(myVerticalScrollBar()->value() + scrollValue.y());
+    updateViewport();
+}
+
+void BlueprintView::updateHoveredSegment()
+{
+    const double reselectionPenaltyScreen = 2.;
+    const double maxDistanceScreen = 4.;
+    QPointF cursorPos = screenToBlueprint(viewport()->mapFromGlobal(QCursor::pos()));
+    const double reselectionPenalty = reselectionPenaltyScreen / sizeCoeff();
+    double bestDistance = maxDistanceScreen / sizeCoeff();
+    SegmentId bestSegment = SegmentId::invalid();
+    for (int i = 0; i < int(m_blueprint->elements().size()); ++i) {
+        const Element& element = m_blueprint->elements()[i];
+        for (int j = 0; j < element.polygon.size() - 1; ++j) {
+            SegmentId segmentId = {i, j};
+            double d = geometry::distance(QLineF(element.polygon[j], element.polygon[j + 1]), element.width, cursorPos);
+            if (segmentId == m_selectedSegment)
+                d += reselectionPenalty;
+            if (d < bestDistance) {
+                bestDistance = d;
+                bestSegment = segmentId;
+            }
+        }
+    }
+    if (m_hoveredSegment != bestSegment) {
+        m_hoveredSegment = bestSegment;
+        emit hoveredSegmentChanged(m_hoveredSegment);
+    }
+}
+
+void BlueprintView::updateViewport()
+{
+    updateHoveredSegment();
     viewport()->update();
+}
+
+void BlueprintView::renderSegment(QPainter& painter, SegmentId segmentId, QColor color) const
+{
+    assert(m_blueprint->isSegmentValid(segmentId));
+    const Element& element = m_blueprint->elements()[segmentId.element];
+    // TODO: Use Qt::SquareCap for segment and QPainterPathStroker to clip current element
+    painter.setPen(QPen(color, element.width, Qt::SolidLine, Qt::FlatCap));
+    painter.drawLine(element.polygon[segmentId.segment], element.polygon[segmentId.segment + 1]);
 }
 
 void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const
@@ -211,5 +277,16 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     for (const Element& element : m_blueprint->elements()) {
         painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));  // TODO: PenCapStyle, PenJoinStyle - ?
         painter.drawPolyline(element.polygon);
+    }
+
+    if (m_selectedSegment == m_hoveredSegment) {
+        if (m_blueprint->isSegmentValid(m_selectedSegment))
+            renderSegment(painter, m_selectedSegment, QColor::fromRgbF(1., 0.2, 0.2));
+    }
+    else {
+        if (m_blueprint->isSegmentValid(m_selectedSegment))
+            renderSegment(painter, m_selectedSegment, QColor::fromRgbF(1., 0., 0.));
+        if (m_blueprint->isSegmentValid(m_hoveredSegment))
+            renderSegment(painter, m_hoveredSegment, QColor::fromRgbF(0.7, 0.7, 0.7));
     }
 }

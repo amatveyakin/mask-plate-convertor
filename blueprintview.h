@@ -3,7 +3,7 @@
 
 #include <QAbstractScrollArea>
 
-#include "blueprint.h"
+#include "blueprintbasic.h"
 
 class QPrinter;
 
@@ -26,8 +26,14 @@ public slots:
     void renderBlueprint(QPaintDevice* target, const QRect& targetRect);
     void renderBlueprint(QPrinter* printer);
 
+signals:
+    void hoveredSegmentChanged(SegmentId segment);
+    void selectedSegmentChanged(SegmentId segment);
+
 protected:
     virtual void paintEvent(QPaintEvent*) override;
+    virtual void mousePressEvent(QMouseEvent*) override;
+    virtual void mouseMoveEvent(QMouseEvent*) override;
     virtual void wheelEvent(QWheelEvent*) override;
     virtual void resizeEvent(QResizeEvent*) override;
 
@@ -37,6 +43,8 @@ private:
     double m_scale;
     bool m_flipHorizontally;
     bool m_flipVertically;
+    SegmentId m_hoveredSegment;
+    SegmentId m_selectedSegment;
 
 private:
     AgileScrollBar* myHorizontalScrollBar() const;
@@ -56,8 +64,11 @@ private:
     void updateCanvasRect();
     void updateScrollBarRanges();
     void updateViewportGeometry();
-    void coLocatePoints(QPoint blueprintPoint, QPoint screenPoint);     ///< update geometry and co-locate specified point together
+    void coLocatePoints(QPoint blueprintPoint, QPoint screenPoint);
+    void updateHoveredSegment();
+    void updateViewport();
 
+    void renderSegment(QPainter& painter, SegmentId segmentId, QColor color) const;
     void doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const;
 };
 

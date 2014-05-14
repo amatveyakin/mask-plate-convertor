@@ -131,6 +131,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(document, SIGNAL(redoAvailable(bool)), m_redoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
+    connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
+
     connect(m_convertAction, SIGNAL(triggered()), this, SLOT(convert()));
     connect(m_saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
     connect(m_printImageAction, SIGNAL(triggered()), this, SLOT(printImage()));
@@ -165,17 +167,22 @@ void MainWindow::showProgramError(TextRange range, const QString& message, const
 
     m_logModel->clear();
     m_logModel->addLine(LogDataModel::Error, message, range.begin);
-    if (!callStack.empty()) {
-        for (auto it = callStack.rbegin(); it != callStack.rend(); ++it) {
-            QString text = (it == callStack.rbegin())
-                           ? (it->routineIndex == mainRoutineIndex ? "В главной программе"            : QString("В подпрограмме %1").arg(it->routineIndex))
-                           : (it->routineIndex == mainRoutineIndex ? "вызванной из главной программы" : QString("вызванной из подпрограммы %1").arg(it->routineIndex));
-            m_logModel->addLine(LogDataModel::Neutral, text, it->inputPosition);
-        }
-    }
+    addBacktraceToLog(callStack);
     showLog();
 
     m_programTextEdit->setFocus();
+}
+
+void MainWindow::addBacktraceToLog(const CallStack& callStack)
+{
+    if (callStack.empty())
+        return;
+    for (auto it = callStack.rbegin(); it != callStack.rend(); ++it) {
+        QString text = (it == callStack.rbegin())
+                       ? (it->routineIndex == mainRoutineIndex ? "В главной программе"            : QString("В подпрограмме %1").arg(it->routineIndex))
+                       : (it->routineIndex == mainRoutineIndex ? "вызванной из главной программы" : QString("вызванной из подпрограммы %1").arg(it->routineIndex));
+        m_logModel->addLine(LogDataModel::Neutral, text, it->inputPosition);
+    }
 }
 
 void MainWindow::setBlueprint(std::unique_ptr<Blueprint> newBlueprint)
@@ -230,9 +237,7 @@ void MainWindow::showLog()
     const int desiredHeight = contentHeight + outerMargin + scrollBarHeight;
     const int viewHeight = qMin(desiredHeight, maxLogHeight);
     m_logView->setFixedHeight(viewHeight);
-
     m_logModel->setIconSize(m_logView->fontMetrics().height());
-
     m_logView->show();
 }
 
@@ -314,6 +319,20 @@ void MainWindow::updateOnDocumentChanged()
     hideLog();
     setBlueprint(nullptr);
     updateWindowTitle();
+}
+
+void MainWindow::showSegmentOrigin(SegmentId segmentId)
+{
+    if (m_blueprint->isSegmentValid(segmentId)) {
+        m_logModel->clear();
+        const CallStack& backtrace = m_blueprint->elements()[segmentId.element].segmentBacktraces[segmentId.segment];
+        assert(!backtrace.empty());
+        addBacktraceToLog(backtrace);
+        showLog();
+        m_programTextEdit->setTextCursor(backtrace.back().inputPosition);
+    }
+    else
+        hideLog();
 }
 
 void MainWindow::convert()

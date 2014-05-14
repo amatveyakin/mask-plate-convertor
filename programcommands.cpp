@@ -56,7 +56,7 @@ void MoveToCommand::doExecute(RunningProgram& instance)
     QPoint oldPosition = instance.state.position;
     instance.state.position += m_movement.value(instance.state.arguments, instance);
     if (instance.state.laserEnabled)
-        instance.output->appendLine(oldPosition, instance.state.position, instance.state.lineWidth);
+        instance.output->appendLine(oldPosition, instance.state.position, instance.state.lineWidth, instance.state.callStack);
 }
 
 

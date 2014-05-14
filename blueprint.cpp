@@ -3,9 +3,6 @@
 #include "blueprint.h"
 
 
-//==============================================================================================================================================================
-// Blueprint
-
 BlueprintPtr Blueprint::makePtr()
 {
     return BlueprintPtr(new Blueprint);
@@ -20,18 +17,26 @@ Blueprint::~Blueprint()
 {
 }
 
-void Blueprint::appendLine(QPoint from, QPoint to, int width)
+bool Blueprint::isSegmentValid(SegmentId id) const
+{
+    return    0 <= id.element && id.element < int(elements().size())
+           && 0 <= id.segment && id.segment < elements()[id.element].polygon.size() - 1;
+}
+
+void Blueprint::appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace)
 {
     assert(!m_elements.empty());
     Element& curElement = m_elements.back();
     if (curElement.polygon.empty()) {
         curElement.polygon << from << to;
         curElement.width = width;
+        curElement.segmentBacktraces.push_back(backtrace);
     }
     else {
         assert(curElement.polygon.back() == from);
         assert(curElement.width == width);
         curElement.polygon << to;
+        curElement.segmentBacktraces.push_back(backtrace);
     }
 }
 
@@ -71,50 +76,5 @@ void Blueprint::postProcess()
         for (const Element& element : m_elements)
             m_boundingRect |= elementBoundingRect(element);
         ensureMinSize(m_boundingRect, 1);
-    }
-}
-
-
-//==============================================================================================================================================================
-// BlueprintPtr
-
-const Blueprint BlueprintPtr::defaultBlueprint;
-
-BlueprintPtr::~BlueprintPtr()
-{
-}
-
-void BlueprintPtr::reset(Blueprint* ptr)
-{
-    Blueprint* oldPtr = m_data.get();
-    m_data.reset(ptr);
-    emitChangedSignals(oldPtr);
-}
-
-BlueprintPtr& BlueprintPtr::operator=(BlueprintPtr&& rhs)
-{
-    Blueprint* oldPtr = m_data.get();
-    m_data = rhs.m_data;
-    emitChangedSignals(oldPtr);
-    return *this;
-}
-
-BlueprintPtr& BlueprintPtr::operator=(const BlueprintPtr& rhs)
-{
-    Blueprint* oldPtr = m_data.get();
-    m_data = rhs.m_data;
-    emitChangedSignals(oldPtr);
-    return *this;
-}
-
-void BlueprintPtr::emitChangedSignals(Blueprint* oldPtr)
-{
-    if (m_data.get() != oldPtr) {
-        bool wasValid = bool(oldPtr);
-        if (wasValid != isValid()) {
-            emit isValidChanged(isValid());
-            emit isNullChanged(isNull());
-        }
-        emit pointerChanged();
     }
 }

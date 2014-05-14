@@ -19,6 +19,7 @@ namespace geometry
 
     double distance(QPointF p1, QPointF p2);
     double distance(QLineF line, QPointF point);
+    double distance(QLineF line, double width, QPointF point);
 
     double dot(QPointF p1, QPointF p2);
 };

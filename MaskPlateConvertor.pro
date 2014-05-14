@@ -30,6 +30,9 @@ SOURCES += autocadconvertor.cpp
 HEADERS += blueprint.h
 SOURCES += blueprint.cpp
 
+HEADERS += blueprintbasic.h
+SOURCES += blueprintbasic.cpp
+
 HEADERS += blueprintview.h
 SOURCES += blueprintview.cpp
 

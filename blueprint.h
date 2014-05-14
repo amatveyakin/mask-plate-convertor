@@ -1,23 +1,24 @@
 #ifndef BLUEPRINT_H
 #define BLUEPRINT_H
 
-#include <assert.h>
-
-#include <memory>
 #include <vector>
 
 #include <QPolygon>
-#include <QObject>
 
-class BlueprintPtr;
+#include "blueprintbasic.h"
+#include "programbasic.h"
 
 
+/*!
+ * \brief Polygon with specific width and inverse search information
+ */
 struct Element
 {
     Element() : width(-1) {}
 
     QPolygon polygon;
     int width;
+    std::vector<CallStack> segmentBacktraces;
 };
 
 /*!
@@ -33,8 +34,9 @@ public:
 
     const std::vector<Element>& elements() const    { return m_elements; }
     QRect boundingRect() const                      { return m_boundingRect; }
+    bool isSegmentValid(SegmentId id) const;
 
-    void appendLine(QPoint from, QPoint to, int width);
+    void appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace);
     void finishElement();
     void preProcess();
     void postProcess();
@@ -42,45 +44,6 @@ public:
 private:
     std::vector<Element> m_elements;
     QRect m_boundingRect;
-};
-
-/*!
- * \brief Blueprint shared pointer that can be always dereferenced
- */
-class BlueprintPtr : public QObject
-{
-    Q_OBJECT
-
-public:
-    BlueprintPtr() {}
-    explicit BlueprintPtr(Blueprint* ptr) : m_data(ptr) {}
-    ~BlueprintPtr();
-
-    BlueprintPtr(const BlueprintPtr& rhs) : QObject(), m_data(rhs.m_data) {}
-    BlueprintPtr(BlueprintPtr&& rhs) : QObject(), m_data(rhs.m_data) {}
-    BlueprintPtr& operator=(const BlueprintPtr& rhs);
-    BlueprintPtr& operator=(BlueprintPtr&& rhs);
-
-    void reset(Blueprint* ptr);
-
-    bool isValid() const                { return bool(m_data); }
-    bool isNull() const                 { return !isValid(); }
-    const Blueprint* get() const        { return m_data ? m_data.get() : &defaultBlueprint; }
-    Blueprint* getMutable() const       { assert(m_data); return m_data.get(); }
-    const Blueprint& operator*() const  { return *get(); }
-    const Blueprint* operator->() const { return get(); }
-
-signals:
-    void pointerChanged();
-    void isValidChanged(bool isValidNow);
-    void isNullChanged(bool isNullNow);
-
-private:
-    static const Blueprint defaultBlueprint;
-private:
-    std::shared_ptr<Blueprint> m_data;
-private:
-    void emitChangedSignals(Blueprint* oldPtr);
 };
 
 #endif // BLUEPRINT_H
