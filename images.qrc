@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
+    <file>images/about.ico</file>
     <file>images/app_icon.ico</file>
     <file>images/edit_copy.ico</file>
     <file>images/edit_cut.ico</file>

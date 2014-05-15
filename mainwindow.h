@@ -55,6 +55,7 @@ private:
     QAction* m_flipVerticallyAction;
     QAction* m_saveImageAction;
     QAction* m_printImageAction;
+    QAction* m_showAboutAction;
 
 protected:
     void closeEvent(QCloseEvent* ev);
@@ -87,6 +88,7 @@ private slots:
     void convert();
     void saveImage();
     void printImage();
+    void showAbout();
 };
 
 #endif // MAINWINDOW_H

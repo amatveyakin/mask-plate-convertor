@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
 #endif
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-    QCoreApplication::setOrganizationName(companyName);
-    QCoreApplication::setApplicationName(appName);
+    QCoreApplication::setOrganizationName(companyName());
+    QCoreApplication::setApplicationName(appName());
 
     MainWindow mainWindow;
     mainWindow.show();

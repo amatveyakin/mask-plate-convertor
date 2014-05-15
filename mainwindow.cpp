@@ -2,7 +2,6 @@
 // TODO: Allow to change laser width when drawing (?) (or may be, only when laser is enabled, but no when drawing)
 // TODO: Step-by-step drawing
 // TODO: Add recent documents
-// TODO: Add `About'
 
 #include <exception>
 
@@ -74,6 +73,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по &вертикали", this);
     m_saveImageAction = new QAction(QIcon(":/images/save_image.png"), "Сохранить &изображение...", this);
     m_printImageAction = new QAction(QIcon(":/images/print_image.png"), "&Распечатать изображение...", this);
+    m_showAboutAction = new QAction(QIcon(":/images/about.ico"), "&О программе...", this);
 
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);
@@ -117,6 +117,9 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     QMenu* developmentMenu = menuBar()->addMenu("&Разработка");
     developmentMenu->addAction(m_convertAction);
+
+    QMenu* helpMenu = menuBar()->addMenu("П&омощь");
+    helpMenu->addAction(m_showAboutAction);
 
     QToolBar* toolbar = new QToolBar(this);
     toolbar->addAction(m_newAction);
@@ -191,6 +194,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipVertically(bool)));
 
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
+
+    connect(m_showAboutAction, SIGNAL(triggered()), this, SLOT(showAbout()));
 
     updateWindowTitle();
     loadSettings();
@@ -483,4 +488,9 @@ void MainWindow::printImage()
     QPrintPreviewDialog dialog(this);
     connect(&dialog, SIGNAL(paintRequested(QPrinter*)), m_blueprintView, SLOT(renderBlueprint(QPrinter*)));
     dialog.exec();
+}
+
+void MainWindow::showAbout()
+{
+  QMessageBox::about(this, QString("О программе %1").arg(appName()), aboutText());
 }
