@@ -40,7 +40,7 @@ static const int statusMessageDuration = 5000;  // ms
 MainWindow::MainWindow(QWidget* parentArg)
     : QMainWindow(parentArg)
 {
-    setWindowIcon(QIcon(":/images/app_icon.ico"));
+    setWindowIcon(QIcon(":/images/application-icon.png"));
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
 
@@ -55,24 +55,24 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_logView->setModel(m_logModel);
     m_logView->hide();
 
-    m_newAction = new QAction(QIcon(":/images/new_document.png"), "&Новый", this);
-    m_openAction = new QAction(QIcon(":/images/open.ico"), "&Открыть...", this);
-    m_saveAction = new QAction(QIcon(":/images/save.ico"), "&Сохранить", this);
-    m_saveAsAction = new QAction(QIcon(":/images/save_as.ico"), "Сохранить &как...", this);
-    m_exitAction = new QAction(QIcon(":/images/exit.ico"), "В&ыход", this);
-    m_cutAction = new QAction(QIcon(":/images/edit_cut.ico"), "Вы&резать", this);
-    m_copyAction = new QAction(QIcon(":/images/edit_copy.ico"), "&Копировать", this);
-    m_pasteAction = new QAction(QIcon(":/images/edit_paste.ico"), "&Вставить", this);
-    m_undoAction = new QAction(QIcon(":/images/undo.png"), "&Отменить", this);
-    m_redoAction = new QAction(QIcon(":/images/redo.png"), "&Повторить", this);
+    m_newAction = new QAction(QIcon(":/images/document-new.png"), "&Новый", this);
+    m_openAction = new QAction(QIcon(":/images/document-open.png"), "&Открыть...", this);
+    m_saveAction = new QAction(QIcon(":/images/document-save.png"), "&Сохранить", this);
+    m_saveAsAction = new QAction(QIcon(":/images/document-save-as.png"), "Сохранить &как...", this);
+    m_exitAction = new QAction(QIcon(":/images/application-exit.png"), "В&ыход", this);
+    m_cutAction = new QAction(QIcon(":/images/edit-cut.png"), "Вы&резать", this);
+    m_copyAction = new QAction(QIcon(":/images/edit-copy.png"), "&Копировать", this);
+    m_pasteAction = new QAction(QIcon(":/images/edit-paste.png"), "&Вставить", this);
+    m_undoAction = new QAction(QIcon(":/images/edit-undo.png"), "&Отменить", this);
+    m_redoAction = new QAction(QIcon(":/images/edit-redo.png"), "&Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
-    m_increaseFontSizeAction = new QAction(QIcon(":/images/increase_font.png"), "&Увеличить размер шрифта", this);
-    m_decreaseFontSizeAction = new QAction(QIcon(":/images/decrease_font.png"), "У&меньшить размер шрифта", this);
-    m_flipHorizontallyAction = new QAction(QIcon(":/images/flip_horizontally.png"), "Отразить по &горизонтали", this);
-    m_flipVerticallyAction = new QAction(QIcon(":/images/flip_vertically.png"), "Отразить по &вертикали", this);
-    m_saveImageAction = new QAction(QIcon(":/images/save_image.png"), "Сохранить &изображение...", this);
-    m_printImageAction = new QAction(QIcon(":/images/print_image.png"), "&Распечатать изображение...", this);
-    m_showAboutAction = new QAction(QIcon(":/images/about.ico"), "&О программе...", this);
+    m_increaseFontSizeAction = new QAction(QIcon(":/images/view-increase-font.png"), "&Увеличить размер шрифта", this);
+    m_decreaseFontSizeAction = new QAction(QIcon(":/images/view-decrease-font.png"), "У&меньшить размер шрифта", this);
+    m_flipHorizontallyAction = new QAction(QIcon(":/images/view-flip-horizontally.png"), "Отразить по &горизонтали", this);
+    m_flipVerticallyAction = new QAction(QIcon(":/images/view-flip-vertically.png"), "Отразить по &вертикали", this);
+    m_saveImageAction = new QAction(QIcon(":/images/image-save.png"), "Сохранить &изображение...", this);
+    m_printImageAction = new QAction(QIcon(":/images/image-print.png"), "&Распечатать изображение...", this);
+    m_showAboutAction = new QAction(QIcon(":/images/help-about.png"), "&О программе...", this);
 
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);

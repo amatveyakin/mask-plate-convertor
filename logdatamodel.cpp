@@ -53,8 +53,8 @@ QVariant LogDataModel::data(const QModelIndex& idx, int role) const
             emptyPixmap.fill(Qt::transparent);
             return emptyPixmap;
         }
-        case Warning:   return QPixmap(":/images/warning.png").scaledToHeight(m_iconSize, Qt::SmoothTransformation);
-        case Error:     return QPixmap(":/images/error.png").scaledToHeight(m_iconSize, Qt::SmoothTransformation);
+        case Warning:   return QPixmap(":/images/log-warning.png").scaledToHeight(m_iconSize, Qt::SmoothTransformation);
+        case Error:     return QPixmap(":/images/log-error.png").scaledToHeight(m_iconSize, Qt::SmoothTransformation);
         }
         return QVariant();
     case SourceTextPositionRole:

@@ -1,25 +1,25 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>images/about.ico</file>
-    <file>images/app_icon.ico</file>
-    <file>images/edit_copy.ico</file>
-    <file>images/edit_cut.ico</file>
-    <file>images/edit_paste.ico</file>
-    <file>images/error.png</file>
-    <file>images/exit.ico</file>
-    <file>images/flip_horizontally.png</file>
-    <file>images/flip_vertically.png</file>
-    <file>images/decrease_font.png</file>
+    <file>images/application-exit.png</file>
+    <file>images/application-icon.png</file>
+    <file>images/document-new.png</file>
+    <file>images/document-open.png</file>
+    <file>images/document-save-as.png</file>
+    <file>images/document-save.png</file>
+    <file>images/edit-copy.png</file>
+    <file>images/edit-cut.png</file>
+    <file>images/edit-paste.png</file>
+    <file>images/edit-redo.png</file>
+    <file>images/edit-undo.png</file>
     <file>images/go.png</file>
-    <file>images/increase_font.png</file>
-    <file>images/new_document.png</file>
-    <file>images/open.ico</file>
-    <file>images/print_image.png</file>
-    <file>images/redo.png</file>
-    <file>images/save.ico</file>
-    <file>images/save_as.ico</file>
-    <file>images/save_image.png</file>
-    <file>images/undo.png</file>
-    <file>images/warning.png</file>
+    <file>images/help-about.png</file>
+    <file>images/image-print.png</file>
+    <file>images/image-save.png</file>
+    <file>images/log-error.png</file>
+    <file>images/log-warning.png</file>
+    <file>images/view-decrease-font.png</file>
+    <file>images/view-flip-horizontally.png</file>
+    <file>images/view-flip-vertically.png</file>
+    <file>images/view-increase-font.png</file>
 </qresource>
 </RCC>
