@@ -1,5 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
+    <file>images/edit_copy.ico</file>
+    <file>images/edit_cut.ico</file>
+    <file>images/edit_paste.ico</file>
     <file>images/error.png</file>
     <file>images/exit.ico</file>
     <file>images/flip_horizontally.png</file>

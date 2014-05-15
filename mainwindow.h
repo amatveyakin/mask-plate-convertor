@@ -43,6 +43,9 @@ private:
     QAction* m_saveAction;
     QAction* m_saveAsAction;
     QAction* m_exitAction;
+    QAction* m_cutAction;
+    QAction* m_copyAction;
+    QAction* m_pasteAction;
     QAction* m_undoAction;
     QAction* m_redoAction;
     QAction* m_convertAction;

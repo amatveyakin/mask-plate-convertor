@@ -2,7 +2,6 @@
 // TODO: Allow to change laser width when drawing (?) (or may be, only when laser is enabled, but no when drawing)
 // TODO: Step-by-step drawing
 // TODO: Add recent documents
-// TODO: Fill menu with standard shortcuts like `copy', `paste', ...
 // TODO: Add `About'
 
 #include <exception>
@@ -62,7 +61,10 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_openAction = new QAction(QIcon(":/images/open.ico"), "&Открыть...", this);
     m_saveAction = new QAction(QIcon(":/images/save.ico"), "&Сохранить", this);
     m_saveAsAction = new QAction(QIcon(":/images/save_as.ico"), "Сохранить &как...", this);
-    m_exitAction = new QAction(QIcon(":/images/exit.ico"), "&Выход", this);
+    m_exitAction = new QAction(QIcon(":/images/exit.ico"), "В&ыход", this);
+    m_cutAction = new QAction(QIcon(":/images/edit_cut.ico"), "Вы&резать", this);
+    m_copyAction = new QAction(QIcon(":/images/edit_copy.ico"), "&Копировать", this);
+    m_pasteAction = new QAction(QIcon(":/images/edit_paste.ico"), "&Вставить", this);
     m_undoAction = new QAction(QIcon(":/images/undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/redo.png"), "&Повторить", this);
     m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
@@ -101,6 +103,10 @@ MainWindow::MainWindow(QWidget* parentArg)
     QMenu* editMenu = menuBar()->addMenu("&Правка");
     editMenu->addAction(m_undoAction);
     editMenu->addAction(m_redoAction);
+    editMenu->addSeparator();
+    editMenu->addAction(m_cutAction);
+    editMenu->addAction(m_copyAction);
+    editMenu->addAction(m_pasteAction);
 
     QMenu* viewMenu = menuBar()->addMenu("&Вид");
     viewMenu->addAction(m_increaseFontSizeAction);
@@ -161,10 +167,15 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveDocumentAs()));
     connect(m_exitAction,   SIGNAL(triggered()), this, SLOT(close()));
 
+    connect(m_cutAction,    SIGNAL(triggered()), m_programTextEdit, SLOT(cut()));
+    connect(m_copyAction,   SIGNAL(triggered()), m_programTextEdit, SLOT(copy()));
+    connect(m_pasteAction,  SIGNAL(triggered()), m_programTextEdit, SLOT(paste()));
+
     connect(m_undoAction, SIGNAL(triggered()), document, SLOT(undo()));
     connect(m_redoAction, SIGNAL(triggered()), document, SLOT(redo()));
     connect(document, SIGNAL(undoAvailable(bool)), m_undoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(redoAvailable(bool)), m_redoAction, SLOT(setEnabled(bool)));
+
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
