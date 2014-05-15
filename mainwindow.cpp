@@ -1,5 +1,4 @@
 // TODO: blink status bar background when showing message
-// TODO: Allow to change laser width when drawing (?) (or may be, only when laser is enabled, but no when drawing)
 // TODO: Step-by-step drawing
 // TODO: Add recent documents
 
