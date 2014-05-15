@@ -42,7 +42,7 @@ static const int statusMessageDuration = 5000;  // ms
 MainWindow::MainWindow(QWidget* parentArg)
     : QMainWindow(parentArg)
 {
-    setWindowTitle(titleText());
+    setWindowIcon(QIcon(":/images/app_icon.ico"));
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
 
