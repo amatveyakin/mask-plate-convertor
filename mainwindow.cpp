@@ -140,6 +140,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     QWidget* editorWidget = new QWidget(this);
 
     QBoxLayout* editorLayout = new QVBoxLayout(editorWidget);
+    editorLayout->setContentsMargins(0, 0, 0, 0);
     editorLayout->addWidget(m_programTextEdit);
     editorLayout->addWidget(m_logView);
 

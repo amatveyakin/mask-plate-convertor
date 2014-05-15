@@ -238,7 +238,7 @@ void BlueprintView::updateHoveredSegment()
     for (int i = 0; i < int(m_blueprint->elements().size()); ++i) {
         const Element& element = m_blueprint->elements()[i];
         for (int j = 0; j < element.polygon.size() - 1; ++j) {
-            SegmentId segmentId = {i, j};
+            SegmentId segmentId(i, j);
             double d = geometry::distance(QLineF(element.polygon[j], element.polygon[j + 1]), element.width, cursorPos);
             if (segmentId == m_selectedSegment)
                 d += reselectionPenalty;
