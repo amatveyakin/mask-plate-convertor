@@ -238,6 +238,7 @@ void MainWindow::addBacktraceToLog(const CallStack& callStack)
         QString text = (it == callStack.rbegin())
                        ? (it->routineIndex == mainRoutineIndex ? "В главной программе"            : QString("В подпрограмме %1").arg(it->routineIndex))
                        : (it->routineIndex == mainRoutineIndex ? "вызванной из главной программы" : QString("вызванной из подпрограммы %1").arg(it->routineIndex));
+        text += QString(" (строка %1)").arg(it->inputPosition.line);
         m_logModel->addLine(LogDataModel::Neutral, text, it->inputPosition);
     }
 }
