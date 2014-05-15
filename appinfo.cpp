@@ -2,6 +2,8 @@
 
 
 extern const QString appName = "Mask plate convertor";
+extern const QString companyName = "AMM Soft";
+
 
 QString titleText(const QString& subtitle)
 {

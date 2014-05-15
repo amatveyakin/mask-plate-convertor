@@ -63,6 +63,8 @@ private:
     bool confirmClose();
 
 private slots:
+    void loadSettings();
+    void saveSettings();
     void updateWindowTitle();
     void setBlueprintActionsEnabled(bool enabled);
     void updateLogHeight();
@@ -76,6 +78,7 @@ private slots:
     bool doSaveDocument(const QString& target);
     void updateOnDocumentChanged();
     void showSegmentOrigin(SegmentId segmentId);
+    void setFontSize(int pointSize);
     void increaseFontSize();
     void decreaseFontSize();
     void convert();

@@ -5,6 +5,7 @@
 
 
 extern const QString appName;
+extern const QString companyName;
 
 QString titleText(const QString& subtitle = QString());
 QString titleErrorText();

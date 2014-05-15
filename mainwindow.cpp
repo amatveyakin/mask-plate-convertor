@@ -1,5 +1,4 @@
 // TODO: blink status bar background when showing message
-// TODO: Save font size to settings
 // TODO: Allow to change laser width when drawing (?) (or may be, only when laser is enabled, but no when drawing)
 // TODO: Step-by-step drawing
 // TODO: Add recent documents
@@ -19,6 +18,7 @@
 #include <QMessageBox>
 #include <QPrintPreviewDialog>
 #include <QScrollBar>
+#include <QSettings>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QStyle>
@@ -182,6 +182,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 
     updateWindowTitle();
+    loadSettings();
 }
 
 MainWindow::~MainWindow()
@@ -190,8 +191,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* ev)
 {
-    if (confirmClose())
+    if (confirmClose()) {
+        saveSettings();
         ev->accept();
+    }
     else
         ev->ignore();
 }
@@ -247,6 +250,21 @@ bool MainWindow::confirmClose()
         return false;
     }
     assert(false);
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+    bool ok;
+    int fontSize = settings.value("font_size").toInt(&ok);
+    if (ok)
+        setFontSize(fontSize);
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+    settings.setValue("font_size", centralWidget()->fontInfo().pointSize());
 }
 
 void MainWindow::updateWindowTitle()
@@ -379,21 +397,23 @@ void MainWindow::showSegmentOrigin(SegmentId segmentId)
         hideLog();
 }
 
-void MainWindow::increaseFontSize()
+void MainWindow::setFontSize(int pointSize)
 {
     QFont newFont = centralWidget()->font();
-    newFont.setPointSize(centralWidget()->fontInfo().pointSize() + 1);
+    newFont.setPointSize(pointSize);
     centralWidget()->setFont(newFont);
     updateLogHeight();
+}
+
+void MainWindow::increaseFontSize()
+{
+    setFontSize(centralWidget()->fontInfo().pointSize() + 1);
 }
 
 void MainWindow::decreaseFontSize()
 {
     const int minPointSize = 4;
-    QFont newFont = centralWidget()->font();
-    newFont.setPointSize(qMax(minPointSize, centralWidget()->fontInfo().pointSize() - 1));
-    centralWidget()->setFont(newFont);
-    updateLogHeight();
+    setFontSize(qMax(minPointSize, centralWidget()->fontInfo().pointSize() - 1));
 }
 
 void MainWindow::convert()
