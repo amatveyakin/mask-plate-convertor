@@ -9,6 +9,7 @@
 #include "blueprintbasic.h"
 #include "textbasic.h"
 
+class QLabel;
 class QLineEdit;
 class QListView;
 class QPushButton;
@@ -37,6 +38,7 @@ private:
     ProgramTextEdit* m_programTextEdit;
     BlueprintView* m_blueprintView;
     QListView* m_logView;
+    QLabel* m_coordinatesWidget;
 
     QAction* m_newAction;
     QAction* m_openAction;

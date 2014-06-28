@@ -1,6 +1,6 @@
 // TODO: blink status bar background when showing message
 // TODO: Step-by-step drawing
-// TODO: Add recent documents
+// TODO: Add recent documents; save/load all settings
 
 #include <exception>
 
@@ -10,6 +10,7 @@
 #include <QBoxLayout>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QLabel>
 #include <QListView>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -54,6 +55,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_logView = new QListView(this);
     m_logView->setModel(m_logModel);
     m_logView->hide();
+
+    m_coordinatesWidget = new QLabel(this);
+    statusBar()->addPermanentWidget(m_coordinatesWidget);
 
     m_newAction = new QAction(QIcon(":/images/document-new.png"), "&Новый", this);
     m_openAction = new QAction(QIcon(":/images/document-open.png"), "&Открыть...", this);
@@ -400,18 +404,28 @@ void MainWindow::updateOnDocumentChanged()
     updateWindowTitle();
 }
 
+static QString pointToString(QPoint p)
+{
+    return QString("(X: %1, Y: %2)").arg(QString::number(p.x()), QString::number(p.y()));
+}
+
 void MainWindow::showSegmentOrigin(SegmentId segmentId)
 {
     if (m_blueprint->isSegmentValid(segmentId)) {
         m_logModel->clear();
-        const CallStack& backtrace = m_blueprint->elements()[segmentId.element].segmentBacktraces[segmentId.segment];
+        const Element& element = m_blueprint->elements()[segmentId.element];
+        const CallStack& backtrace = element.segmentBacktraces[segmentId.segment];
         assert(!backtrace.empty());
         addBacktraceToLog(backtrace);
         showLog();
         m_programTextEdit->setTextCursor(backtrace.back().inputPosition);
+        m_coordinatesWidget->setText(QString("%1 — %2").arg(pointToString(element.polygon[segmentId.segment]),
+                                                            pointToString(element.polygon[segmentId.segment + 1])));  // TODO: Fix numbers screen positions
     }
-    else
+    else {
         hideLog();
+        m_coordinatesWidget->clear();
+    }
 }
 
 void MainWindow::setFontSize(int pointSize)
