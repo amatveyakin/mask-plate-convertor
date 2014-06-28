@@ -419,8 +419,9 @@ void MainWindow::showSegmentOrigin(SegmentId segmentId)
         addBacktraceToLog(backtrace);
         showLog();
         m_programTextEdit->setTextCursor(backtrace.back().inputPosition);
-        m_coordinatesWidget->setText(QString("%1 — %2").arg(pointToString(element.polygon[segmentId.segment]),
-                                                            pointToString(element.polygon[segmentId.segment + 1])));  // TODO: Fix numbers screen positions
+        m_coordinatesWidget->setText(QString("%1 — %2, ширина %3").arg(pointToString(element.polygon[segmentId.segment]),
+                                                                       pointToString(element.polygon[segmentId.segment + 1]),
+                                                                       QString::number(element.width)));   // TODO: Fix numbers screen positions
     }
     else {
         hideLog();
