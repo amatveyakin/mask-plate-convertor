@@ -21,5 +21,6 @@
     <file>images/view-flip-horizontally.png</file>
     <file>images/view-flip-vertically.png</file>
     <file>images/view-increase-font.png</file>
+    <file>images/view-show-transitions.png</file>
 </qresource>
 </RCC>

@@ -55,6 +55,7 @@ private:
     QAction* m_decreaseFontSizeAction;
     QAction* m_flipHorizontallyAction;
     QAction* m_flipVerticallyAction;
+    QAction* m_showTransitionsAction;
     QAction* m_saveImageAction;
     QAction* m_printImageAction;
     QAction* m_showAboutAction;

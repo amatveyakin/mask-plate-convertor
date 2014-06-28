@@ -74,12 +74,14 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_decreaseFontSizeAction = new QAction(QIcon(":/images/view-decrease-font.png"), "У&меньшить размер шрифта", this);
     m_flipHorizontallyAction = new QAction(QIcon(":/images/view-flip-horizontally.png"), "Отразить по &горизонтали", this);
     m_flipVerticallyAction = new QAction(QIcon(":/images/view-flip-vertically.png"), "Отразить по &вертикали", this);
+    m_showTransitionsAction = new QAction(QIcon(":/images/view-show-transitions.png"), "Показывать &переходы", this);
     m_saveImageAction = new QAction(QIcon(":/images/image-save.png"), "Сохранить &изображение...", this);
     m_printImageAction = new QAction(QIcon(":/images/image-print.png"), "&Распечатать изображение...", this);
     m_showAboutAction = new QAction(QIcon(":/images/help-about.png"), "&О программе...", this);
 
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);
+    m_showTransitionsAction->setCheckable(true);
 
     m_newAction->setShortcut(QKeySequence::New);
     m_openAction->setShortcut(QKeySequence::Open);
@@ -117,6 +119,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     viewMenu->addSeparator();
     viewMenu->addAction(m_flipHorizontallyAction);
     viewMenu->addAction(m_flipVerticallyAction);
+    viewMenu->addAction(m_showTransitionsAction);
 
     QMenu* developmentMenu = menuBar()->addMenu("&Разработка");
     developmentMenu->addAction(m_convertAction);
@@ -136,6 +139,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     toolbar->addSeparator();
     toolbar->addAction(m_flipHorizontallyAction);
     toolbar->addAction(m_flipVerticallyAction);
+    toolbar->addAction(m_showTransitionsAction);
     toolbar->addSeparator();
     toolbar->addAction(m_saveImageAction);
     toolbar->addAction(m_printImageAction);
@@ -196,6 +200,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipHorizontally(bool)));
     connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipVertically(bool)));
+    connect(m_showTransitionsAction,  SIGNAL(toggled(bool)), m_blueprintView, SLOT(setShowTransitions(bool)));
 
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 
@@ -302,6 +307,7 @@ void MainWindow::setBlueprintActionsEnabled(bool enabled)
 {
     m_flipHorizontallyAction->setEnabled(enabled);
     m_flipVerticallyAction->setEnabled(enabled);
+    m_showTransitionsAction->setEnabled(enabled);
     m_saveImageAction->setEnabled(enabled);
     m_printImageAction->setEnabled(enabled);
 }

@@ -23,6 +23,7 @@ public:
 public slots:
     void setFlipHorizontally(bool flip);
     void setFlipVertically(bool flip);
+    void setShowTransitions(bool showTrans);
     void renderBlueprint(QPaintDevice* target, const QRect& targetRect);
     void renderBlueprint(QPrinter* printer);
 
@@ -43,6 +44,7 @@ private:
     double m_scale;
     bool m_flipHorizontally;
     bool m_flipVertically;
+    bool m_showTransitions;
     SegmentId m_hoveredSegment;
     SegmentId m_selectedSegment;
 

@@ -24,6 +24,7 @@ BlueprintView::BlueprintView(QWidget* parentArg)
     , m_scale(1.)
     , m_flipHorizontally(false)
     , m_flipVertically(false)
+    , m_showTransitions(false)
     , m_hoveredSegment(SegmentId::invalid())
     , m_selectedSegment(SegmentId::invalid())
 {
@@ -54,6 +55,12 @@ void BlueprintView::setFlipHorizontally(bool flip)
 void BlueprintView::setFlipVertically(bool flip)
 {
     m_flipVertically = flip;
+    updateViewport();
+}
+
+void BlueprintView::setShowTransitions(bool showTrans)
+{
+    m_showTransitions = showTrans;
     updateViewport();
 }
 
@@ -274,6 +281,17 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     painter.fillRect(targetRect, Qt::white);  // TODO: Should we do it here? It will spoil SVG for example
     painter.setTransform(transform);
     painter.setBrush(Qt::NoBrush);
+
+    if (m_showTransitions) {
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(QPen(QColor(80, 80, 255), 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
+        for (int i = 0; i < (int)m_blueprint->elements().size() - 1; ++i) {
+            painter.drawLine(m_blueprint->elements()[i].polygon.back(),
+                             m_blueprint->elements()[i + 1].polygon.front());
+        }
+    }
+
+    painter.setRenderHint(QPainter::Antialiasing, false);
     for (const Element& element : m_blueprint->elements()) {
         painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
         painter.drawPolyline(element.polygon);
