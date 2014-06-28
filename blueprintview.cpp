@@ -275,7 +275,7 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     painter.setTransform(transform);
     painter.setBrush(Qt::NoBrush);
     for (const Element& element : m_blueprint->elements()) {
-        painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));  // TODO: PenCapStyle, PenJoinStyle - ?
+        painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
         painter.drawPolyline(element.polygon);
     }
 
