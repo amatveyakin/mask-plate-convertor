@@ -15,7 +15,7 @@ QString companyName()
 QList<int> appVersion()
 {
   // TODO: extract version from git!
-  return QList<int>() << 1 << 0;
+  return QList<int>() << 1 << 1;
 }
 
 QString appVersionString()
