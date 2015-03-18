@@ -32,6 +32,7 @@ public:
 
 private:
     QString m_fileName;
+    QStringList m_recentFilesNames;
     BlueprintPtr m_blueprint;
     LogDataModel* m_logModel;
 
@@ -40,8 +41,16 @@ private:
     QListView* m_logView;
     QLabel* m_coordinatesWidget;
 
+    QMenu* m_fileMenu;
+    QMenu* m_editMenu;
+    QMenu* m_viewMenu;
+    QMenu* m_developmentMenu;
+    QMenu* m_helpMenu;
+
     QAction* m_newAction;
     QAction* m_openAction;
+    QList<QAction*> m_openRecentActions;
+    QAction* m_openRecentEndAction;
     QAction* m_saveAction;
     QAction* m_saveAsAction;
     QAction* m_exitAction;
@@ -81,14 +90,17 @@ private slots:
     void updateOnLogItemClicked(const QModelIndex& idx);
     bool newDocument();
     bool openDocument();
+    bool openRecentDocument();
+    bool doOpenDocument(const QString& fileName);
     bool saveDocument();
     bool saveDocumentAs();
-    bool doSaveDocument(const QString& target);
+    bool doSaveDocument(const QString& fileName);
     void updateOnDocumentChanged();
     void showSegmentOrigin(SegmentId segmentId);
     void setFontSize(int pointSize);
     void increaseFontSize();
     void decreaseFontSize();
+    void updateRecentFilesMenu();
     bool draw();
     bool drawAndConvert();
     void saveImage();

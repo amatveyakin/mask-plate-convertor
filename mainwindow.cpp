@@ -35,7 +35,15 @@
 #include "saveimagedialog.h"
 
 
+static const int maxRecentDocuments = 10;
 static const int statusMessageDuration = 5000;  // ms
+
+QString elideFilename(QString filename)
+{
+    const int maxLength = 100;
+    const int maxLengthWithoutEllipsis = maxLength - 3;
+    return (filename.length() <= maxLength) ? filename : "..." + filename.right(maxLengthWithoutEllipsis);
+}
 
 
 MainWindow::MainWindow(QWidget* parentArg)
@@ -94,40 +102,41 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_decreaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Minus);
     m_printImageAction->setShortcut(QKeySequence::Print);
 
-    QMenu* fileMenu = menuBar()->addMenu("&Файл");
-    fileMenu->addAction(m_newAction);
-    fileMenu->addAction(m_openAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(m_saveAction);
-    fileMenu->addAction(m_saveAsAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(m_saveImageAction);
-    fileMenu->addAction(m_printImageAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(m_exitAction);
+    m_fileMenu = menuBar()->addMenu("&Файл");
+    m_fileMenu->addAction(m_newAction);
+    m_fileMenu->addAction(m_openAction);
+    m_fileMenu->addSeparator();
+    m_openRecentEndAction = m_fileMenu->addSeparator();
+    m_fileMenu->addAction(m_saveAction);
+    m_fileMenu->addAction(m_saveAsAction);
+    m_fileMenu->addSeparator();
+    m_fileMenu->addAction(m_saveImageAction);
+    m_fileMenu->addAction(m_printImageAction);
+    m_fileMenu->addSeparator();
+    m_fileMenu->addAction(m_exitAction);
 
-    QMenu* editMenu = menuBar()->addMenu("&Правка");
-    editMenu->addAction(m_undoAction);
-    editMenu->addAction(m_redoAction);
-    editMenu->addSeparator();
-    editMenu->addAction(m_cutAction);
-    editMenu->addAction(m_copyAction);
-    editMenu->addAction(m_pasteAction);
+    m_editMenu = menuBar()->addMenu("&Правка");
+    m_editMenu->addAction(m_undoAction);
+    m_editMenu->addAction(m_redoAction);
+    m_editMenu->addSeparator();
+    m_editMenu->addAction(m_cutAction);
+    m_editMenu->addAction(m_copyAction);
+    m_editMenu->addAction(m_pasteAction);
 
-    QMenu* viewMenu = menuBar()->addMenu("&Вид");
-    viewMenu->addAction(m_increaseFontSizeAction);
-    viewMenu->addAction(m_decreaseFontSizeAction);
-    viewMenu->addSeparator();
-    viewMenu->addAction(m_flipHorizontallyAction);
-    viewMenu->addAction(m_flipVerticallyAction);
-    viewMenu->addAction(m_showTransitionsAction);
+    m_viewMenu = menuBar()->addMenu("&Вид");
+    m_viewMenu->addAction(m_increaseFontSizeAction);
+    m_viewMenu->addAction(m_decreaseFontSizeAction);
+    m_viewMenu->addSeparator();
+    m_viewMenu->addAction(m_flipHorizontallyAction);
+    m_viewMenu->addAction(m_flipVerticallyAction);
+    m_viewMenu->addAction(m_showTransitionsAction);
 
-    QMenu* developmentMenu = menuBar()->addMenu("&Разработка");
-    developmentMenu->addAction(m_drawAction);
-    developmentMenu->addAction(m_drawAndConvertAction);
+    m_developmentMenu = menuBar()->addMenu("&Разработка");
+    m_developmentMenu->addAction(m_drawAction);
+    m_developmentMenu->addAction(m_drawAndConvertAction);
 
-    QMenu* helpMenu = menuBar()->addMenu("П&омощь");
-    helpMenu->addAction(m_showAboutAction);
+    m_helpMenu = menuBar()->addMenu("П&омощь");
+    m_helpMenu->addAction(m_showAboutAction);
 
     QToolBar* toolbar = new QToolBar(this);
     toolbar->addAction(m_newAction);
@@ -284,16 +293,34 @@ bool MainWindow::confirmClose()
 void MainWindow::loadSettings()
 {
     QSettings settings;
-    bool ok;
+    bool ok = false;
+
     int fontSize = settings.value("font_size").toInt(&ok);
     if (ok)
         setFontSize(fontSize);
+
+    m_recentFilesNames.clear();
+    int recentFilesCount = settings.beginReadArray("recent_documents");
+    for (int i = 0; i < recentFilesCount; ++i) {
+        settings.setArrayIndex(i);
+        m_recentFilesNames.push_back(settings.value("name").toString());
+    }
+    settings.endArray();
+    updateRecentFilesMenu();
 }
 
 void MainWindow::saveSettings()
 {
     QSettings settings;
+
     settings.setValue("font_size", centralWidget()->fontInfo().pointSize());
+
+    settings.beginWriteArray("recent_documents", m_recentFilesNames.size());
+    for (int i = 0; i < m_recentFilesNames.size(); ++i) {
+        settings.setArrayIndex(i);
+        settings.setValue("name", m_recentFilesNames[i]);
+    }
+    settings.endArray();
 }
 
 void MainWindow::updateWindowTitle()
@@ -358,19 +385,36 @@ bool MainWindow::openDocument()
 {
     if (!confirmClose())
         return false;
-
-    QString newFileName = QFileDialog::getOpenFileName(this, titleText("Открыть файл"), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
-    if (newFileName.isEmpty())
+    QString fileName = QFileDialog::getOpenFileName(this, titleText("Открыть файл"), QString(), "Текстовые файлы (*.txt);;Все файлы (*)");
+    if (fileName.isEmpty())
         return false;
+    return doOpenDocument(fileName);
+}
 
-    QFile file(newFileName);
+bool MainWindow::openRecentDocument()
+{
+    if (!confirmClose())
+        return false;
+    QAction* senderAction = qobject_cast<QAction*>(sender());
+    assert(senderAction);
+    QString fileName = senderAction->data().toString();
+    return doOpenDocument(fileName);
+}
+
+bool MainWindow::doOpenDocument(const QString& fileName)
+{
+    QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, titleErrorText(), QString("Не удалось открыть файл: \"%1\"").arg(newFileName));
+        QMessageBox::warning(this, titleErrorText(), QString("Не удалось открыть файл: \"%1\"").arg(fileName));
         return false;
     }
 
     m_programTextEdit->setPlainText(file.readAll());
-    m_fileName = newFileName;
+    m_fileName = fileName;
+    m_recentFilesNames.removeAll(fileName);
+    m_recentFilesNames.push_front(fileName);
+    m_recentFilesNames = m_recentFilesNames.mid(0, maxRecentDocuments);
+    updateRecentFilesMenu();
     updateOnDocumentChanged();
     return true;
 }
@@ -390,18 +434,18 @@ bool MainWindow::saveDocumentAs()
     return doSaveDocument(newFileName);
 }
 
-bool MainWindow::doSaveDocument(const QString& target)
+bool MainWindow::doSaveDocument(const QString& fileName)
 {
-    QFile file(target);
+    QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, titleErrorText(), QString("Не удалось открыть на запись файл: \"%1\"").arg(target));
+        QMessageBox::warning(this, titleErrorText(), QString("Не удалось открыть на запись файл: \"%1\"").arg(fileName));
         return false;
     }
 
     file.write(m_programTextEdit->toPlainText().toUtf8());
     m_programTextEdit->document()->clearUndoRedoStacks();
     m_programTextEdit->document()->setModified(false);
-    m_fileName = target;
+    m_fileName = fileName;
     updateWindowTitle();
     return true;
 }
@@ -457,6 +501,19 @@ void MainWindow::decreaseFontSize()
     setFontSize(qMax(minPointSize, centralWidget()->fontInfo().pointSize() - 1));
 }
 
+void MainWindow::updateRecentFilesMenu()
+{
+    qDeleteAll(m_openRecentActions);
+    m_openRecentActions.clear();
+    for (const QString& fileName : m_recentFilesNames) {
+        QAction* action = new QAction(elideFilename(fileName), this);
+        action->setData(fileName);
+        m_openRecentActions.push_back(action);
+        m_fileMenu->insertAction(m_openRecentEndAction, action);
+        connect(action, SIGNAL(triggered()), this, SLOT(openRecentDocument()));
+    }
+}
+
 bool MainWindow::draw()
 {
     try {
@@ -468,12 +525,11 @@ bool MainWindow::draw()
 
         std::unique_ptr<Program> program = parser.finish();
         setBlueprint(program->execute());
-        QString output = blueprintToAutocadCommandLineCommands(m_blueprint.get());
 
-        QApplication::clipboard()->setText(output);
         m_logModel->clear();
         hideLog();
-        statusBar()->showMessage("Конвертация прошла успешно.\n(Результат скопирован в буфер обмена)", statusMessageDuration);
+        statusBar()->showMessage("Программа нарисована.", statusMessageDuration);
+        return true;
     }
     catch (const ParseError& error) {
         showProgramError(TextRange(error.position(), TextPosition()), error.what(), CallStack());
@@ -484,6 +540,18 @@ bool MainWindow::draw()
     catch (const std::exception& error) {
         QMessageBox::critical(this, titleErrorText(), error.what());
     }
+    return false;
+}
+
+bool MainWindow::drawAndConvert()
+{
+    bool ok = draw();
+    if (!ok)
+        return false;
+    QString output = blueprintToAutocadCommandLineCommands(m_blueprint.get());
+    QApplication::clipboard()->setText(output);
+    statusBar()->showMessage("Программа сконвертирована (результат в буфере обмена).", statusMessageDuration);
+    return true;
 }
 
 void MainWindow::saveImage()
