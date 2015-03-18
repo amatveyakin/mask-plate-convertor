@@ -7,6 +7,7 @@
 #include "program.h"
 #include "programparser.h"
 #include "programcommands.h"
+#include "utils.h"
 
 
 const int ProgramParser::infinity = std::numeric_limits<int>::max();
@@ -176,7 +177,7 @@ int ProgramParser::eatUnsignedInteger(int length)
     while (nDigits < line().length() && nDigits < length && line().at(nDigits).isDigit())
         ++nDigits;
     if (length != infinity && nDigits != length)
-        throw frustratedExpectations(QString("%1-значное число").arg(QString::number(length)));
+        throw frustratedExpectations(QString("%1-значное число").arg(prettyPrintNumber(length)));
     if (nDigits == 0)
         throw frustratedExpectations("число");
     bool ok = false;

@@ -33,6 +33,7 @@
 #include "programtextedit.h"
 #include "runningprogram.h"
 #include "saveimagedialog.h"
+#include "utils.h"
 
 
 static const int maxRecentDocuments = 10;
@@ -459,7 +460,7 @@ void MainWindow::updateOnDocumentChanged()
 
 static QString pointToString(QPoint p)
 {
-    return QString("(X: %1, Y: %2)").arg(QString::number(p.x()), QString::number(p.y()));
+    return QString("(X: %1, Y: %2)").arg(prettyPrintNumber(p.x()), prettyPrintNumber(p.y()));
 }
 
 void MainWindow::showSegmentOrigin(SegmentId segmentId)
@@ -472,9 +473,9 @@ void MainWindow::showSegmentOrigin(SegmentId segmentId)
         addBacktraceToLog(backtrace);
         showLog();
         m_programTextEdit->setTextCursor(backtrace.back().inputPosition);
-        m_coordinatesWidget->setText(QString("%1 — %2, ширина %3").arg(pointToString(element.polygon[segmentId.segment]),
+        m_coordinatesWidget->setText(QString("%1 → %2, ширина %3").arg(pointToString(element.polygon[segmentId.segment]),
                                                                        pointToString(element.polygon[segmentId.segment + 1]),
-                                                                       QString::number(element.width)));   // TODO: Fix numbers screen positions
+                                                                       prettyPrintNumber(element.width)));   // TODO: Fix numbers screen positions
     }
     else {
         hideLog();

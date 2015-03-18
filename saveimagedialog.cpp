@@ -15,6 +15,7 @@
 
 #include "appinfo.h"
 #include "saveimagedialog.h"
+#include "utils.h"
 
 
 static const double maxSize = 1e9;
@@ -239,8 +240,8 @@ void SaveImageDialog::updateWidgets()
     m_widthDoubleSpinBox->setValue(m_settings.size().width());
     m_heightDoubleSpinBox->setValue(m_settings.size().height());
     m_dpiSpinBox->setValue(m_settings.dpi());
-    m_otherUnitsLabel->setText(QString("(%1×%2 %3)").arg(QString::number(extraSettings.size().width()),
-                                                         QString::number(extraSettings.size().height()),
+    m_otherUnitsLabel->setText(QString("(%1×%2 %3)").arg(prettyPrintNumber(extraSettings.size().width()),
+                                                         prettyPrintNumber(extraSettings.size().height()),
                                                          unitsString(extraSettings.units())));
 
     connectSettings();
