@@ -37,6 +37,7 @@ public:
     static Number literal(int value)            { return Number(Literal,  value, 1); }
     static Number variable(int value, int mult) { return Number(Variable, value, mult); }
     int value(const Arguments& arguments, const RunningProgram& instance) const;
+    bool argumentDependent() const              { return m_type != Literal; }
 
 private:
     enum Type { Literal, Variable };
@@ -55,6 +56,7 @@ struct Movement
 {
     Number x, y;
     QPoint value(const Arguments& arguments, const RunningProgram& instance);
+    bool argumentDependent() const;
 };
 
 
@@ -68,6 +70,8 @@ struct Call
 
 class CallStack : public std::vector<Call>
 {
+public:
+    int currentRoutine() const;
 };
 
 #endif // PROGRAMBASIC_H

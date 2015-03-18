@@ -38,6 +38,9 @@ SOURCES += blueprintview.cpp
 
 HEADERS += cpp_extensions.h
 
+HEADERS += forwardmapping.h
+SOURCES += forwardmapping.cpp
+
 HEADERS += geometry.h
 SOURCES += geometry.cpp
 

@@ -6,6 +6,7 @@
 #include <QPolygon>
 
 #include "blueprintbasic.h"
+#include "forwardmapping.h"
 #include "programbasic.h"
 
 
@@ -35,6 +36,8 @@ public:
     const std::vector<Element>& elements() const    { return m_elements; }
     QRect boundingRect() const                      { return m_boundingRect; }
     bool isSegmentValid(SegmentId id) const;
+    const ForwardMapping& forwardMapping() const    { return m_forwardMapping; }
+    ForwardMapping& forwardMapping()                { return m_forwardMapping; }
 
     void appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace);
     void finishElement();
@@ -44,6 +47,7 @@ public:
 private:
     std::vector<Element> m_elements;
     QRect m_boundingRect;
+    ForwardMapping m_forwardMapping;
 };
 
 #endif // BLUEPRINT_H

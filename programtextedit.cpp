@@ -17,6 +17,8 @@ ProgramTextEdit::ProgramTextEdit(QWidget *parentArg)
 
     connect(document(), SIGNAL(contentsChanged()), this, SLOT(clearAdditionalFormats()));
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCurrentLineHighlighting()));
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateSelectedLines()));
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(updateSelectedLines()));
 
     updateCurrentLineHighlighting();
 }
@@ -47,6 +49,11 @@ void ProgramTextEdit::setTextCursor(TextPosition position)
     setTextCursor(newCursor);
 }
 
+int ProgramTextEdit::positionToLine(int position) const
+{
+    return document()->findBlock(position).firstLineNumber();
+}
+
 void ProgramTextEdit::updateCurrentLineHighlighting()
 {
     QTextEdit::ExtraSelection selection;
@@ -63,3 +70,14 @@ void ProgramTextEdit::clearAdditionalFormats()
     updateCurrentLineHighlighting();
 }
 
+void ProgramTextEdit::updateSelectedLines()
+{
+    int first = 0, last = -1;
+    if (textCursor().hasSelection()) {
+        first = positionToLine(textCursor().selectionStart() + 1);
+        last = positionToLine(textCursor().selectionEnd() - 1);
+    }
+    if (last < first)
+        first = last = positionToLine(textCursor().position());
+    emit selectedLinesChanged(first, last);
+}

@@ -38,6 +38,9 @@ void Blueprint::appendLine(QPoint from, QPoint to, int width, const CallStack& b
         curElement.polygon << to;
         curElement.segmentBacktraces.push_back(backtrace);
     }
+    SegmentId lastSegment(m_elements.size() - 1, curElement.polygon.size() - 2);
+    assert(isSegmentValid(lastSegment));
+    m_forwardMapping.addSegment(lastSegment, backtrace);
 }
 
 void Blueprint::finishElement()

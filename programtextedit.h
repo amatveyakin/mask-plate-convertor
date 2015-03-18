@@ -21,13 +21,20 @@ public:
 public slots:
     void setTextCursor(TextPosition position);
 
+signals:
+    void selectedLinesChanged(int first, int last);
+
 private:
     QTextCharFormat m_currentLineFormat;
     QTextCharFormat m_errorFormat;
 
+private:
+    int positionToLine(int position) const;
+
 private slots:
     void updateCurrentLineHighlighting();
     void clearAdditionalFormats();
+    void updateSelectedLines();
 };
 
 #endif // PROGRAMTEXTEDIT_H

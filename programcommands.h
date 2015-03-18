@@ -13,6 +13,7 @@ public:
 
     void setTextRange(TextRange textRangeArg)   { m_textRange = textRangeArg; }
     TextRange textRange() const                 { return m_textRange; }
+    int textLine() const;
 
 protected:
     virtual void doExecute(RunningProgram& instance) = 0;

@@ -46,6 +46,11 @@ QString elideFilename(QString filename)
     return (filename.length() <= maxLength) ? filename : "..." + filename.right(maxLengthWithoutEllipsis);
 }
 
+static QString pointToString(QPoint p)
+{
+    return QString("(X: %1, Y: %2)").arg(prettyPrintNumber(p.x()), prettyPrintNumber(p.y()));
+}
+
 
 MainWindow::MainWindow(QWidget* parentArg)
     : QMainWindow(parentArg)
@@ -201,6 +206,8 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
+    connect(m_programTextEdit, SIGNAL(selectedLinesChanged(int, int)), this, SLOT(updateOnSelectedLinesChanged(int, int)));
+
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
 
     connect(m_drawAction,           SIGNAL(triggered()), this, SLOT(draw()));
@@ -343,6 +350,18 @@ void MainWindow::setBlueprintActionsEnabled(bool enabled)
     m_printImageAction->setEnabled(enabled);
 }
 
+void MainWindow::updateOnSelectedLinesChanged(int first, int last)
+{
+    // TODO: Reset forward mapping if program text has changed.
+    bool ok;
+    QPoint movement;
+    m_blueprint->forwardMapping().lineIntervalMovement(first, last, ok, movement);
+    if (ok)
+        statusBar()->showMessage(QString("Σ перемещение в %1 строках = %2").arg(prettyPrintNumber(last - first + 1), pointToString(movement)));
+    else
+        statusBar()->clearMessage();
+}
+
 void MainWindow::updateLogHeight()
 {
     const int maxLogHeight = m_logView->fontMetrics().height() * 10;
@@ -456,11 +475,6 @@ void MainWindow::updateOnDocumentChanged()
     hideLog();
     setBlueprint(nullptr);
     updateWindowTitle();
-}
-
-static QString pointToString(QPoint p)
-{
-    return QString("(X: %1, Y: %2)").arg(prettyPrintNumber(p.x()), prettyPrintNumber(p.y()));
 }
 
 void MainWindow::showSegmentOrigin(SegmentId segmentId)
