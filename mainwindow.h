@@ -50,7 +50,8 @@ private:
     QAction* m_pasteAction;
     QAction* m_undoAction;
     QAction* m_redoAction;
-    QAction* m_convertAction;
+    QAction* m_drawAction;
+    QAction* m_drawAndConvertAction;
     QAction* m_increaseFontSizeAction;
     QAction* m_decreaseFontSizeAction;
     QAction* m_flipHorizontallyAction;
@@ -88,7 +89,8 @@ private slots:
     void setFontSize(int pointSize);
     void increaseFontSize();
     void decreaseFontSize();
-    void convert();
+    bool draw();
+    bool drawAndConvert();
     void saveImage();
     void printImage();
     void showAbout();

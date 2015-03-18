@@ -69,7 +69,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_pasteAction = new QAction(QIcon(":/images/edit-paste.png"), "&Вставить", this);
     m_undoAction = new QAction(QIcon(":/images/edit-undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/edit-redo.png"), "&Повторить", this);
-    m_convertAction = new QAction(QIcon(":/images/go.png"), "&Конвертировать", this);
+    m_drawAction = new QAction(QIcon(":/images/development-draw.png"), "&Нарисовать", this);
+    m_drawAndConvertAction = new QAction(QIcon(":/images/development-convert.png"), "&Конвертировать", this);
     m_increaseFontSizeAction = new QAction(QIcon(":/images/view-increase-font.png"), "&Увеличить размер шрифта", this);
     m_decreaseFontSizeAction = new QAction(QIcon(":/images/view-decrease-font.png"), "У&меньшить размер шрифта", this);
     m_flipHorizontallyAction = new QAction(QIcon(":/images/view-flip-horizontally.png"), "Отразить по &горизонтали", this);
@@ -88,7 +89,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_saveAction->setShortcut(QKeySequence::Save);
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_redoAction->setShortcut(QKeySequence::Redo);
-    m_convertAction->setShortcut(Qt::CTRL | Qt::Key_Return);
+    m_drawAction->setShortcut(Qt::CTRL | Qt::Key_Return);
     m_increaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Plus);
     m_decreaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Minus);
     m_printImageAction->setShortcut(QKeySequence::Print);
@@ -122,7 +123,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     viewMenu->addAction(m_showTransitionsAction);
 
     QMenu* developmentMenu = menuBar()->addMenu("&Разработка");
-    developmentMenu->addAction(m_convertAction);
+    developmentMenu->addAction(m_drawAction);
+    developmentMenu->addAction(m_drawAndConvertAction);
 
     QMenu* helpMenu = menuBar()->addMenu("П&омощь");
     helpMenu->addAction(m_showAboutAction);
@@ -135,7 +137,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     toolbar->addAction(m_undoAction);
     toolbar->addAction(m_redoAction);
     toolbar->addSeparator();
-    toolbar->addAction(m_convertAction);
+    toolbar->addAction(m_drawAction);
     toolbar->addSeparator();
     toolbar->addAction(m_flipHorizontallyAction);
     toolbar->addAction(m_flipVerticallyAction);
@@ -191,9 +193,10 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
 
-    connect(m_convertAction,    SIGNAL(triggered()), this, SLOT(convert()));
-    connect(m_saveImageAction,  SIGNAL(triggered()), this, SLOT(saveImage()));
-    connect(m_printImageAction, SIGNAL(triggered()), this, SLOT(printImage()));
+    connect(m_drawAction,           SIGNAL(triggered()), this, SLOT(draw()));
+    connect(m_drawAndConvertAction, SIGNAL(triggered()), this, SLOT(drawAndConvert()));
+    connect(m_saveImageAction,      SIGNAL(triggered()), this, SLOT(saveImage()));
+    connect(m_printImageAction,     SIGNAL(triggered()), this, SLOT(printImage()));
 
     connect(m_increaseFontSizeAction, SIGNAL(triggered()), this, SLOT(increaseFontSize()));
     connect(m_decreaseFontSizeAction, SIGNAL(triggered()), this, SLOT(decreaseFontSize()));
@@ -454,7 +457,7 @@ void MainWindow::decreaseFontSize()
     setFontSize(qMax(minPointSize, centralWidget()->fontInfo().pointSize() - 1));
 }
 
-void MainWindow::convert()
+bool MainWindow::draw()
 {
     try {
         setBlueprint(nullptr);

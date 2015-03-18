@@ -2,6 +2,8 @@
 <qresource>
     <file>images/application-exit.png</file>
     <file>images/application-icon.png</file>
+    <file>images/development-convert.png</file>
+    <file>images/development-draw.png</file>
     <file>images/document-new.png</file>
     <file>images/document-open.png</file>
     <file>images/document-save-as.png</file>
@@ -11,7 +13,6 @@
     <file>images/edit-paste.png</file>
     <file>images/edit-redo.png</file>
     <file>images/edit-undo.png</file>
-    <file>images/go.png</file>
     <file>images/help-about.png</file>
     <file>images/image-print.png</file>
     <file>images/image-save.png</file>
