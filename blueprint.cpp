@@ -17,6 +17,13 @@ Blueprint::~Blueprint()
 {
 }
 
+QPoint Blueprint::finishPoint() const
+{
+    if (m_elements.empty())
+        return {0, 0};
+    return m_elements.back().polygon.back();
+}
+
 bool Blueprint::isSegmentValid(SegmentId id) const
 {
     return    0 <= id.element && id.element < int(elements().size())

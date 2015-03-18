@@ -35,6 +35,7 @@ public:
 
     const std::vector<Element>& elements() const    { return m_elements; }
     QRect boundingRect() const                      { return m_boundingRect; }
+    QPoint finishPoint() const;
     bool isSegmentValid(SegmentId id) const;
     const ForwardMapping& forwardMapping() const    { return m_forwardMapping; }
     ForwardMapping& forwardMapping()                { return m_forwardMapping; }
