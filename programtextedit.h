@@ -14,6 +14,10 @@ class ProgramTextEdit : public QPlainTextEdit
 public:
     explicit ProgramTextEdit(QWidget *parentArg = 0);
 
+    LineRange selectedLines() const;
+
+    void replaceLines(LineRange linesRange, QString newText);
+
     void indicateError(TextRange range);
 
     using ParentT::setTextCursor;

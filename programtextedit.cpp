@@ -23,6 +23,31 @@ ProgramTextEdit::ProgramTextEdit(QWidget *parentArg)
     updateCurrentLineHighlighting();
 }
 
+LineRange ProgramTextEdit::selectedLines() const
+{
+    LineRange range;
+    if (textCursor().hasSelection()) {
+        range.first = positionToLine(textCursor().selectionStart() + 1);
+        range.last = positionToLine(textCursor().selectionEnd() - 1);
+    }
+    if (!range.isValid())
+        range.first = range.last = positionToLine(textCursor().position());
+    return range;
+}
+
+void ProgramTextEdit::replaceLines(LineRange linesRange, QString newText)
+{
+    QTextCursor cursor(document());
+    auto firstBlock = document()->findBlockByLineNumber(linesRange.first);
+    int firstChar = firstBlock.position();
+    auto lastBlock = document()->findBlockByLineNumber(linesRange.last);
+    int lastChar = lastBlock.position() + lastBlock.length();
+    cursor.setPosition(firstChar);
+    cursor.setPosition(lastChar, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.insertText(newText);
+}
+
 void ProgramTextEdit::indicateError(TextRange range)
 {
     QTextBlock errorBlock = document()->findBlockByLineNumber(range.begin.line);
@@ -68,12 +93,6 @@ void ProgramTextEdit::clearAdditionalFormats()
 
 void ProgramTextEdit::updateSelectedLines()
 {
-    int first = 0, last = -1;
-    if (textCursor().hasSelection()) {
-        first = positionToLine(textCursor().selectionStart() + 1);
-        last = positionToLine(textCursor().selectionEnd() - 1);
-    }
-    if (last < first)
-        first = last = positionToLine(textCursor().position());
-    emit selectedLinesChanged(first, last);
+    LineRange range = selectedLines();
+    emit selectedLinesChanged(range.first, range.last);
 }

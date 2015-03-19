@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_pasteAction = new QAction(QIcon(":/images/edit-paste.png"), "&Вставить", this);
     m_undoAction = new QAction(QIcon(":/images/edit-undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/edit-redo.png"), "&Повторить", this);
+    m_removeFragmentAction = new QAction("&Исключить фрагмент", this);
     m_drawAction = new QAction(QIcon(":/images/development-draw.png"), "&Нарисовать", this);
     m_drawAndConvertAction = new QAction(QIcon(":/images/development-convert.png"), "&Конвертировать", this);
     m_increaseFontSizeAction = new QAction(QIcon(":/images/view-increase-font.png"), "&Увеличить размер шрифта", this);
@@ -138,6 +139,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_viewMenu->addAction(m_showTransitionsAction);
 
     m_developmentMenu = menuBar()->addMenu("&Разработка");
+    m_developmentMenu->addAction(m_removeFragmentAction);
+    m_developmentMenu->addSeparator();
     m_developmentMenu->addAction(m_drawAction);
     m_developmentMenu->addAction(m_drawAndConvertAction);
 
@@ -211,6 +214,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
 
+    connect(m_removeFragmentAction, SIGNAL(triggered()), this, SLOT(removeFragment()));
     connect(m_drawAction,           SIGNAL(triggered()), this, SLOT(draw()));
     connect(m_drawAndConvertAction, SIGNAL(triggered()), this, SLOT(drawAndConvert()));
     connect(m_saveImageAction,      SIGNAL(triggered()), this, SLOT(saveImage()));
@@ -533,6 +537,25 @@ void MainWindow::updateRecentFilesMenu()
         m_openRecentActions.push_back(action);
         m_fileMenu->insertAction(m_openRecentEndAction, action);
         connect(action, SIGNAL(triggered()), this, SLOT(openRecentDocument()));
+    }
+}
+
+void MainWindow::removeFragment()
+{
+    bool ok = false;
+    QPoint movement;
+    LineRange selectedLines = m_programTextEdit->selectedLines();
+    m_blueprint->forwardMapping().lineIntervalMovement(selectedLines.first, selectedLines.last, ok, movement);
+    if (ok) {
+        QString replacment = "N0";
+        if (movement.x() != 0)
+            replacment += "X" + QString::number(movement.x());
+        if (movement.y() != 0)
+            replacment += "Y" + QString::number(movement.y());
+        m_programTextEdit->replaceLines(selectedLines, replacment + "\n");
+    }
+    else {
+        QMessageBox::warning(this, titleErrorText(), QString("Нет информации о фрагмента (возможно, не было перерисовки после поледнего изменения)."));
     }
 }
 

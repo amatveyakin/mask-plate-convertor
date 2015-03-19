@@ -4,6 +4,14 @@
 #include <QMetaType>
 
 
+struct LineRange
+{
+    int first = -1;  // inclusive
+    int last = 0;  // inclusive (!)
+
+    bool isValid() const { return first >= 0 && last >= 0 && last >= first; }
+};
+
 struct TextPosition
 {
     int line = -1;
