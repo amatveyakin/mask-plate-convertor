@@ -2,6 +2,7 @@
 #define BLUEPRINTVIEW_H
 
 #include <QAbstractScrollArea>
+#include <QPen>
 
 #include "blueprintbasic.h"
 
@@ -19,6 +20,7 @@ public:
     explicit BlueprintView(QWidget* parentArg = nullptr);
 
     void setBlueprint(BlueprintPtr blueprint);
+    void setHighlight(std::vector<SegmentId> segments);
 
 public slots:
     void setFlipHorizontally(bool flip);
@@ -39,6 +41,11 @@ protected:
     virtual void resizeEvent(QResizeEvent*) override;
 
 private:
+    struct SegmentAvatar {
+        QLine coords;
+        QPen pen;
+    };
+
     BlueprintPtr m_blueprint;
     QRect m_canvasRect;
     double m_scale = 1.;
@@ -47,6 +54,7 @@ private:
     bool m_showTransitions = false;
     SegmentId m_hoveredSegment;
     SegmentId m_selectedSegment;
+    std::vector<SegmentId> m_externallyHighlightedSegments;
 
 private:
     AgileScrollBar* myHorizontalScrollBar() const;
@@ -58,6 +66,7 @@ private:
     QPoint screenToBlueprint(QPoint point) const;
     QPoint blueprintToScreen(QPoint point) const;
 
+    SegmentAvatar segmentAvatar(SegmentId segmentId, QColor color) const;
     QRect blueprintRect() const;
     double builtInSizeCoeff() const;
     double sizeCoeff() const;
@@ -70,6 +79,7 @@ private:
     void updateHoveredSegment();
     void updateViewport();
 
+    void renderSegment(QPainter& painter, const SegmentAvatar& avatar) const;
     void renderSegment(QPainter& painter, SegmentId segmentId, QColor color) const;
     void doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform, bool showDecorations) const;
 };

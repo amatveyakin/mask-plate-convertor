@@ -360,6 +360,7 @@ void MainWindow::updateOnSelectedLinesChanged(int first, int last)
         statusBar()->showMessage(QString("Σ перемещение в %1 строках = %2").arg(prettyPrintNumber(last - first + 1), pointToString(movement)));
     else
         statusBar()->clearMessage();
+    m_blueprintView->setHighlight(m_blueprint->forwardMapping().lineIntervalSegments(first, last));
 }
 
 void MainWindow::updateLogHeight()

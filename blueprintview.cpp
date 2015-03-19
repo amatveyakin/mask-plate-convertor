@@ -38,6 +38,12 @@ void BlueprintView::setBlueprint(BlueprintPtr blueprint)
     coLocatePoints(blueprintRect().center(), m_canvasRect.center());
 }
 
+void BlueprintView::setHighlight(std::vector<SegmentId> segments)
+{
+    m_externallyHighlightedSegments = std::move(segments);
+    updateViewport();
+}
+
 void BlueprintView::setFlipHorizontally(bool flip)
 {
     m_flipHorizontally = flip;
@@ -162,6 +168,15 @@ QPoint BlueprintView::blueprintToScreen(QPoint point) const
     return blueprintToScreenTransform().map(point);
 }
 
+BlueprintView::SegmentAvatar BlueprintView::segmentAvatar(SegmentId segmentId, QColor color) const
+{
+    assert(m_blueprint->isSegmentValid(segmentId));
+    const Element& element = m_blueprint->elements()[segmentId.element];
+    // TODO: Use Qt::SquareCap for segment and QPainterPathStroker to clip current element
+    return {QLine(element.polygon[segmentId.segment], element.polygon[segmentId.segment + 1]),
+            QPen(color, element.width, Qt::SolidLine, Qt::FlatCap)};
+}
+
 QRect BlueprintView::blueprintRect() const
 {
     return m_blueprint->boundingRect();
@@ -259,13 +274,15 @@ void BlueprintView::updateViewport()
     viewport()->update();
 }
 
+void BlueprintView::renderSegment(QPainter& painter, const SegmentAvatar& avatar) const
+{
+    painter.setPen(avatar.pen);
+    painter.drawLine(avatar.coords);
+}
+
 void BlueprintView::renderSegment(QPainter& painter, SegmentId segmentId, QColor color) const
 {
-    assert(m_blueprint->isSegmentValid(segmentId));
-    const Element& element = m_blueprint->elements()[segmentId.element];
-    // TODO: Use Qt::SquareCap for segment and QPainterPathStroker to clip current element
-    painter.setPen(QPen(color, element.width, Qt::SolidLine, Qt::FlatCap));
-    painter.drawLine(element.polygon[segmentId.segment], element.polygon[segmentId.segment + 1]);
+    renderSegment(painter, segmentAvatar(segmentId, color));
 }
 
 void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform, bool showDecorations) const
@@ -275,6 +292,13 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     painter.setBrush(Qt::NoBrush);
 
     if (showDecorations) {
+        for (SegmentId segmentId : m_externallyHighlightedSegments) {
+            SegmentAvatar avatar = segmentAvatar(segmentId, QColor::fromRgbF(0.92, 0.88, 0.6));
+            avatar.pen.setWidthF(avatar.pen.widthF() + 2.5 / builtInSizeCoeff());
+            avatar.pen.setCapStyle(Qt::RoundCap);
+            renderSegment(painter, avatar);
+        }
+
         if (m_showTransitions) {
             painter.setRenderHint(QPainter::Antialiasing, true);
             painter.setPen(QPen(QColor(80, 80, 255), 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
