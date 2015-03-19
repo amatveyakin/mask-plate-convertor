@@ -65,7 +65,7 @@ void BlueprintView::setShowTransitions(bool showTrans)
 void BlueprintView::renderBlueprint(QPaintDevice* target, const QRect& targetRect)
 {
     QPainter painter(target);
-    doRenderBlueprint(painter, targetRect, blueprintToRectTransform(targetRect));
+    doRenderBlueprint(painter, targetRect, blueprintToRectTransform(targetRect), false);
 }
 
 void BlueprintView::renderBlueprint(QPrinter* printer)
@@ -78,7 +78,7 @@ void BlueprintView::renderBlueprint(QPrinter* printer)
 void BlueprintView::paintEvent(QPaintEvent*)
 {
     QPainter painter(viewport());
-    doRenderBlueprint(painter, viewport()->rect(), blueprintToScreenTransform());
+    doRenderBlueprint(painter, viewport()->rect(), blueprintToScreenTransform(), true);
 }
 
 void BlueprintView::mousePressEvent(QMouseEvent* ev)
@@ -274,18 +274,20 @@ void BlueprintView::renderSegment(QPainter& painter, SegmentId segmentId, QColor
     painter.drawLine(element.polygon[segmentId.segment], element.polygon[segmentId.segment + 1]);
 }
 
-void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const
+void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform, bool showDecorations) const
 {
     painter.fillRect(targetRect, Qt::white);  // TODO: Should we do it here? It will spoil SVG for example
     painter.setTransform(transform);
     painter.setBrush(Qt::NoBrush);
 
-    if (m_showTransitions) {
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(QColor(80, 80, 255), 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
-        for (int i = 0; i < (int)m_blueprint->elements().size() - 1; ++i) {
-            painter.drawLine(m_blueprint->elements()[i].polygon.back(),
-                             m_blueprint->elements()[i + 1].polygon.front());
+    if (showDecorations) {
+        if (m_showTransitions) {
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            painter.setPen(QPen(QColor(80, 80, 255), 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
+            for (int i = 0; i < (int)m_blueprint->elements().size() - 1; ++i) {
+                painter.drawLine(m_blueprint->elements()[i].polygon.back(),
+                                 m_blueprint->elements()[i + 1].polygon.front());
+            }
         }
     }
 
@@ -295,14 +297,16 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
         painter.drawPolyline(element.polygon);
     }
 
-    if (m_selectedSegment == m_hoveredSegment) {
-        if (m_blueprint->isSegmentValid(m_selectedSegment))
-            renderSegment(painter, m_selectedSegment, QColor::fromRgbF(1., 0.2, 0.2));
-    }
-    else {
-        if (m_blueprint->isSegmentValid(m_selectedSegment))
-            renderSegment(painter, m_selectedSegment, QColor::fromRgbF(1., 0., 0.));
-        if (m_blueprint->isSegmentValid(m_hoveredSegment))
-            renderSegment(painter, m_hoveredSegment, QColor::fromRgbF(0.7, 0.7, 0.7));
+    if (showDecorations) {
+        if (m_selectedSegment == m_hoveredSegment) {
+            if (m_blueprint->isSegmentValid(m_selectedSegment))
+                renderSegment(painter, m_selectedSegment, QColor::fromRgbF(1., 0.2, 0.2));
+        }
+        else {
+            if (m_blueprint->isSegmentValid(m_selectedSegment))
+                renderSegment(painter, m_selectedSegment, QColor::fromRgbF(1., 0., 0.));
+            if (m_blueprint->isSegmentValid(m_hoveredSegment))
+                renderSegment(painter, m_hoveredSegment, QColor::fromRgbF(0.7, 0.7, 0.7));
+        }
     }
 }

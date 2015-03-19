@@ -71,7 +71,7 @@ private:
     void updateViewport();
 
     void renderSegment(QPainter& painter, SegmentId segmentId, QColor color) const;
-    void doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform) const;
+    void doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform, bool showDecorations) const;
 };
 
 #endif // BLUEPRINTVIEW_H
