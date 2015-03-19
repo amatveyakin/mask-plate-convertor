@@ -1,5 +1,3 @@
-// TODO: May be, use placeholder empty blueprint when there is not blueprint (here and in main window)?
-
 #include <assert.h>
 
 #include <QPainter>

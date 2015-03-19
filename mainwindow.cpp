@@ -1,6 +1,6 @@
 // TODO: blink status bar background when showing message
 // TODO: Step-by-step drawing
-// TODO: Add recent documents; save/load all settings
+// TODO: Save/load all settings
 
 #include <exception>
 
