@@ -84,6 +84,7 @@ private slots:
     void saveSettings();
     void updateWindowTitle();
     void setBlueprintActionsEnabled(bool enabled);
+    void updateOnProgramTextChanged();
     void updateOnSelectedLinesChanged(int first, int last);
     void updateLogHeight();
     void showLog();

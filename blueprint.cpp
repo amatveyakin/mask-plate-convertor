@@ -88,3 +88,8 @@ void Blueprint::postProcess()
         ensureMinSize(m_boundingRect, 1);
     }
 }
+
+void Blueprint::resetForwardMapping()
+{
+    m_forwardMapping = {};
+}

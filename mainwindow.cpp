@@ -206,6 +206,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 
+    connect(m_programTextEdit, SIGNAL(textChanged()),                  this, SLOT(updateOnProgramTextChanged()));
     connect(m_programTextEdit, SIGNAL(selectedLinesChanged(int, int)), this, SLOT(updateOnSelectedLinesChanged(int, int)));
 
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
@@ -350,10 +351,15 @@ void MainWindow::setBlueprintActionsEnabled(bool enabled)
     m_printImageAction->setEnabled(enabled);
 }
 
+void MainWindow::updateOnProgramTextChanged()
+{
+    if (m_blueprint.isValid())
+        m_blueprint.getMutable()->resetForwardMapping();
+}
+
 void MainWindow::updateOnSelectedLinesChanged(int first, int last)
 {
-    // TODO: Reset forward mapping if program text has changed.
-    bool ok;
+    bool ok = false;
     QPoint movement;
     m_blueprint->forwardMapping().lineIntervalMovement(first, last, ok, movement);
     if (ok)

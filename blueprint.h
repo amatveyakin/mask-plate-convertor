@@ -42,6 +42,7 @@ public:
     void finishElement();
     void preProcess();
     void postProcess();
+    void resetForwardMapping();
 
 private:
     std::vector<Element> m_elements;
