@@ -52,7 +52,7 @@ public:
     void execute(RunningProgram& instance, const Arguments &arguments) const;
 
 private:
-    int m_index;
+    int m_index = mainRoutineIndex;
     std::vector<std::unique_ptr<ProgramCommand>> m_commands;
 };
 

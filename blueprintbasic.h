@@ -15,14 +15,15 @@ class Blueprint;
  */
 struct SegmentId
 {
+    int element = -1;
+    int segment = -1;
+
+    static SegmentId invalid() { return {}; }
+
+    SegmentId() {}
     SegmentId(int elementArg, int segmentArg) : element(elementArg), segment(segmentArg) {}
 
-    int element;
-    int segment;
-
-    static SegmentId invalid() { return SegmentId(-1, -1); }
-
-    bool operator==(const SegmentId& rhs) const { return element == rhs.element && segment == rhs.segment; }
+    bool operator==(const SegmentId& rhs) const { return std::tie(element, segment) == std::tie(rhs.element, rhs.segment); }
     bool operator!=(const SegmentId& rhs) const { return !(*this == rhs); }
 };
 

@@ -29,7 +29,7 @@ int Number::value(const Arguments& arguments, const RunningProgram& instance) co
 
 QPoint Movement::value(const Arguments& arguments, const RunningProgram& instance)
 {
-    return QPoint(x.value(arguments, instance), y.value(arguments, instance));
+    return {x.value(arguments, instance), y.value(arguments, instance)};
 }
 
 bool Movement::argumentDependent() const

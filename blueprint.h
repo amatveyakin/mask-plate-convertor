@@ -15,10 +15,8 @@
  */
 struct Element
 {
-    Element() : width(-1) {}
-
     QPolygon polygon;
-    int width;
+    int width = -1;
     std::vector<CallStack> segmentBacktraces;
 };
 

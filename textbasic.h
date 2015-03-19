@@ -6,13 +6,13 @@
 
 struct TextPosition
 {
-    TextPosition() : line(-1), column(0) {}
+    int line = -1;
+    int column = 0;
+
+    TextPosition() {}
     TextPosition(int lineArg, int columnArg) : line(lineArg), column(columnArg) {}
 
     bool valid() const  { return line >= 0 && column >= 0; }
-
-    int line;
-    int column;
 };
 
 struct TextRange

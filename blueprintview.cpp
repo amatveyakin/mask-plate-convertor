@@ -19,12 +19,6 @@ static inline double rectToRectSizeCoeff(const QRect& rect1, const QRect& rect2)
 
 BlueprintView::BlueprintView(QWidget* parentArg)
     : ParentT(parentArg)
-    , m_scale(1.)
-    , m_flipHorizontally(false)
-    , m_flipVertically(false)
-    , m_showTransitions(false)
-    , m_hoveredSegment(SegmentId::invalid())
-    , m_selectedSegment(SegmentId::invalid())
 {
     setMouseTracking(true);
 
@@ -71,7 +65,7 @@ void BlueprintView::renderBlueprint(QPaintDevice* target, const QRect& targetRec
 void BlueprintView::renderBlueprint(QPrinter* printer)
 {
     QRect targetRect = printer->pageRect();
-    targetRect.moveTopLeft(QPoint(0, 0));
+    targetRect.moveTopLeft({0, 0});
     renderBlueprint(printer, targetRect);
 }
 
@@ -243,7 +237,7 @@ void BlueprintView::updateHoveredSegment()
     for (int i = 0; i < int(m_blueprint->elements().size()); ++i) {
         const Element& element = m_blueprint->elements()[i];
         for (int j = 0; j < element.polygon.size() - 1; ++j) {
-            SegmentId segmentId(i, j);
+            SegmentId segmentId = {i, j};
             double d = geometry::distance(QLineF(element.polygon[j], element.polygon[j + 1]), element.width, cursorPos);
             if (segmentId == m_selectedSegment)
                 d += reselectionPenalty;

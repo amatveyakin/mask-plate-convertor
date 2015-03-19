@@ -40,16 +40,13 @@ public:
 private:
     struct Line
     {
-        Line(Icon iconArg, QString textArg, TextPosition sourceTextPositionArg)
-            : icon(iconArg), text(textArg), sourceTextPosition(sourceTextPositionArg) {}
-
         Icon icon;
         QString text;
         TextPosition sourceTextPosition;    ///< corresponding source text position that will be focused on clicked; invalid - no position
     };
 
 private:
-    int m_iconSize;
+    int m_iconSize = 0;
     std::vector<Line> m_lines;
 };
 

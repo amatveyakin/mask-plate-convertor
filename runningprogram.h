@@ -27,13 +27,11 @@ private:
 
 struct ProgramState
 {
-    ProgramState() : currentCommand(nullptr), laserEnabled(false), lineWidth(startingLineWidth) {}
-
-    const ProgramCommand* currentCommand;
+    const ProgramCommand* currentCommand = nullptr;
     CallStack callStack;
     Arguments arguments;
-    bool laserEnabled;
-    int lineWidth;
+    bool laserEnabled = false;
+    int lineWidth = startingLineWidth;
     QPoint position;
 };
 
@@ -43,7 +41,7 @@ struct RunningProgram
     RunningProgram(const Program* programArg);
     ExecutionError executionError(const std::string& whatArg) const;
 
-    const Program* program;
+    const Program* program = nullptr;
     ProgramState state;
     std::unique_ptr<Blueprint> output;
 };

@@ -23,7 +23,7 @@ void ForwardMapping::lineIntervalMovement(int first, int last, bool& ok, QPoint&
 {
     assert(first <= last);
     ok = false;
-    movement = QPoint();
+    movement = {};
     auto beginIt = m_lineBeginPos.lower_bound(first);
     auto endIt = m_lineEndPos.upper_bound(last);
     if (beginIt == m_lineBeginPos.end())

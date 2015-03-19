@@ -39,9 +39,9 @@ public:
 
 private:
     QSize m_blueprintSize;
-    Units m_units;
-    double m_scale;
-    int m_dpi;
+    Units m_units = Units::Pixels;
+    double m_scale = 1.;
+    int m_dpi = 300;
     QString m_outputFile;
 };
 
@@ -58,14 +58,14 @@ public:
 private:
     SaveImageSettings m_settings;
 
-    QLineEdit* m_outputFileLineEdit;
-    QPushButton* m_browseButton;
-    QComboBox* m_unitsComboBox;
-    QDoubleSpinBox* m_widthDoubleSpinBox;
-    QDoubleSpinBox* m_heightDoubleSpinBox;
-    QSpinBox* m_dpiSpinBox;
-    QLabel* m_otherUnitsLabel;
-    QDialogButtonBox* m_buttonBox;
+    QLineEdit* m_outputFileLineEdit = nullptr;
+    QPushButton* m_browseButton = nullptr;
+    QComboBox* m_unitsComboBox = nullptr;
+    QDoubleSpinBox* m_widthDoubleSpinBox = nullptr;
+    QDoubleSpinBox* m_heightDoubleSpinBox = nullptr;
+    QSpinBox* m_dpiSpinBox = nullptr;
+    QLabel* m_otherUnitsLabel = nullptr;
+    QDialogButtonBox* m_buttonBox = nullptr;
 
 private:
     void connectSettings();

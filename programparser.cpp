@@ -35,7 +35,6 @@ ParseError::ParseError(TextPosition positionArg, const QString& whatArg)
 ProgramParser::ProgramParser()
     : m_section(Section::MainHeader1)
     , m_program(new Program)
-    , m_currentRoutineIndex(mainRoutineIndex)
 {
 }
 

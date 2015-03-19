@@ -41,10 +41,10 @@ protected:
 private:
     BlueprintPtr m_blueprint;
     QRect m_canvasRect;
-    double m_scale;
-    bool m_flipHorizontally;
-    bool m_flipVertically;
-    bool m_showTransitions;
+    double m_scale = 1.;
+    bool m_flipHorizontally = false;
+    bool m_flipVertically = false;
+    bool m_showTransitions = false;
     SegmentId m_hoveredSegment;
     SegmentId m_selectedSegment;
 

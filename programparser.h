@@ -52,9 +52,9 @@ private:
 private:
     TextPosition m_position;
     QString m_line;
-    Section m_section;
+    Section m_section = Section::MainHeader1;
     std::unique_ptr<Program> m_program;
-    int m_currentRoutineIndex;
+    int m_currentRoutineIndex = mainRoutineIndex;
 
 private:
     ParseError frustratedExpectations(const QString &expectation) const;

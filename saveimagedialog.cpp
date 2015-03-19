@@ -146,10 +146,7 @@ SaveImageDialog::SaveImageDialog(QSize blueprintSize, QWidget* parentArg)
     m_dpiSpinBox->setRange(0, maxDpi);
 
     m_unitsComboBox = new QComboBox(this);
-    QList<SaveImageSettings::Units> allUnits;
-    allUnits << SaveImageSettings::Pixels;
-    allUnits << SaveImageSettings::Millimeters;
-    for (SaveImageSettings::Units units : allUnits)
+    for (SaveImageSettings::Units units : {SaveImageSettings::Pixels, SaveImageSettings::Millimeters})
         m_unitsComboBox->addItem(unitsString(units), static_cast<int>(units));
 
     m_otherUnitsLabel = new QLabel(this);

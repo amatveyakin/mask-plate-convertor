@@ -28,7 +28,7 @@ void LogDataModel::clear()
 void LogDataModel::addLine(LogDataModel::Icon icon, const QString& text, TextPosition sourceTextPosition)
 {
     beginInsertRows(QModelIndex(), m_lines.size(), m_lines.size());
-    m_lines.emplace_back(icon, text, sourceTextPosition);
+    m_lines.push_back({icon, text, sourceTextPosition});
     endInsertRows();
 }
 

@@ -48,7 +48,7 @@ public:
 protected:
     virtual void doExecute(RunningProgram& instance) override;
 private:
-    int m_newWidth;
+    int m_newWidth = 0;
 };
 
 
@@ -70,8 +70,8 @@ public:
 protected:
     virtual void doExecute(RunningProgram& instance) override;
 private:
-    int m_subroutineIndex;
-    int m_repeatCount;
+    int m_subroutineIndex = 0;
+    int m_repeatCount = 0;
     Arguments m_arguments;
 };
 

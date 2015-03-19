@@ -33,9 +33,9 @@ private:
 class Number
 {
 public:
-    Number() : m_type(Literal), m_data(0), m_mult(1) {}
-    static Number literal(int value)            { return Number(Literal,  value, 1); }
-    static Number variable(int value, int mult) { return Number(Variable, value, mult); }
+    static Number literal(int value)            { return {Literal, value, 1}; }
+    static Number variable(int value, int mult) { return {Variable, value, mult}; }
+    Number() {}
     int value(const Arguments& arguments, const RunningProgram& instance) const;
     bool argumentDependent() const              { return m_type != Literal; }
 
@@ -43,9 +43,9 @@ private:
     enum Type { Literal, Variable };
 
 private:
-    Type m_type;
-    int m_data;
-    int m_mult;
+    Type m_type = Literal;
+    int m_data = 0;
+    int m_mult = 1;
 
 private:
     Number(Type type, int data, int mult) : m_type(type), m_data(data), m_mult(mult) {}
@@ -55,6 +55,7 @@ private:
 struct Movement
 {
     Number x, y;
+
     QPoint value(const Arguments& arguments, const RunningProgram& instance);
     bool argumentDependent() const;
 };
@@ -64,7 +65,7 @@ struct Call
 {
     Call(int routineIndexArg) : routineIndex(routineIndexArg) {}
 
-    int routineIndex;
+    int routineIndex = mainRoutineIndex;
     TextPosition inputPosition;
 };
 

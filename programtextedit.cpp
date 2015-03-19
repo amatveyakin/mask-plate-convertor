@@ -32,11 +32,7 @@ void ProgramTextEdit::indicateError(TextRange range)
     const int selectionEnd = qMin(range.end.column, errorBlock.length() - nNewLineCharacters);
     const int selectionStart = qMin(range.begin.column, selectionEnd - minSelectionLength);
     const int selectionLength = selectionEnd - selectionStart;
-    QTextLayout::FormatRange errorRange;
-    errorRange.start = selectionStart;
-    errorRange.length = selectionLength;
-    errorRange.format = m_errorFormat;
-    errorBlock.layout()->setAdditionalFormats(errorBlock.layout()->additionalFormats() << errorRange);
+    errorBlock.layout()->setAdditionalFormats({ { selectionStart, selectionLength, m_errorFormat } });
     setTextCursor(range.begin);
 
 }
