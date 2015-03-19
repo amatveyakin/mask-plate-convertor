@@ -1,1 +1,1 @@
-C:/Qt/Qt5.2.1-x86/5.2.1/msvc2012/bin/qmake.exe -tp vc
+D:\Qt\5.4\msvc2013\bin\qmake.exe -tp vc

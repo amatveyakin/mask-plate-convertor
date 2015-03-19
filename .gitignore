@@ -1,6 +1,10 @@
 *~
 *.pro.user*
 *.sdf
+*.sln
 *.suo
 *.vcxproj*
+*.opensdf
 images/work
+/debug
+/release
