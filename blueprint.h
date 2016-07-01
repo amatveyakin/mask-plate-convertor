@@ -36,9 +36,11 @@ public:
     bool isSegmentValid(SegmentId id) const;
     const ForwardMapping& forwardMapping() const    { return m_forwardMapping; }
     ForwardMapping& forwardMapping()                { return m_forwardMapping; }
+    QPoint stopPoint() const                        { return m_stopPoint; }
 
     void appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace);
     void finishElement();
+    void setStopPoint(QPoint p);
     void preProcess();
     void postProcess();
     void resetForwardMapping();
@@ -47,6 +49,7 @@ private:
     std::vector<Element> m_elements;
     QRect m_boundingRect;
     ForwardMapping m_forwardMapping;
+    QPoint m_stopPoint;
 };
 
 #endif // BLUEPRINT_H

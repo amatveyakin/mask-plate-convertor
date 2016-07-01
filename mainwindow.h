@@ -39,7 +39,8 @@ private:
     ProgramTextEdit* m_programTextEdit = nullptr;
     BlueprintView* m_blueprintView = nullptr;
     QListView* m_logView = nullptr;
-    QLabel* m_coordinatesWidget = nullptr;
+    QLabel* m_selectionCoordinatesWidget = nullptr;
+    QLabel* m_stopCoordinatesWidget = nullptr;
 
     QMenu* m_fileMenu = nullptr;
     QMenu* m_editMenu = nullptr;
@@ -99,6 +100,7 @@ private slots:
     bool saveDocumentAs();
     bool doSaveDocument(const QString& fileName);
     void updateOnDocumentChanged();
+    void updateStopCoordinates();
     void showSegmentOrigin(SegmentId segmentId);
     void setFontSize(int pointSize);
     void increaseFontSize();

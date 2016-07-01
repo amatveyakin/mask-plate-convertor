@@ -23,6 +23,11 @@ bool Blueprint::isSegmentValid(SegmentId id) const
            && 0 <= id.segment && id.segment < elements()[id.element].polygon.size() - 1;
 }
 
+void Blueprint::setStopPoint(QPoint p)
+{
+    m_stopPoint = p;
+}
+
 void Blueprint::appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace)
 {
     assert(!m_elements.empty());

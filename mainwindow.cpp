@@ -70,8 +70,21 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_logView->setModel(m_logModel);
     m_logView->hide();
 
-    m_coordinatesWidget = new QLabel(this);
-    statusBar()->addPermanentWidget(m_coordinatesWidget);
+    QFrame* logSeparator = new QFrame();
+    logSeparator->setFrameShape(QFrame::VLine);
+    logSeparator->setFrameShadow(QFrame::Sunken);
+    m_selectionCoordinatesWidget = new QLabel(this);
+
+    m_stopCoordinatesWidget = new QLabel(this);
+
+    QFont stopCoordinatesFont = m_stopCoordinatesWidget->font();
+    stopCoordinatesFont.setItalic(true);
+    m_stopCoordinatesWidget->setFont(stopCoordinatesFont);
+    m_stopCoordinatesWidget->setToolTip("Координаты конца рисунка");
+
+    statusBar()->addPermanentWidget(m_selectionCoordinatesWidget);
+    statusBar()->addPermanentWidget(logSeparator);
+    statusBar()->addPermanentWidget(m_stopCoordinatesWidget);
 
     m_newAction = new QAction(QIcon(":/images/document-new.png"), "&Новый", this);
     m_openAction = new QAction(QIcon(":/images/document-open.png"), "&Открыть...", this);
@@ -254,6 +267,8 @@ void MainWindow::showProgramError(TextRange range, const QString& message, const
     if (!range.end.valid())
         range.end = TextPosition(range.begin.line, std::numeric_limits<int>::max());
     assert(range.begin.line == range.end.line);
+
+    m_stopCoordinatesWidget->clear();
 
     m_programTextEdit->indicateError(range);
 
@@ -488,6 +503,14 @@ void MainWindow::updateOnDocumentChanged()
     updateWindowTitle();
 }
 
+void MainWindow::updateStopCoordinates()
+{
+    if (m_blueprint.isValid())
+        m_stopCoordinatesWidget->setText(QString("🏁 %1").arg(pointToString(m_blueprint->stopPoint())));
+    else
+        m_stopCoordinatesWidget->clear();
+}
+
 void MainWindow::showSegmentOrigin(SegmentId segmentId)
 {
     if (m_blueprint->isSegmentValid(segmentId)) {
@@ -498,13 +521,13 @@ void MainWindow::showSegmentOrigin(SegmentId segmentId)
         addBacktraceToLog(backtrace);
         showLog();
         m_programTextEdit->setTextCursor(backtrace.back().inputPosition);
-        m_coordinatesWidget->setText(QString("%1 → %2, ширина %3").arg(pointToString(element.polygon[segmentId.segment]),
-                                                                       pointToString(element.polygon[segmentId.segment + 1]),
-                                                                       prettyPrintNumber(element.width)));   // TODO: Fix numbers screen positions
+        m_selectionCoordinatesWidget->setText(QString("%1 → %2, ширина %3").arg(pointToString(element.polygon[segmentId.segment]),
+                                                                                pointToString(element.polygon[segmentId.segment + 1]),
+                                                                                prettyPrintNumber(element.width)));   // TODO: Fix numbers screen positions
     }
     else {
         hideLog();
-        m_coordinatesWidget->clear();
+        m_selectionCoordinatesWidget->clear();
     }
 }
 
@@ -572,6 +595,7 @@ bool MainWindow::draw()
         setBlueprint(program->execute());
 
         m_logModel->clear();
+        updateStopCoordinates();
         hideLog();
         statusBar()->showMessage("Программа нарисована.", statusMessageDuration);
         return true;

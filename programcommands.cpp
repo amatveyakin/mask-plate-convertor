@@ -67,6 +67,7 @@ void MoveToCommand::doExecute(RunningProgram& instance)
     if (instance.state.laserEnabled)
         instance.output->appendLine(oldPosition, newPosition, instance.state.lineWidth, instance.state.callStack);
     instance.output->forwardMapping().addMovement(m_movement.argumentDependent(), oldPosition, newPosition, currentRoutineIndex, textLine());
+    instance.output->setStopPoint(instance.state.position);
 }
 
 
