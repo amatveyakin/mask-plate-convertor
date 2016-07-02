@@ -28,6 +28,8 @@ struct TextRange
     TextRange() {}
     TextRange(TextPosition beginArg, TextPosition endArg) : begin(beginArg), end(endArg) {}
 
+    bool valid() const;
+
     TextPosition begin;
     TextPosition end;
 };

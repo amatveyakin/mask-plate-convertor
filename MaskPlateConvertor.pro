@@ -73,5 +73,8 @@ SOURCES += runningprogram.cpp
 HEADERS += saveimagedialog.h
 SOURCES += saveimagedialog.cpp
 
+HEADERS += syntaxhighlighter.h
+SOURCES += syntaxhighlighter.cpp
+
 HEADERS += textbasic.h
 SOURCES += textbasic.cpp

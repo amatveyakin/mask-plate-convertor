@@ -2,8 +2,11 @@
 #define PROGRAMTEXTEDIT_H
 
 #include <QPlainTextEdit>
+#include <QTextBlock>
 
 #include "textbasic.h"
+
+class SyntaxHighlighter;
 
 
 class ProgramTextEdit : public QPlainTextEdit
@@ -29,15 +32,22 @@ signals:
     void selectedLinesChanged(int first, int last);
 
 private:
+    SyntaxHighlighter* m_syntaxHighlighter = nullptr;
+    bool m_hasUnparsedModifications;
     QTextCharFormat m_currentLineFormat;
-    QTextCharFormat m_errorFormat;
+    QTextBlock m_lastCursorBlock;
+
+    TextRange fixErrorRange(TextRange range) const;
 
 private:
     int positionToLine(int position) const;
 
 private slots:
+    void setError(TextRange range);
+    void parseProgram();
     void updateCurrentLineHighlighting();
-    void clearAdditionalFormats();
+    void updateOnContentsChanged();
+    void updateOnCursorPositionChanged();
     void updateSelectedLines();
 };
 
