@@ -301,10 +301,16 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
 
         if (m_showTransitions) {
             painter.setRenderHint(QPainter::Antialiasing, true);
-            painter.setPen(QPen(QColor(80, 80, 255), 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
+            QLinearGradient brush;
             for (int i = 0; i < (int)m_blueprint->elements().size() - 1; ++i) {
-                painter.drawLine(m_blueprint->elements()[i].polygon.back(),
-                                 m_blueprint->elements()[i + 1].polygon.front());
+                QPoint start = m_blueprint->elements()[i].polygon.back();
+                QPoint stop = m_blueprint->elements()[i + 1].polygon.front();
+                brush.setStart(start);
+                brush.setFinalStop(stop);
+                brush.setColorAt(0., QColor::fromRgb(60, 60, 255, 255));
+                brush.setColorAt(1., QColor::fromRgb(80, 80, 180, 60));
+                painter.setPen(QPen(brush, 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
+                painter.drawLine(start, stop);
             }
         }
     }
