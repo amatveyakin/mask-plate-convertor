@@ -12,7 +12,7 @@ class ProgramTextEdit : public QPlainTextEdit
     typedef QPlainTextEdit ParentT;
 
 public:
-    explicit ProgramTextEdit(QWidget *parentArg = 0);
+    explicit ProgramTextEdit(QWidget* parentArg = 0);
 
     LineRange selectedLines() const;
 

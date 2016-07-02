@@ -1,7 +1,7 @@
 #include "agilescrollbar.h"
 
 
-AgileScrollBar::AgileScrollBar(QWidget *parentArg) :
+AgileScrollBar::AgileScrollBar(QWidget* parentArg) :
     QScrollBar(parentArg)
 {
     setGoalMinimum(minimum());

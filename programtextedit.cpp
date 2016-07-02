@@ -6,7 +6,7 @@
 #include <QTextLayout>
 
 
-ProgramTextEdit::ProgramTextEdit(QWidget *parentArg)
+ProgramTextEdit::ProgramTextEdit(QWidget* parentArg)
     : ParentT(parentArg)
 {
     m_currentLineFormat.setBackground(QColor::fromRgbF(0.2, 0.2, 0.6, 0.15));

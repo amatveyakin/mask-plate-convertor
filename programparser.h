@@ -57,7 +57,7 @@ private:
     int m_currentRoutineIndex = mainRoutineIndex;
 
 private:
-    ParseError frustratedExpectations(const QString &expectation) const;
+    ParseError frustratedExpectations(const QString& expectation) const;
 
     void setPosition(TextPosition position);
     void setCurrentRoutineIndex(int newIndex);
