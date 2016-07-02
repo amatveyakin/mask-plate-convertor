@@ -75,8 +75,12 @@ MainWindow::MainWindow(QWidget* parentArg)
     logSeparator->setFrameShadow(QFrame::Sunken);
     m_selectionCoordinatesWidget = new QLabel(this);
 
-    m_stopCoordinatesWidget = new QLabel(this);
+    QLabel* m_stopCoordinatesIconWidget = new QLabel(this);
+    QPixmap stopCoordinatesPixmap = QPixmap(":/images/misc-finish.png").scaledToHeight(statusBar()->height(), Qt::SmoothTransformation);
+    m_stopCoordinatesIconWidget->setPixmap(stopCoordinatesPixmap);
+    m_stopCoordinatesIconWidget->setMaximumHeight(statusBar()->height());
 
+    m_stopCoordinatesWidget = new QLabel(this);
     QFont stopCoordinatesFont = m_stopCoordinatesWidget->font();
     stopCoordinatesFont.setItalic(true);
     m_stopCoordinatesWidget->setFont(stopCoordinatesFont);
@@ -84,6 +88,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     statusBar()->addPermanentWidget(m_selectionCoordinatesWidget);
     statusBar()->addPermanentWidget(logSeparator);
+    statusBar()->addPermanentWidget(m_stopCoordinatesIconWidget);
     statusBar()->addPermanentWidget(m_stopCoordinatesWidget);
 
     m_newAction = new QAction(QIcon(":/images/document-new.png"), "&Новый", this);
@@ -506,7 +511,7 @@ void MainWindow::updateOnDocumentChanged()
 void MainWindow::updateStopCoordinates()
 {
     if (m_blueprint.isValid())
-        m_stopCoordinatesWidget->setText(QString("🏁 %1").arg(pointToString(m_blueprint->stopPoint())));
+        m_stopCoordinatesWidget->setText(pointToString(m_blueprint->stopPoint()));
     else
         m_stopCoordinatesWidget->clear();
 }
