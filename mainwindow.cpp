@@ -573,7 +573,7 @@ bool MainWindow::draw()
 
         m_logModel->clear();
         hideLog();
-        statusBar()->showMessage(QString("Σ перемещение во всей программе = %1").arg(pointToString(m_blueprint->finishPoint())));
+        statusBar()->showMessage("Программа нарисована.", statusMessageDuration);
         return true;
     }
     catch (const ParseError& error) {
@@ -595,6 +595,7 @@ bool MainWindow::drawAndConvert()
         return false;
     QString output = blueprintToAutocadCommandLineCommands(m_blueprint.get());
     QApplication::clipboard()->setText(output);
+    statusBar()->showMessage("Программа сконвертирована (результат в буфере обмена).", statusMessageDuration);
     return true;
 }
 
