@@ -17,6 +17,11 @@ RESOURCES = images.qrc
   QMAKE_CXXFLAGS *= -isystem$$QMAKE_INCDIR_QT
 }
 
+*g++*|*clang*{
+  QMAKE_CXXFLAGS_DEBUG *= -fsanitize=address -fno-omit-frame-pointer
+  QMAKE_LFLAGS_DEBUG *= -fsanitize=address
+}
+
 
 HEADERS += agilescrollbar.h
 SOURCES += agilescrollbar.cpp
