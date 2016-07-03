@@ -68,6 +68,28 @@ void ProgramTextEdit::setTextCursor(TextPosition position)
     setTextCursor(newCursor);
 }
 
+void ProgramTextEdit::find(const QString& text, QTextDocument::FindFlags options)
+{
+    if (document()->find(text, 0, options & ~QTextDocument::FindBackward).isNull()) {
+        emit notFound();
+        return;
+    }
+    bool found = ParentT::find(text, options);
+    if (!found) {
+        QTextCursor cursor(document());
+        if (options & QTextDocument::FindBackward) {
+            cursor.movePosition(QTextCursor::End);
+            setTextCursor(cursor);
+        }
+        else {
+            cursor.movePosition(QTextCursor::Start);
+            setTextCursor(cursor);
+        }
+        found = ParentT::find(text, options);
+        assert(found);
+    }
+}
+
 int ProgramTextEdit::positionToLine(int position) const
 {
     return document()->findBlock(position).firstLineNumber();

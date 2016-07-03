@@ -33,6 +33,7 @@
 #include "programtextedit.h"
 #include "runningprogram.h"
 #include "saveimagedialog.h"
+#include "searchbar.h"
 #include "utils.h"
 
 
@@ -63,6 +64,9 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     m_programTextEdit = new ProgramTextEdit(this);
     m_programTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
+
+    m_searchBar = new SearchBar(this);
+    m_searchBar->hide();
 
     m_blueprintView = new BlueprintView(this);
 
@@ -101,6 +105,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_pasteAction = new QAction(QIcon(":/images/edit-paste.png"), "&Вставить", this);
     m_undoAction = new QAction(QIcon(":/images/edit-undo.png"), "&Отменить", this);
     m_redoAction = new QAction(QIcon(":/images/edit-redo.png"), "&Повторить", this);
+    m_findAction = new QAction(QIcon(":/images/edit-find.png"), "&Найти", this);
     m_removeFragmentAction = new QAction("&Исключить фрагмент", this);
     m_drawAction = new QAction(QIcon(":/images/development-draw.png"), "&Нарисовать", this);
     m_drawAndConvertAction = new QAction(QIcon(":/images/development-convert.png"), "&Конвертировать", this);
@@ -122,6 +127,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_saveAction->setShortcut(QKeySequence::Save);
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_redoAction->setShortcut(QKeySequence::Redo);
+    m_findAction->setShortcut(QKeySequence::Find);
     m_drawAction->setShortcut(Qt::CTRL | Qt::Key_Return);
     m_increaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Plus);
     m_decreaseFontSizeAction->setShortcut(Qt::ALT | Qt::Key_Minus);
@@ -147,6 +153,8 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_editMenu->addAction(m_cutAction);
     m_editMenu->addAction(m_copyAction);
     m_editMenu->addAction(m_pasteAction);
+    m_editMenu->addSeparator();
+    m_editMenu->addAction(m_findAction);
 
     m_viewMenu = menuBar()->addMenu("&Вид");
     m_viewMenu->addAction(m_increaseFontSizeAction);
@@ -186,8 +194,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     QWidget* editorWidget = new QWidget(this);
 
     QBoxLayout* editorLayout = new QVBoxLayout(editorWidget);
-    editorLayout->setContentsMargins(0, 0, 0, 0);
+    editorLayout->setContentsMargins(0, 0, 2 /* TODO: some value from pixelmetrics */, 0);
     editorLayout->addWidget(m_programTextEdit);
+    editorLayout->addWidget(m_searchBar);
     editorLayout->addWidget(m_logView);
 
     QSplitter* splitter = new QSplitter(this);
@@ -224,6 +233,13 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_redoAction, SIGNAL(triggered()), document, SLOT(redo()));
     connect(document, SIGNAL(undoAvailable(bool)), m_undoAction, SLOT(setEnabled(bool)));
     connect(document, SIGNAL(redoAvailable(bool)), m_redoAction, SLOT(setEnabled(bool)));
+
+    connect(m_findAction, SIGNAL(triggered()), m_searchBar, SLOT(startSearch()));
+
+    connect(m_searchBar,     SIGNAL(find(QString, QTextDocument::FindFlags)),
+            m_programTextEdit, SLOT(find(QString, QTextDocument::FindFlags)));
+
+    connect(m_programTextEdit, SIGNAL(notFound()), m_searchBar, SLOT(indicateNotFound()));
 
     connect(document, SIGNAL(modificationChanged(bool)), this, SLOT(updateWindowTitle()));
 

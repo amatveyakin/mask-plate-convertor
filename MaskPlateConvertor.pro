@@ -41,6 +41,8 @@ SOURCES += blueprintbasic.cpp
 HEADERS += blueprintview.h
 SOURCES += blueprintview.cpp
 
+HEADERS += colorutils.h
+
 HEADERS += cpp_extensions.h
 
 HEADERS += forwardmapping.h
@@ -77,6 +79,9 @@ SOURCES += runningprogram.cpp
 
 HEADERS += saveimagedialog.h
 SOURCES += saveimagedialog.cpp
+
+HEADERS += searchbar.h
+SOURCES += searchbar.cpp
 
 HEADERS += syntaxhighlighter.h
 SOURCES += syntaxhighlighter.cpp

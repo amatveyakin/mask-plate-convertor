@@ -20,6 +20,7 @@ class BlueprintView;
 class CallStack;
 class LogDataModel;
 class ProgramTextEdit;
+class SearchBar;
 
 
 class MainWindow : public QMainWindow
@@ -37,6 +38,7 @@ private:
     LogDataModel* m_logModel = nullptr;
 
     ProgramTextEdit* m_programTextEdit = nullptr;
+    SearchBar* m_searchBar = nullptr;
     BlueprintView* m_blueprintView = nullptr;
     QListView* m_logView = nullptr;
     QLabel* m_selectionCoordinatesWidget = nullptr;
@@ -60,6 +62,7 @@ private:
     QAction* m_pasteAction = nullptr;
     QAction* m_undoAction = nullptr;
     QAction* m_redoAction = nullptr;
+    QAction* m_findAction = nullptr;
     QAction* m_removeFragmentAction = nullptr;
     QAction* m_drawAction = nullptr;
     QAction* m_drawAndConvertAction = nullptr;

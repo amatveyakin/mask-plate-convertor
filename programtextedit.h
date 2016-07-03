@@ -27,9 +27,11 @@ public:
 
 public slots:
     void setTextCursor(TextPosition position);
+    void find(const QString& text, QTextDocument::FindFlags options);
 
 signals:
     void selectedLinesChanged(int first, int last);
+    void notFound();
 
 private:
     SyntaxHighlighter* m_syntaxHighlighter = nullptr;
