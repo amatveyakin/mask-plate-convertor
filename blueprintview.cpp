@@ -307,9 +307,9 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
                 QPoint stop = m_blueprint->elements()[i + 1].polygon.front();
                 brush.setStart(start);
                 brush.setFinalStop(stop);
-                brush.setColorAt(0., QColor::fromRgb(60, 60, 255, 255));
-                brush.setColorAt(1., QColor::fromRgb(80, 80, 180, 60));
-                painter.setPen(QPen(brush, 10, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
+                brush.setColorAt(0., QColor::fromRgb(20, 20, 200, 255));
+                brush.setColorAt(1., QColor::fromRgb(40, 40, 160, 100));
+                painter.setPen(QPen(brush, 15, Qt::DotLine, Qt::FlatCap, Qt::BevelJoin));
                 painter.drawLine(start, stop);
             }
         }
