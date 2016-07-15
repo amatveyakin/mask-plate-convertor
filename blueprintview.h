@@ -81,6 +81,7 @@ private:
 
     void renderSegment(QPainter& painter, const SegmentAvatar& avatar) const;
     void renderSegment(QPainter& painter, SegmentId segmentId, QColor color) const;
+    void renderExternallyHighlightedSegments(QPainter& painter) const;
     void doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform, bool showDecorations) const;
 };
 

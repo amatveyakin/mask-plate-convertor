@@ -285,6 +285,37 @@ void BlueprintView::renderSegment(QPainter& painter, SegmentId segmentId, QColor
     renderSegment(painter, segmentAvatar(segmentId, color));
 }
 
+void BlueprintView::renderExternallyHighlightedSegments(QPainter& painter) const
+{
+    if (m_externallyHighlightedSegments.empty())
+        return;
+
+    int minX = std::numeric_limits<int>::max();
+    int minY = std::numeric_limits<int>::max();
+    int maxX = std::numeric_limits<int>::min();
+    int maxY = std::numeric_limits<int>::min();
+    for (SegmentId segmentId : m_externallyHighlightedSegments) {
+        SegmentAvatar avatar = segmentAvatar(segmentId, QColor::fromRgbF(0.6, 0.6, 1., 0.8));
+        avatar.pen.setWidthF(avatar.pen.widthF() + 60);
+        avatar.pen.setCapStyle(Qt::RoundCap);
+        renderSegment(painter, avatar);
+        for (QPoint p : {avatar.coords.p1(), avatar.coords.p2()}) {
+            minX = std::min(minX, p.x());
+            minY = std::min(minY, p.y());
+            maxX = std::max(maxX, p.x());
+            maxY = std::max(maxY, p.y());
+        }
+    }
+    const int infinity = 1000000000;
+    const int border = 150;
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QColor::fromRgbF(0.6, 0.8, 1., 0.15));
+    painter.drawRect(QRect(QPoint(minX - border, -infinity),
+                           QPoint(maxX + border,  infinity)));
+    painter.drawRect(QRect(QPoint(-infinity, minY - border),
+                           QPoint( infinity, maxY + border)));
+}
+
 void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect, const QTransform& transform, bool showDecorations) const
 {
     painter.fillRect(targetRect, Qt::white);  // TODO: Should we do it here? It will spoil SVG for example
@@ -292,23 +323,18 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     painter.setBrush(Qt::NoBrush);
 
     if (showDecorations) {
-        for (SegmentId segmentId : m_externallyHighlightedSegments) {
-            SegmentAvatar avatar = segmentAvatar(segmentId, QColor::fromRgbF(0.92, 0.88, 0.6));
-            avatar.pen.setWidthF(avatar.pen.widthF() + 2.5 / builtInSizeCoeff());
-            avatar.pen.setCapStyle(Qt::RoundCap);
-            renderSegment(painter, avatar);
-        }
+        renderExternallyHighlightedSegments(painter);
 
         if (m_showTransitions) {
             painter.setRenderHint(QPainter::Antialiasing, true);
             QLinearGradient brush;
+            brush.setColorAt(0., QColor::fromRgbF(0.6, 0.6, 0.,   1.));
+            brush.setColorAt(1., QColor::fromRgbF(0.7, 0.7, 0.15, 0.5));
             for (int i = 0; i < (int)m_blueprint->elements().size() - 1; ++i) {
                 QPoint start = m_blueprint->elements()[i].polygon.back();
                 QPoint stop = m_blueprint->elements()[i + 1].polygon.front();
                 brush.setStart(start);
                 brush.setFinalStop(stop);
-                brush.setColorAt(0., QColor::fromRgb(20, 20, 200, 255));
-                brush.setColorAt(1., QColor::fromRgb(40, 40, 160, 100));
                 painter.setPen(QPen(brush, 15, Qt::DotLine, Qt::FlatCap, Qt::BevelJoin));
                 painter.drawLine(start, stop);
             }
