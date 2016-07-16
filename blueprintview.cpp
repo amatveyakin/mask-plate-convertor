@@ -35,7 +35,7 @@ void BlueprintView::setBlueprint(BlueprintPtr blueprint)
     m_hoveredSegment = SegmentId::invalid();
     m_selectedSegment = SegmentId::invalid();
     updateViewportGeometry();
-    coLocatePoints(blueprintRect().center(), m_canvasRect.center());
+    coLocatePoints(blueprintRect().center(), m_canvasRect.center(), true);
 }
 
 void BlueprintView::setHighlight(std::vector<SegmentId> segments)
@@ -108,7 +108,7 @@ void BlueprintView::mouseReleaseEvent(QMouseEvent* ev)
 void BlueprintView::mouseMoveEvent(QMouseEvent* ev)
 {
     if (m_isPanning) {
-        coLocatePoints(m_panPivot, ev->pos());
+        coLocatePoints(m_panPivot, ev->pos(), false);
     }
     updateViewport();
 }
@@ -127,7 +127,7 @@ void BlueprintView::resizeEvent(QResizeEvent* /*ev*/)
     QPoint blueprintFixedPoint = screenToBlueprint(m_canvasRect.center());
     updateViewportGeometry();
     QPoint goalScreenPoint = m_canvasRect.center();
-    coLocatePoints(blueprintFixedPoint, goalScreenPoint);
+    coLocatePoints(blueprintFixedPoint, goalScreenPoint, true);
 }
 
 AgileScrollBar* BlueprintView::myHorizontalScrollBar() const
@@ -212,7 +212,7 @@ void BlueprintView::zoom(double factor, QPoint fixedScreenPoint)
     QPoint fixedBlueprintPoint = screenToBlueprint(fixedScreenPoint);
     m_scale = qMax(m_scale * factor, 1.);
     updateViewportGeometry();
-    coLocatePoints(fixedBlueprintPoint, fixedScreenPoint);
+    coLocatePoints(fixedBlueprintPoint, fixedScreenPoint, true);
 }
 
 void BlueprintView::updateCanvasRect()
@@ -248,11 +248,11 @@ void BlueprintView::updateViewportGeometry()
     updateViewport();
 }
 
-void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint)
+void BlueprintView::coLocatePoints(QPoint blueprintPoint, QPoint screenPoint, bool force)
 {
     QPoint scrollValue = blueprintToScreen(blueprintPoint) - screenPoint;
-    myHorizontalScrollBar()->forceValue(myHorizontalScrollBar()->value() + scrollValue.x());
-    myVerticalScrollBar()->forceValue(myVerticalScrollBar()->value() + scrollValue.y());
+    myHorizontalScrollBar()->setValue(myHorizontalScrollBar()->value() + scrollValue.x(), force);
+    myVerticalScrollBar()->setValue(myVerticalScrollBar()->value() + scrollValue.y(), force);
     updateViewport();
 }
 

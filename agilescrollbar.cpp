@@ -42,6 +42,19 @@ void AgileScrollBar::forceValue(int newValue)
     setValue(newValue);
 }
 
+void AgileScrollBar::setValue(int newValue)
+{
+    QScrollBar::setValue(newValue);
+}
+
+void AgileScrollBar::setValue(int newValue, bool force)
+{
+    if (force)
+        forceValue(newValue);
+    else
+        setValue(newValue);
+}
+
 void AgileScrollBar::updateRange(int curValue)
 {
     setMinimum(qMin(goalMinimum(), curValue));

@@ -78,7 +78,7 @@ private:
     void updateCanvasRect();
     void updateScrollBarRanges();
     void updateViewportGeometry();
-    void coLocatePoints(QPoint blueprintPoint, QPoint screenPoint);
+    void coLocatePoints(QPoint blueprintPoint, QPoint screenPoint, bool force);
     void updateHoveredSegment();
     void updateViewport();
 

@@ -23,6 +23,8 @@ public:
 
 public slots:
     void forceValue(int newValue);
+    void setValue(int newValue);
+    void setValue(int newValue, bool force);
 
 private:
     int m_goalMinimum = 0;
