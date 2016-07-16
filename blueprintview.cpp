@@ -90,11 +90,26 @@ void BlueprintView::mousePressEvent(QMouseEvent* ev)
             emit selectedSegmentChanged(m_selectedSegment);
             updateViewport();
         }
+    } else if (ev->button() == Qt::RightButton) {
+        m_isPanning = true;
+        m_panPivot = screenToBlueprint(ev->pos());
+        setCursor(Qt::ClosedHandCursor);
     }
 }
 
-void BlueprintView::mouseMoveEvent(QMouseEvent* /*ev*/)
+void BlueprintView::mouseReleaseEvent(QMouseEvent* ev)
 {
+    if (ev->button() == Qt::RightButton) {
+        m_isPanning = false;
+        unsetCursor();
+    }
+}
+
+void BlueprintView::mouseMoveEvent(QMouseEvent* ev)
+{
+    if (m_isPanning) {
+        coLocatePoints(m_panPivot, ev->pos());
+    }
     updateViewport();
 }
 

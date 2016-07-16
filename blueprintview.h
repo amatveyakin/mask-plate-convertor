@@ -36,6 +36,7 @@ signals:
 protected:
     virtual void paintEvent(QPaintEvent*) override;
     virtual void mousePressEvent(QMouseEvent*) override;
+    virtual void mouseReleaseEvent(QMouseEvent*) override;
     virtual void mouseMoveEvent(QMouseEvent*) override;
     virtual void wheelEvent(QWheelEvent*) override;
     virtual void resizeEvent(QResizeEvent*) override;
@@ -52,6 +53,8 @@ private:
     bool m_flipHorizontally = false;
     bool m_flipVertically = false;
     bool m_showTransitions = false;
+    bool m_isPanning = false;
+    QPoint m_panPivot;  // blueprint point that stays under mouse while panning
     SegmentId m_hoveredSegment;
     SegmentId m_selectedSegment;
     std::vector<SegmentId> m_externallyHighlightedSegments;
