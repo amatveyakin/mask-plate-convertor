@@ -32,11 +32,6 @@ QPoint Movement::value(const Arguments& arguments, const RunningProgram& instanc
     return {x.value(arguments, instance), y.value(arguments, instance)};
 }
 
-bool Movement::argumentDependent() const
-{
-    return x.argumentDependent() || y.argumentDependent();
-}
-
 
 int CallStack::currentRoutine() const
 {

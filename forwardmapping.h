@@ -17,36 +17,28 @@ class CallStack;
 class ForwardMapping
 {
 public:
-    void addMovement(bool argumentDependent, QPoint from, QPoint to, int routineIndex, int line);
+    void addMovement(QPoint from, QPoint to, int routineIndex, int line);
     void addSegment(SegmentId segment, const CallStack& backtrace);
 
     void lineIntervalMovement(int first, int last, bool& ok, QPoint& movement) const;
     std::vector<SegmentId> lineIntervalSegments(int first, int last) const;
 
 private:
-    struct PositionInfo
+    struct LineMovement
     {
-        QPoint position;
         int routineIndex;
+        bool isMovementAmbiguous;
+        QPoint movementValue;
     };
 
     /*!
-     * Laser position at the beginning of line.
-     * Some unknown (but well-defined) position for subroutines.
+     * Information about lines that produced movement.
+     *
+     * A movement is unambiguous if each time the line was executed it produced the same movement, i.e.
+     * movement produced by argument dependent subroutine is still unambiguous it the routine was always
+     * called with the same arguments.
      */
-    std::map<int, PositionInfo> m_lineBeginPos;
-
-    /*!
-     * Laser position at the end of line.
-     * Some unknown (but well-defined) position for subroutines.
-     */
-    std::map<int, PositionInfo> m_lineEndPos;
-
-    /*!
-     * (lineEndPos[j] - lineEndPos[i]) is the correct movement between lines i..j
-     * if m_breakerLines doesn't contain lines i..j.
-     */
-    std::set<int> m_breakerLines;
+    std::map<int, LineMovement> m_lineMovements;
 
     /*!
      * Segments produced by this line (directly or indirectly).

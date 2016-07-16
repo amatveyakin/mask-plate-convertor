@@ -37,7 +37,6 @@ public:
     static Number variable(int value, int mult) { return {Variable, value, mult}; }
     Number() {}
     int value(const Arguments& arguments, const RunningProgram& instance) const;
-    bool argumentDependent() const              { return m_type != Literal; }
 
 private:
     enum Type { Literal, Variable };

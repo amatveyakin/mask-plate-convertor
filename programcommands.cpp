@@ -66,7 +66,7 @@ void MoveToCommand::doExecute(RunningProgram& instance)
     QPoint newPosition = instance.state.position;
     if (instance.state.laserEnabled)
         instance.output->appendLine(oldPosition, newPosition, instance.state.lineWidth, instance.state.callStack);
-    instance.output->forwardMapping().addMovement(m_movement.argumentDependent(), oldPosition, newPosition, currentRoutineIndex, textLine());
+    instance.output->forwardMapping().addMovement(oldPosition, newPosition, currentRoutineIndex, textLine());
     instance.output->setStopPoint(instance.state.position);
 }
 
@@ -91,6 +91,5 @@ void CallSubroutineCommand::doExecute(RunningProgram& instance)
     for (int i = 0; i < m_repeatCount; ++i)
         subroutine->execute(instance, m_arguments);
     QPoint newPosition = instance.state.position;
-    bool argumentDependent = (currentRoutineIndex != mainRoutineIndex);  // TODO: Also recognize subroutines calling other subroutines without arguments
-    instance.output->forwardMapping().addMovement(argumentDependent, oldPosition, newPosition, currentRoutineIndex, textLine());
+    instance.output->forwardMapping().addMovement(oldPosition, newPosition, currentRoutineIndex, textLine());
 }
