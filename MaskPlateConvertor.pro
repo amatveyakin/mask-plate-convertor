@@ -88,3 +88,6 @@ SOURCES += syntaxhighlighter.cpp
 
 HEADERS += textbasic.h
 SOURCES += textbasic.cpp
+
+HEADERS += utils.h
+SOURCES += utils.cpp

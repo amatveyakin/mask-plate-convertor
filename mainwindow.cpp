@@ -40,7 +40,7 @@
 static const int maxRecentDocuments = 10;
 static const int statusMessageDuration = 5000;  // ms
 
-QString elideFilename(QString filename)
+static QString elideFilename(QString filename)
 {
     const int maxLength = 100;
     const int maxLengthWithoutEllipsis = maxLength - 3;
@@ -399,11 +399,12 @@ void MainWindow::updateOnProgramTextChanged()
 
 void MainWindow::updateOnSelectedLinesChanged(int first, int last)
 {
+    const QString lineNumberString = stringWithInteger(last - first + 1, "%1 строке", "%1 строкaх", "%1 строкaх");
     bool ok = false;
     QPoint movement;
     m_blueprint->forwardMapping().lineIntervalMovement(first, last, ok, movement);
     if (ok)
-        statusBar()->showMessage(QString("Σ перемещение в %1 строках = %2").arg(prettyPrintNumber(last - first + 1), pointToString(movement)));
+        statusBar()->showMessage(QString("Σ перемещение в %1 = %2").arg(lineNumberString, pointToString(movement)));
     else
         statusBar()->clearMessage();
     m_blueprintView->setHighlight(m_blueprint->forwardMapping().lineIntervalSegments(first, last));

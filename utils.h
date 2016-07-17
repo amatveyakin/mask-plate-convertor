@@ -12,4 +12,6 @@ QString prettyPrintNumber(T x)
     return result;
 }
 
+QString stringWithInteger(int value, QString s1, QString s2, QString s3);
+
 #endif // UTILS_H
