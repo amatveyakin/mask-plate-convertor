@@ -71,6 +71,7 @@ private:
     QAction* m_flipHorizontallyAction = nullptr;
     QAction* m_flipVerticallyAction = nullptr;
     QAction* m_showTransitionsAction = nullptr;
+    QAction* m_showSegmentsHighlightAction = nullptr;
     QAction* m_saveImageAction = nullptr;
     QAction* m_printImageAction = nullptr;
     QAction* m_showAboutAction = nullptr;

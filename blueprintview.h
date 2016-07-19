@@ -26,6 +26,7 @@ public slots:
     void setFlipHorizontally(bool flip);
     void setFlipVertically(bool flip);
     void setShowTransitions(bool showTrans);
+    void setShowSegmentsHighlight(bool showHighlight);
     void renderBlueprint(QPaintDevice* target, const QRect& targetRect);
     void renderBlueprint(QPrinter* printer);
 
@@ -53,11 +54,12 @@ private:
     bool m_flipHorizontally = false;
     bool m_flipVertically = false;
     bool m_showTransitions = false;
+    bool m_showSegmentsHighlight = false;
     bool m_isPanning = false;
     QPoint m_panPivot;  // blueprint point that stays under mouse while panning
     SegmentId m_hoveredSegment;
     SegmentId m_selectedSegment;
-    std::vector<SegmentId> m_externallyHighlightedSegments;
+    std::vector<SegmentId> m_highlightedSegments;
 
 private:
     AgileScrollBar* myHorizontalScrollBar() const;

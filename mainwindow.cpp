@@ -114,6 +114,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_flipHorizontallyAction = new QAction(QIcon(":/images/view-flip-horizontally.png"), "Отразить по &горизонтали", this);
     m_flipVerticallyAction = new QAction(QIcon(":/images/view-flip-vertically.png"), "Отразить по &вертикали", this);
     m_showTransitionsAction = new QAction(QIcon(":/images/view-show-transitions.png"), "Показывать &переходы", this);
+    m_showSegmentsHighlightAction = new QAction(QIcon(":/images/view-show-highlight.png"), "Подсвечивать &выделенное", this);
     m_saveImageAction = new QAction(QIcon(":/images/image-save.png"), "Сохранить &изображение...", this);
     m_printImageAction = new QAction(QIcon(":/images/image-print.png"), "&Распечатать изображение...", this);
     m_showAboutAction = new QAction(QIcon(":/images/help-about.png"), "&О программе...", this);
@@ -121,6 +122,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);
     m_showTransitionsAction->setCheckable(true);
+    m_showSegmentsHighlightAction->setCheckable(true);
 
     m_newAction->setShortcut(QKeySequence::New);
     m_openAction->setShortcut(QKeySequence::Open);
@@ -163,6 +165,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_viewMenu->addAction(m_flipHorizontallyAction);
     m_viewMenu->addAction(m_flipVerticallyAction);
     m_viewMenu->addAction(m_showTransitionsAction);
+    m_viewMenu->addAction(m_showSegmentsHighlightAction);
 
     m_developmentMenu = menuBar()->addMenu("&Разработка");
     m_developmentMenu->addAction(m_removeFragmentAction);
@@ -186,6 +189,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     toolbar->addAction(m_flipHorizontallyAction);
     toolbar->addAction(m_flipVerticallyAction);
     toolbar->addAction(m_showTransitionsAction);
+    toolbar->addAction(m_showSegmentsHighlightAction);
     toolbar->addSeparator();
     toolbar->addAction(m_saveImageAction);
     toolbar->addAction(m_printImageAction);
@@ -257,9 +261,10 @@ MainWindow::MainWindow(QWidget* parentArg)
     connect(m_increaseFontSizeAction, SIGNAL(triggered()), this, SLOT(increaseFontSize()));
     connect(m_decreaseFontSizeAction, SIGNAL(triggered()), this, SLOT(decreaseFontSize()));
 
-    connect(m_flipHorizontallyAction, SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipHorizontally(bool)));
-    connect(m_flipVerticallyAction,   SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipVertically(bool)));
-    connect(m_showTransitionsAction,  SIGNAL(toggled(bool)), m_blueprintView, SLOT(setShowTransitions(bool)));
+    connect(m_flipHorizontallyAction,       SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipHorizontally(bool)));
+    connect(m_flipVerticallyAction,         SIGNAL(toggled(bool)), m_blueprintView, SLOT(setFlipVertically(bool)));
+    connect(m_showTransitionsAction,        SIGNAL(toggled(bool)), m_blueprintView, SLOT(setShowTransitions(bool)));
+    connect(m_showSegmentsHighlightAction,  SIGNAL(toggled(bool)), m_blueprintView, SLOT(setShowSegmentsHighlight(bool)));
 
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 

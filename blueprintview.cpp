@@ -40,7 +40,7 @@ void BlueprintView::setBlueprint(BlueprintPtr blueprint)
 
 void BlueprintView::setHighlight(std::vector<SegmentId> segments)
 {
-    m_externallyHighlightedSegments = std::move(segments);
+    m_highlightedSegments = std::move(segments);
     updateViewport();
 }
 
@@ -59,6 +59,12 @@ void BlueprintView::setFlipVertically(bool flip)
 void BlueprintView::setShowTransitions(bool showTrans)
 {
     m_showTransitions = showTrans;
+    updateViewport();
+}
+
+void BlueprintView::setShowSegmentsHighlight(bool showHighlight)
+{
+    m_showSegmentsHighlight = showHighlight;
     updateViewport();
 }
 
@@ -302,14 +308,14 @@ void BlueprintView::renderSegment(QPainter& painter, SegmentId segmentId, QColor
 
 void BlueprintView::renderExternallyHighlightedSegments(QPainter& painter) const
 {
-    if (m_externallyHighlightedSegments.empty())
+    if (m_highlightedSegments.empty())
         return;
 
     int minX = std::numeric_limits<int>::max();
     int minY = std::numeric_limits<int>::max();
     int maxX = std::numeric_limits<int>::min();
     int maxY = std::numeric_limits<int>::min();
-    for (SegmentId segmentId : m_externallyHighlightedSegments) {
+    for (SegmentId segmentId : m_highlightedSegments) {
         SegmentAvatar avatar = segmentAvatar(segmentId, QColor::fromRgbF(0.6, 0.6, 1., 0.8));
         avatar.pen.setWidthF(avatar.pen.widthF() + 60);
         avatar.pen.setCapStyle(Qt::RoundCap);
@@ -338,7 +344,8 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     painter.setBrush(Qt::NoBrush);
 
     if (showDecorations) {
-        renderExternallyHighlightedSegments(painter);
+        if (m_showSegmentsHighlight)
+            renderExternallyHighlightedSegments(painter);
 
         if (m_showTransitions) {
             painter.setRenderHint(QPainter::Antialiasing, true);
