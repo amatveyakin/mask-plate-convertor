@@ -41,7 +41,7 @@ public:
     void appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace);
     void finishElement();
     void setStopPoint(QPoint p);
-    void preProcess();
+    void preProcess(const ForwardMapping& forwardMapping);
     void postProcess();
     void resetForwardMapping();
 

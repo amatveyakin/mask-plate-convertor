@@ -17,19 +17,29 @@ class CallStack;
 class ForwardMapping
 {
 public:
-    void addMovement(QPoint from, QPoint to, int routineIndex, int line);
-    void addSegment(SegmentId segment, const CallStack& backtrace);
+    void addInfo(int line, int routineIndex);
+    void addMovement(int line, QPoint from, QPoint to);
+    void addSegment(const CallStack& backtrace, SegmentId segment);
 
     void lineIntervalMovement(int first, int last, bool& ok, QPoint& movement) const;
     std::vector<SegmentId> lineIntervalSegments(int first, int last) const;
 
 private:
-    struct LineMovement
+    struct LineInfo
     {
         int routineIndex;
+    };
+
+    struct LineMovement
+    {
         bool isMovementAmbiguous;
         QPoint movementValue;
     };
+
+    /*!
+     * Line information supplied by parser.
+     */
+    std::map<int, LineInfo> m_lineInfo;
 
     /*!
      * Information about lines that produced movement.

@@ -2,22 +2,26 @@
 #include "programbasic.h"
 
 
-void ForwardMapping::addMovement(QPoint from, QPoint to, int routineIndex, int line)
+void ForwardMapping::addInfo(int line, int routineIndex)
+{
+    m_lineInfo.emplace(line, LineInfo{routineIndex});
+}
+
+void ForwardMapping::addMovement(int line, QPoint from, QPoint to)
 {
     const QPoint movementValue = to - from;
     const auto it = m_lineMovements.find(line);
     if (it == m_lineMovements.end()) {
-        m_lineMovements.emplace(line, LineMovement{routineIndex, false, movementValue});
+        m_lineMovements.emplace(line, LineMovement{false, movementValue});
     }
     else {
         LineMovement& lineMovement = it->second;
-        assert(lineMovement.routineIndex == routineIndex);
         if (lineMovement.movementValue != movementValue)
             lineMovement.isMovementAmbiguous = true;
     }
 }
 
-void ForwardMapping::addSegment(SegmentId segment, const CallStack& backtrace)
+void ForwardMapping::addSegment(const CallStack& backtrace, SegmentId segment)
 {
     for (const Call& call : backtrace)
         m_lineSegments.emplace(call.inputPosition.line, segment);
@@ -28,15 +32,16 @@ void ForwardMapping::lineIntervalMovement(int first, int last, bool& ok, QPoint&
     assert(first <= last);
     ok = false;
     movement = {};
-    const auto beginIt = m_lineMovements.lower_bound(first);
-    const auto endIt = m_lineMovements.upper_bound(last);
-    if (beginIt == m_lineMovements.end())
+    const auto routineFirstIt = m_lineInfo.find(first);
+    const auto routineLastIt = m_lineInfo.find(last);
+    if (routineFirstIt == m_lineInfo.end() || routineLastIt == m_lineInfo.end())
         return;
-    const int routineIndex = beginIt->second.routineIndex;
-    for (auto it = beginIt; it != endIt; ++it) {
+    if (routineFirstIt->second.routineIndex != routineLastIt->second.routineIndex)
+        return;
+    const auto movementBeginIt = m_lineMovements.lower_bound(first);
+    const auto movementEndIt = m_lineMovements.upper_bound(last);
+    for (auto it = movementBeginIt; it != movementEndIt; ++it) {
         const LineMovement& lineMovement = it->second;
-        if (lineMovement.routineIndex != routineIndex)
-            return;
         if (lineMovement.isMovementAmbiguous)
             return;
         movement += lineMovement.movementValue;

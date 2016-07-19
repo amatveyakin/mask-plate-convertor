@@ -88,6 +88,8 @@ void ProgramParser::processLine(const QString& nextLine)
         break;
     }
 
+    m_program->forwardMapping().addInfo(m_position.line, m_currentRoutineIndex);
+
     if (!atEol())
         throw frustratedExpectations("конец строки");
 }

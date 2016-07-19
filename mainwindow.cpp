@@ -395,6 +395,8 @@ void MainWindow::updateOnProgramTextChanged()
 {
     if (m_blueprint.isValid())
         m_blueprint.getMutable()->resetForwardMapping();
+    const LineRange selectedLine = m_programTextEdit->selectedLines();
+    updateOnSelectedLinesChanged(selectedLine.first, selectedLine.last);
 }
 
 void MainWindow::updateOnSelectedLinesChanged(int first, int last)

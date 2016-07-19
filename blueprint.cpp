@@ -45,7 +45,7 @@ void Blueprint::appendLine(QPoint from, QPoint to, int width, const CallStack& b
     }
     SegmentId lastSegment(m_elements.size() - 1, curElement.polygon.size() - 2);
     assert(isSegmentValid(lastSegment));
-    m_forwardMapping.addSegment(lastSegment, backtrace);
+    m_forwardMapping.addSegment(backtrace, lastSegment);
 }
 
 void Blueprint::finishElement()
@@ -55,8 +55,9 @@ void Blueprint::finishElement()
         m_elements.emplace_back();
 }
 
-void Blueprint::preProcess()
+void Blueprint::preProcess(const ForwardMapping& forwardMapping)
 {
+    m_forwardMapping = forwardMapping;
     m_elements.emplace_back();
 }
 

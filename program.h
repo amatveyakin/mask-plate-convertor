@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 
+#include "forwardmapping.h"
 #include "programbasic.h"
 
 class QPoint;
@@ -23,6 +24,9 @@ public:
     Program();
     ~Program();
 
+    const ForwardMapping& forwardMapping() const    { return m_forwardMapping; }
+    ForwardMapping& forwardMapping()                { return m_forwardMapping; }
+
     bool hasRoutine(int index) const;
 
     void pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newCommand);
@@ -31,6 +35,7 @@ public:
 
 private:
     std::map<int, std::unique_ptr<Routine>> m_routines;
+    ForwardMapping m_forwardMapping;
 
 private:
     const Routine* routine(int index) const;

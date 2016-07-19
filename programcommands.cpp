@@ -60,13 +60,12 @@ MoveToCommand::MoveToCommand(Movement movement)
 
 void MoveToCommand::doExecute(RunningProgram& instance)
 {
-    int currentRoutineIndex = instance.state.callStack.currentRoutine();
     QPoint oldPosition = instance.state.position;
     instance.state.position += m_movement.value(instance.state.arguments, instance);
     QPoint newPosition = instance.state.position;
     if (instance.state.laserEnabled)
         instance.output->appendLine(oldPosition, newPosition, instance.state.lineWidth, instance.state.callStack);
-    instance.output->forwardMapping().addMovement(oldPosition, newPosition, currentRoutineIndex, textLine());
+    instance.output->forwardMapping().addMovement(textLine(), oldPosition, newPosition);
     instance.output->setStopPoint(instance.state.position);
 }
 
@@ -80,7 +79,6 @@ CallSubroutineCommand::CallSubroutineCommand(int subroutineIndex, int repeatCoun
 
 void CallSubroutineCommand::doExecute(RunningProgram& instance)
 {
-    int currentRoutineIndex = instance.state.callStack.currentRoutine();
     // TODO: in case of error: always print 2 digits for index
     const Routine* subroutine = instance.program->routine(m_subroutineIndex);
     if (!subroutine)
@@ -91,5 +89,5 @@ void CallSubroutineCommand::doExecute(RunningProgram& instance)
     for (int i = 0; i < m_repeatCount; ++i)
         subroutine->execute(instance, m_arguments);
     QPoint newPosition = instance.state.position;
-    instance.output->forwardMapping().addMovement(oldPosition, newPosition, currentRoutineIndex, textLine());
+    instance.output->forwardMapping().addMovement(textLine(), oldPosition, newPosition);
 }
