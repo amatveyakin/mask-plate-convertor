@@ -384,9 +384,6 @@ void MainWindow::updateWindowTitle()
 
 void MainWindow::setBlueprintActionsEnabled(bool enabled)
 {
-    m_flipHorizontallyAction->setEnabled(enabled);
-    m_flipVerticallyAction->setEnabled(enabled);
-    m_showTransitionsAction->setEnabled(enabled);
     m_saveImageAction->setEnabled(enabled);
     m_printImageAction->setEnabled(enabled);
 }
