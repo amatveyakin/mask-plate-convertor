@@ -353,6 +353,11 @@ void MainWindow::loadSettings()
     if (ok)
         setFontSize(fontSize);
 
+    m_flipHorizontallyAction->setChecked(settings.value("flip_horizontally", false).toBool());
+    m_flipVerticallyAction->setChecked(settings.value("flip_vertically", false).toBool());
+    m_showTransitionsAction->setChecked(settings.value("show_transitions", false).toBool());
+    m_showSegmentsHighlightAction->setChecked(settings.value("show_segments_highlight", true).toBool());
+
     m_recentFilesNames.clear();
     int recentFilesCount = settings.beginReadArray("recent_documents");
     for (int i = 0; i < recentFilesCount; ++i) {
@@ -368,6 +373,11 @@ void MainWindow::saveSettings()
     QSettings settings;
 
     settings.setValue("font_size", centralWidget()->fontInfo().pointSize());
+
+    settings.setValue("flip_horizontally", m_flipHorizontallyAction->isChecked());
+    settings.setValue("flip_vertically", m_flipVerticallyAction->isChecked());
+    settings.setValue("show_transitions", m_showTransitionsAction->isChecked());
+    settings.setValue("show_segments_highlight", m_showSegmentsHighlightAction->isChecked());
 
     settings.beginWriteArray("recent_documents", m_recentFilesNames.size());
     for (int i = 0; i < m_recentFilesNames.size(); ++i) {
