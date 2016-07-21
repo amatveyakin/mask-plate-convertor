@@ -63,7 +63,6 @@ private:
     QAction* m_undoAction = nullptr;
     QAction* m_redoAction = nullptr;
     QAction* m_findAction = nullptr;
-    QAction* m_removeFragmentAction = nullptr;
     QAction* m_drawAction = nullptr;
     QAction* m_drawAndConvertAction = nullptr;
     QAction* m_increaseFontSizeAction = nullptr;
@@ -110,7 +109,6 @@ private slots:
     void increaseFontSize();
     void decreaseFontSize();
     void updateRecentFilesMenu();
-    void removeFragment();
     bool draw();
     bool drawAndConvert();
     void saveImage();
