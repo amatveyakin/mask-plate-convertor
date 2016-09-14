@@ -13,7 +13,7 @@ class LogDataModel : public QAbstractListModel
     typedef QAbstractListModel ParentT;
 
 public:
-    enum Icon
+    enum Severity
     {
         Neutral,
         Warning,
@@ -31,7 +31,7 @@ public:
     void setIconSize(int size);
 
     void clear();
-    void addLine(Icon icon, const QString& text, TextPosition sourceTextPosition);
+    void addLine(Severity severity, const QString& text, TextPosition sourceTextPosition);
 
     // QAbstractItemModel interface
 public:
@@ -41,7 +41,7 @@ public:
 private:
     struct Line
     {
-        Icon icon;
+        Severity severity;
         QString text;
         TextPosition sourceTextPosition;    ///< corresponding source text position that will be focused on clicked; invalid - no position
     };
@@ -49,7 +49,7 @@ private:
 private:
     int m_iconSize = 0;
     std::vector<Line> m_lines;
-    std::map<Icon, QPixmap> m_pixmaps;
+    std::map<Severity, QPixmap> m_pixmaps;
 };
 
 #endif // LOGDATAMODEL_H

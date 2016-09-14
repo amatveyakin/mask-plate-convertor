@@ -7,6 +7,7 @@
 #include <QTextFormat>
 
 #include "blueprintbasic.h"
+#include "logdatamodel.h"
 #include "textbasic.h"
 
 class QLabel;
@@ -18,7 +19,6 @@ class QModelIndex;
 class Blueprint;
 class BlueprintView;
 class CallStack;
-class LogDataModel;
 class ProgramTextEdit;
 class SearchBar;
 
@@ -79,7 +79,7 @@ protected:
     void closeEvent(QCloseEvent* ev);
 
 private:
-    void showProgramError(TextRange range, const QString& message, const CallStack& callStack);
+    void showProgramProblem(LogDataModel::Severity severity, TextRange range, const QString& message, const CallStack& callStack);
     void addBacktraceToLog(const CallStack& callStack);
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();

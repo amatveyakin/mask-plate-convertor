@@ -13,10 +13,17 @@
 class QPoint;
 
 class Blueprint;
+class ExecutionProblem;
 class ProgramCommand;
 class Routine;
 struct RunningProgram;
 
+
+struct ExecutionResult
+{
+    std::unique_ptr<Blueprint> blueprint;
+    std::unique_ptr<ExecutionProblem> executionWarning;
+};
 
 class Program
 {
@@ -31,7 +38,7 @@ public:
 
     void pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newCommand);
 
-    std::unique_ptr<Blueprint> execute() const;
+    ExecutionResult execute() const;
 
 private:
     std::map<int, std::unique_ptr<Routine>> m_routines;

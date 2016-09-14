@@ -56,13 +56,13 @@ void Program::pushBack(int routineIndex, std::unique_ptr<ProgramCommand> newComm
     nonnullRoutine(routineIndex)->pushBack(std::move(newCommand));
 }
 
-std::unique_ptr<Blueprint> Program::execute() const
+ExecutionResult Program::execute() const
 {
     RunningProgram instance(this);
     instance.output->preProcess(m_forwardMapping);
     routine(mainRoutineIndex)->execute(instance, Arguments());
     instance.output->postProcess();
-    return std::move(instance.output);
+    return {std::move(instance.output), std::move(instance.firstWarning)};
 }
 
 const Routine* Program::routine(int index) const

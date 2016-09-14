@@ -1,4 +1,5 @@
 #include "blueprint.h"
+#include "cpp_extensions.h"
 #include "programcommands.h"
 #include "runningprogram.h"
 
@@ -8,7 +9,7 @@ const int maxRecursionDepth = 16;  // 5 by specification
 const int startingLineWidth = 100;
 
 
-ExecutionError::ExecutionError(TextRange commandTextRangeArg, const CallStack& callStackArg, const std::string& whatArg)
+ExecutionProblem::ExecutionProblem(TextRange commandTextRangeArg, const CallStack& callStackArg, const std::string& whatArg)
     : std::runtime_error(whatArg)
     , m_commandTextRange(commandTextRangeArg)
     , m_callStack(callStackArg)
@@ -22,7 +23,12 @@ RunningProgram::RunningProgram(const Program* programArg)
 {
 }
 
-ExecutionError RunningProgram::executionError(const std::string& whatArg) const
+void RunningProgram::addExecutionWarning(const std::string& whatArg)
 {
-    return ExecutionError(state.currentCommand->textRange(), state.callStack, whatArg);
+    firstWarning = std::make_unique<ExecutionProblem>(executionError(whatArg));
+}
+
+ExecutionProblem RunningProgram::executionError(const std::string& whatArg) const
+{
+    return ExecutionProblem(state.currentCommand->textRange(), state.callStack, whatArg);
 }

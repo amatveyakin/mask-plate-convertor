@@ -284,7 +284,7 @@ void MainWindow::closeEvent(QCloseEvent* ev)
         ev->ignore();
 }
 
-void MainWindow::showProgramError(TextRange range, const QString& message, const CallStack& callStack)
+void MainWindow::showProgramProblem(LogDataModel::Severity severity, TextRange range, const QString& message, const CallStack& callStack)
 {
     if (!range.end.valid())
         range.end = TextPosition(range.begin.line, std::numeric_limits<int>::max());
@@ -295,7 +295,7 @@ void MainWindow::showProgramError(TextRange range, const QString& message, const
     m_programTextEdit->indicateError(range);
 
     m_logModel->clear();
-    m_logModel->addLine(LogDataModel::Error, message, range.begin);
+    m_logModel->addLine(severity, message, range.begin);
     addBacktraceToLog(callStack);
     showLog();
 
@@ -440,6 +440,7 @@ void MainWindow::showLog()
 
 void MainWindow::hideLog()
 {
+    m_logModel->clear();
     m_logView->hide();
 }
 
@@ -599,25 +600,29 @@ bool MainWindow::draw()
 {
     try {
         setBlueprint(nullptr);
-        QStringList programLines = m_programTextEdit->toPlainText().split('\n');
+        const QStringList programLines = m_programTextEdit->toPlainText().split('\n');
         ProgramParser parser;
         for (const QString& line : programLines)
             parser.processLine(line);
 
-        std::unique_ptr<Program> program = parser.finish();
-        setBlueprint(program->execute());
+        const std::unique_ptr<Program> program = parser.finish();
+        ExecutionResult executionResult = program->execute();
+        setBlueprint(std::move(executionResult.blueprint));
 
-        m_logModel->clear();
+        const auto& executionWarning = executionResult.executionWarning;
+        if (executionWarning)
+            showProgramProblem(LogDataModel::Warning, executionWarning->commandTextRange(), executionWarning->what(), executionWarning->callStack());
+        else
+            hideLog();
         updateStopCoordinates();
-        hideLog();
         statusBar()->showMessage("Программа нарисована.", statusMessageDuration);
         return true;
     }
     catch (const ParseError& error) {
-        showProgramError(TextRange(error.position(), TextPosition()), error.what(), CallStack());
+        showProgramProblem(LogDataModel::Error, TextRange(error.position(), TextPosition()), error.what(), CallStack());
     }
-    catch (const ExecutionError& error) {
-        showProgramError(error.commandTextRange(), error.what(), error.callStack());
+    catch (const ExecutionProblem& error) {
+        showProgramProblem(LogDataModel::Error, error.commandTextRange(), error.what(), error.callStack());
     }
     catch (const std::exception& error) {
         QMessageBox::critical(this, titleErrorText(), error.what());

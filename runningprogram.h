@@ -11,10 +11,10 @@ class Program;
 class ProgramCommand;
 
 
-class ExecutionError : public std::runtime_error
+class ExecutionProblem : public std::runtime_error
 {
 public:
-    ExecutionError(TextRange commandTextRangeArg, const CallStack& callStackArg, const std::string& whatArg);
+    ExecutionProblem(TextRange commandTextRangeArg, const CallStack& callStackArg, const std::string& whatArg);
 
     TextRange commandTextRange() const  { return m_commandTextRange; }
     CallStack callStack() const         { return m_callStack; }
@@ -31,7 +31,7 @@ struct ProgramState
     CallStack callStack;
     Arguments arguments;
     bool laserEnabled = false;
-    int lineWidth = startingLineWidth;
+    int lineWidth = -1;
     QPoint position;
 };
 
@@ -39,11 +39,13 @@ struct ProgramState
 struct RunningProgram
 {
     RunningProgram(const Program* programArg);
-    ExecutionError executionError(const std::string& whatArg) const;
+    void addExecutionWarning(const std::string& whatArg);
+    ExecutionProblem executionError(const std::string& whatArg) const;
 
     const Program* program = nullptr;
     ProgramState state;
     std::unique_ptr<Blueprint> output;
+    std::unique_ptr<ExecutionProblem> firstWarning;
 };
 
 #endif // RUNNINGPROGRAM_H

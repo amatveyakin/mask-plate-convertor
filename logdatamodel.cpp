@@ -30,10 +30,10 @@ void LogDataModel::clear()
     endResetModel();
 }
 
-void LogDataModel::addLine(LogDataModel::Icon icon, const QString& text, TextPosition sourceTextPosition)
+void LogDataModel::addLine(LogDataModel::Severity severity, const QString& text, TextPosition sourceTextPosition)
 {
     beginInsertRows(QModelIndex(), m_lines.size(), m_lines.size());
-    m_lines.push_back({icon, text, sourceTextPosition});
+    m_lines.push_back({severity, text, sourceTextPosition});
     endInsertRows();
 }
 
@@ -52,7 +52,7 @@ QVariant LogDataModel::data(const QModelIndex& idx, int role) const
     case Qt::DisplayRole:
         return line.text;
     case Qt::DecorationRole:
-        return m_pixmaps.at(line.icon);
+        return m_pixmaps.at(line.severity);
     case SourceTextPositionRole:
         return QVariant::fromValue(line.sourceTextPosition);
     }
