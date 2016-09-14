@@ -2,6 +2,7 @@
 #define LOGDATAMODEL_H
 
 #include <QAbstractItemModel>
+#include <QPixmap>
 
 #include "textbasic.h"
 
@@ -48,6 +49,7 @@ private:
 private:
     int m_iconSize = 0;
     std::vector<Line> m_lines;
+    std::map<Icon, QPixmap> m_pixmaps;
 };
 
 #endif // LOGDATAMODEL_H
