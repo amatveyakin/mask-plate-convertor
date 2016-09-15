@@ -10,12 +10,14 @@
 #include "logdatamodel.h"
 #include "textbasic.h"
 
+class QActionGroup;
 class QLabel;
 class QLineEdit;
 class QListView;
 class QPushButton;
 class QModelIndex;
 
+struct AutocadConvertorSettings;
 class Blueprint;
 class BlueprintView;
 class CallStack;
@@ -48,6 +50,7 @@ private:
     QMenu* m_editMenu = nullptr;
     QMenu* m_viewMenu = nullptr;
     QMenu* m_developmentMenu = nullptr;
+    QMenu* m_autocadLanguageSubmenu = nullptr;
     QMenu* m_helpMenu = nullptr;
 
     QAction* m_newAction = nullptr;
@@ -65,6 +68,7 @@ private:
     QAction* m_findAction = nullptr;
     QAction* m_drawAction = nullptr;
     QAction* m_drawAndConvertAction = nullptr;
+    QActionGroup* m_autocadLanguageActionGroup = nullptr;
     QAction* m_increaseFontSizeAction = nullptr;
     QAction* m_decreaseFontSizeAction = nullptr;
     QAction* m_flipHorizontallyAction = nullptr;
@@ -79,12 +83,16 @@ protected:
     void closeEvent(QCloseEvent* ev);
 
 private:
+    QString autocadLanguageCodeName() const;
+    AutocadConvertorSettings autocadConvertorSettings() const;
     void showProgramProblem(LogDataModel::Severity severity, TextRange range, const QString& message, const CallStack& callStack);
     void addBacktraceToLog(const CallStack& callStack);
     void setBlueprint(std::unique_ptr<Blueprint> newBlueprint);
     bool confirmClose();
 
 private slots:
+    void initAutocadLanguages();
+    bool setAutocadLanguage(QString codeName);
     void loadSettings();
     void saveSettings();
     void updateWindowTitle();

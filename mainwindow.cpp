@@ -6,6 +6,7 @@
 
 #include <QAbstractItemModel>
 #include <QAction>
+#include <QActionGroup>
 #include <QApplication>
 #include <QBoxLayout>
 #include <QClipboard>
@@ -24,6 +25,7 @@
 
 #include "appinfo.h"
 #include "autocadconvertor.h"
+#include "autocadlanguage.h"
 #include "blueprint.h"
 #include "blueprintview.h"
 #include "logdatamodel.h"
@@ -59,6 +61,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     setWindowIcon(QIcon(":/images/application-icon.png"));
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
+    initAutocadLanguages();
 
     m_logModel = new LogDataModel(this);
 
@@ -169,6 +172,9 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_developmentMenu = menuBar()->addMenu("&Разработка");
     m_developmentMenu->addAction(m_drawAction);
     m_developmentMenu->addAction(m_drawAndConvertAction);
+    m_developmentMenu->addSeparator();
+    m_autocadLanguageSubmenu = m_developmentMenu->addMenu("&Язык команд AutoCAD");
+    m_autocadLanguageSubmenu->addActions(m_autocadLanguageActionGroup->actions());
 
     m_helpMenu = menuBar()->addMenu("П&омощь");
     m_helpMenu->addAction(m_showAboutAction);
@@ -284,6 +290,21 @@ void MainWindow::closeEvent(QCloseEvent* ev)
         ev->ignore();
 }
 
+QString MainWindow::autocadLanguageCodeName() const
+{
+    const QAction* checkedAction = m_autocadLanguageActionGroup->checkedAction();
+    assert(checkedAction);
+    return checkedAction->data().toString();
+}
+
+AutocadConvertorSettings MainWindow::autocadConvertorSettings() const
+{
+    AutocadConvertorSettings settings;
+    settings.autocadLanguageCodeName = autocadLanguageCodeName();
+    settings.sizeCoeff = 0.001;  // TODO: Make size coeff adjustable
+    return settings;
+}
+
 void MainWindow::showProgramProblem(LogDataModel::Severity severity, TextRange range, const QString& message, const CallStack& callStack)
 {
     if (!range.end.valid())
@@ -340,6 +361,28 @@ bool MainWindow::confirmClose()
     assert(false);
 }
 
+void MainWindow::initAutocadLanguages()
+{
+    m_autocadLanguageActionGroup = new QActionGroup(this);
+    for (const auto& lang : AutocadLanguageFactory::singleton().allLanguages()) {
+        QAction* action = new QAction(lang->uiName(), this);
+        action->setCheckable(true);
+        action->setData(lang->codeName());
+        m_autocadLanguageActionGroup->addAction(action);
+    }
+}
+
+bool MainWindow::setAutocadLanguage(QString codeName)
+{
+    for (QAction* action : m_autocadLanguageActionGroup->actions()) {
+        if (action->data().toString() == codeName) {
+            action->setChecked(true);
+            return true;
+        }
+    }
+    return false;
+}
+
 void MainWindow::loadSettings()
 {
     QSettings settings;
@@ -353,6 +396,8 @@ void MainWindow::loadSettings()
     m_flipVerticallyAction->setChecked(settings.value("flip_vertically", false).toBool());
     m_showTransitionsAction->setChecked(settings.value("show_transitions", false).toBool());
     m_showSegmentsHighlightAction->setChecked(settings.value("show_segments_highlight", true).toBool());
+    if (!setAutocadLanguage(settings.value("autocad_command_language", "").toString()))
+        setAutocadLanguage(AutocadLanguageFactory::singleton().defaultLanguage()->codeName());
 
     m_recentFilesNames.clear();
     int recentFilesCount = settings.beginReadArray("recent_documents");
@@ -374,6 +419,7 @@ void MainWindow::saveSettings()
     settings.setValue("flip_vertically", m_flipVerticallyAction->isChecked());
     settings.setValue("show_transitions", m_showTransitionsAction->isChecked());
     settings.setValue("show_segments_highlight", m_showSegmentsHighlightAction->isChecked());
+    settings.setValue("autocad_command_language", autocadLanguageCodeName());
 
     settings.beginWriteArray("recent_documents", m_recentFilesNames.size());
     for (int i = 0; i < m_recentFilesNames.size(); ++i) {
@@ -635,7 +681,8 @@ bool MainWindow::drawAndConvert()
     bool ok = draw();
     if (!ok)
         return false;
-    QString output = blueprintToAutocadCommandLineCommands(m_blueprint.get());
+    AutocadConvertor convertor(autocadConvertorSettings());
+    QString output = convertor.blueprintToAutocadCommandLineCommands(*m_blueprint);
     QApplication::clipboard()->setText(output);
     statusBar()->showMessage("Программа сконвертирована (результат в буфере обмена).", statusMessageDuration);
     return true;

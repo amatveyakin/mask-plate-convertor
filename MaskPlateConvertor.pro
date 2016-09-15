@@ -32,6 +32,9 @@ SOURCES += appinfo.cpp
 HEADERS += autocadconvertor.h
 SOURCES += autocadconvertor.cpp
 
+HEADERS += autocadlanguage.h
+SOURCES += autocadlanguage.cpp
+
 HEADERS += blueprint.h
 SOURCES += blueprint.cpp
 
