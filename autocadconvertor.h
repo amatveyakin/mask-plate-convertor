@@ -11,6 +11,7 @@ struct AutocadConvertorSettings
 {
     QString autocadLanguageCodeName;
     double sizeCoeff = 1.;
+    bool closePolygons = false;
 };
 
 class AutocadConvertor
@@ -23,6 +24,7 @@ public:
 private:
     AutocadLanguage* m_autocadLanguage;
     double m_sizeCoeff;
+    bool m_closePolygons;
 };
 
 #endif // AUTOCADCONVERTOR_H

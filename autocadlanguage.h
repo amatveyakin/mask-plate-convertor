@@ -11,6 +11,7 @@ enum class AutocadCommand
 {
     PLine,
     Width,
+    Close,
 };
 
 class AutocadLanguage

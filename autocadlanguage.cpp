@@ -10,6 +10,7 @@ public:
         switch(command) {
         case AutocadCommand::PLine: return "_pline";
         case AutocadCommand::Width: return "width";
+        case AutocadCommand::Close: return "close";
         }
     }
 };
@@ -23,6 +24,7 @@ public:
         switch(command) {
         case AutocadCommand::PLine: return "плиния";
         case AutocadCommand::Width: return "ширина";
+        case AutocadCommand::Close: return "замкнуть";
         }
     }
 };

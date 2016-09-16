@@ -302,6 +302,7 @@ AutocadConvertorSettings MainWindow::autocadConvertorSettings() const
     AutocadConvertorSettings settings;
     settings.autocadLanguageCodeName = autocadLanguageCodeName();
     settings.sizeCoeff = 0.001;  // TODO: Make size coeff adjustable
+    settings.closePolygons = true;  // TODO: Make this configurable
     return settings;
 }
 
