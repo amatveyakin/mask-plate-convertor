@@ -1,5 +1,5 @@
 #include "autocadlanguage.h"
-#include "cpp_extensions.h"
+
 
 class AutocadLanguageEnglish : public AutocadLanguage
 {

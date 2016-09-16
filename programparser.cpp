@@ -3,7 +3,6 @@
 
 #include <assert.h>
 
-#include "cpp_extensions.h"
 #include "program.h"
 #include "programparser.h"
 #include "programcommands.h"

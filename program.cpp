@@ -4,7 +4,6 @@
 #include <QPoint>
 
 #include "blueprint.h"
-#include "cpp_extensions.h"
 #include "program.h"
 #include "programcommands.h"
 #include "runningprogram.h"
