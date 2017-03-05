@@ -31,6 +31,14 @@ ParseError::ParseError(TextPosition positionArg, const QString& whatArg)
 }
 
 
+std::unique_ptr<Program> ProgramParser::parseProgram(const QString& programText) {
+    QStringList programLines = programText.split('\n');
+    ProgramParser parser;
+    for (const QString& line : programLines)
+        parser.processLine(line);
+    return parser.finish();
+}
+
 ProgramParser::ProgramParser()
     : m_section(Section::MainHeader1)
     , m_program(new Program)

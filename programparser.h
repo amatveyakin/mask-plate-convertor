@@ -29,6 +29,9 @@ private:
 class ProgramParser
 {
 public:
+    static std::unique_ptr<Program> parseProgram(const QString& programText);
+
+protected:
     ProgramParser();
     ~ProgramParser();
 

@@ -647,12 +647,7 @@ bool MainWindow::draw()
 {
     try {
         setBlueprint(nullptr);
-        const QStringList programLines = m_programTextEdit->toPlainText().split('\n');
-        ProgramParser parser;
-        for (const QString& line : programLines)
-            parser.processLine(line);
-
-        const std::unique_ptr<Program> program = parser.finish();
+        const std::unique_ptr<Program> program = ProgramParser::parseProgram(m_programTextEdit->toPlainText());
         ExecutionResult executionResult = program->execute();
         setBlueprint(std::move(executionResult.blueprint));
 

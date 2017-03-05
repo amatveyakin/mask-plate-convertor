@@ -127,11 +127,7 @@ void ProgramTextEdit::setError(TextRange range)
 void ProgramTextEdit::parseProgram()
 {
     try {
-        QStringList programLines = toPlainText().split('\n');
-        ProgramParser parser;
-        for (const QString& line : programLines)
-            parser.processLine(line);
-        parser.finish();
+        ProgramParser::parseProgram(toPlainText());
     }
     catch (const ParseError& error) {
         setError(fixErrorRange(TextRange(error.position(), TextPosition())));
