@@ -184,8 +184,14 @@ MainWindow::MainWindow(QWidget* parentArg)
     toolbar->addAction(m_openAction);
     toolbar->addAction(m_saveAction);
     toolbar->addSeparator();
+    toolbar->addAction(m_cutAction);
+    toolbar->addAction(m_copyAction);
+    toolbar->addAction(m_pasteAction);
+    toolbar->addSeparator();
     toolbar->addAction(m_undoAction);
     toolbar->addAction(m_redoAction);
+    toolbar->addSeparator();
+    toolbar->addAction(m_findAction);
     toolbar->addSeparator();
     toolbar->addAction(m_drawAction);
     toolbar->addSeparator();
