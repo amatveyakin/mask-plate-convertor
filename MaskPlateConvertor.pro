@@ -46,6 +46,8 @@ SOURCES += blueprintview.cpp
 
 HEADERS += colorutils.h
 
+SOURCES += conversiontest.cpp
+
 HEADERS += forwardmapping.h
 SOURCES += forwardmapping.cpp
 
