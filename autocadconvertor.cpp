@@ -17,6 +17,8 @@ QString AutocadConvertor::blueprintToAutocadCommandLineCommands(const Blueprint&
 {
     QString result;
     for (const Element& curElement : blueprint.elements()) {
+        if (!curElement.laserOn)
+            continue;
         const QPolygon& polygon = curElement.polygon;
         for (int i = 0; i < polygon.size(); ++i) {
             const QString coords = QString("%1,%2").arg(QString::number(polygon[i].x() * m_sizeCoeff, 'f'),

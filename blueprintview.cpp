@@ -273,6 +273,8 @@ void BlueprintView::updateHoveredSegment()
     SegmentId bestSegment = SegmentId::invalid();
     for (int i = 0; i < int(m_blueprint->elements().size()); ++i) {
         const Element& element = m_blueprint->elements()[i];
+        if (!element.laserOn && !m_showTransitions)
+            continue;
         for (int j = 0; j < element.polygon.size() - 1; ++j) {
             SegmentId segmentId = {i, j};
             double d = geometry::distance(QLineF(element.polygon[j], element.polygon[j + 1]), element.width, cursorPos);
@@ -347,27 +349,20 @@ void BlueprintView::doRenderBlueprint(QPainter& painter, const QRect& targetRect
     if (showDecorations) {
         if (m_showSegmentsHighlight)
             renderExternallyHighlightedSegments(painter);
-
-        if (m_showTransitions) {
-            painter.setRenderHint(QPainter::Antialiasing, true);
-            QLinearGradient brush;
-            brush.setColorAt(0., QColor::fromRgbF(0.6, 0.6, 0.,   1.));
-            brush.setColorAt(1., QColor::fromRgbF(0.7, 0.7, 0.15, 0.5));
-            for (int i = 0; i < (int)m_blueprint->elements().size() - 1; ++i) {
-                QPoint start = m_blueprint->elements()[i].polygon.back();
-                QPoint stop = m_blueprint->elements()[i + 1].polygon.front();
-                brush.setStart(start);
-                brush.setFinalStop(stop);
-                painter.setPen(QPen(brush, 15, Qt::DotLine, Qt::FlatCap, Qt::BevelJoin));
-                painter.drawLine(start, stop);
-            }
-        }
     }
 
     painter.setRenderHint(QPainter::Antialiasing, false);
     for (const Element& element : m_blueprint->elements()) {
-        painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
-        painter.drawPolyline(element.polygon);
+        if (element.laserOn) {
+            painter.setRenderHint(QPainter::Antialiasing, false);
+            painter.setPen(QPen(Qt::black, element.width, Qt::SolidLine, Qt::FlatCap, Qt::BevelJoin));
+            painter.drawPolyline(element.polygon);
+        } else if (showDecorations && m_showTransitions) {
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            QColor color = QColor::fromRgbF(0.6, 0.6, 0., 1.);
+            painter.setPen(QPen(color, 15, Qt::DotLine, Qt::FlatCap, Qt::BevelJoin));
+            painter.drawPolyline(element.polygon);
+        }
     }
 
     if (showDecorations) {

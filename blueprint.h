@@ -15,6 +15,7 @@
  */
 struct Element
 {
+    bool laserOn = false;
     QPolygon polygon;
     int width = -1;
     std::vector<CallStack> segmentBacktraces;
@@ -38,9 +39,8 @@ public:
     ForwardMapping& forwardMapping()                { return m_forwardMapping; }
     QPoint stopPoint() const                        { return m_stopPoint; }
 
-    void appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace);
+    void appendLine(bool laserOn, QPoint from, QPoint to, int width, const CallStack& backtrace);
     void finishElement();
-    void setStopPoint(QPoint p);
     void preProcess(const ForwardMapping& forwardMapping);
     void postProcess();
     void resetForwardMapping();

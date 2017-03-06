@@ -63,15 +63,12 @@ void MoveToCommand::doExecute(RunningProgram& instance)
     QPoint oldPosition = instance.state.position;
     instance.state.position += m_movement.value(instance.state.arguments, instance);
     QPoint newPosition = instance.state.position;
-    if (instance.state.laserEnabled) {
-        if (instance.state.lineWidth < 0) {
-            instance.addExecutionWarning("Не установлена начальная ширина лазера");
-            instance.state.lineWidth = startingLineWidth;
-        }
-        instance.output->appendLine(oldPosition, newPosition, instance.state.lineWidth, instance.state.callStack);
+    if (instance.state.laserEnabled && instance.state.lineWidth < 0) {
+        instance.addExecutionWarning("Не установлена начальная ширина лазера");
+        instance.state.lineWidth = startingLineWidth;
     }
+    instance.output->appendLine(instance.state.laserEnabled, oldPosition, newPosition, instance.state.lineWidth, instance.state.callStack);
     instance.output->forwardMapping().addMovement(textLine(), oldPosition, newPosition);
-    instance.output->setStopPoint(instance.state.position);
 }
 
 

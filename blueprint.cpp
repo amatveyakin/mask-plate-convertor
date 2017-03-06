@@ -23,42 +23,39 @@ bool Blueprint::isSegmentValid(SegmentId id) const
            && 0 <= id.segment && id.segment < elements()[id.element].polygon.size() - 1;
 }
 
-void Blueprint::setStopPoint(QPoint p)
+void Blueprint::appendLine(bool laserOn, QPoint from, QPoint to, int width, const CallStack& backtrace)
 {
-    m_stopPoint = p;
-}
-
-void Blueprint::appendLine(QPoint from, QPoint to, int width, const CallStack& backtrace)
-{
-    assert(!m_elements.empty());
+    if (m_elements.empty() || m_elements.back().laserOn != laserOn)
+        m_elements.emplace_back();
     Element& curElement = m_elements.back();
     if (curElement.polygon.empty()) {
+        curElement.laserOn = laserOn;
         curElement.polygon << from << to;
         curElement.width = width;
         curElement.segmentBacktraces.push_back(backtrace);
     }
     else {
+        assert(curElement.laserOn == laserOn);
         assert(curElement.polygon.back() == from);
-        assert(curElement.width == width);
+        if (laserOn)
+            assert(curElement.width == width);
         curElement.polygon << to;
         curElement.segmentBacktraces.push_back(backtrace);
     }
     SegmentId lastSegment(m_elements.size() - 1, curElement.polygon.size() - 2);
     assert(isSegmentValid(lastSegment));
     m_forwardMapping.addSegment(backtrace, lastSegment);
+    m_stopPoint = to;
 }
 
-void Blueprint::finishElement()
-{
-    assert(!m_elements.empty());
-    if (!m_elements.back().polygon.empty())
+void Blueprint::finishElement() {
+    if (!m_elements.empty() && !m_elements.back().polygon.empty())
         m_elements.emplace_back();
 }
 
 void Blueprint::preProcess(const ForwardMapping& forwardMapping)
 {
     m_forwardMapping = forwardMapping;
-    m_elements.emplace_back();
 }
 
 static QRect elementBoundingRect(const Element& element)
