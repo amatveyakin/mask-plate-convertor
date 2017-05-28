@@ -28,7 +28,7 @@ QString AutocadConvertor::blueprintToAutocadCommandLineCommands(const Blueprint&
                                   m_autocadLanguage->commandText(AutocadCommand::PLine),
                                   coords,
                                   m_autocadLanguage->commandText(AutocadCommand::Width),
-                                  QString::number(curElement.width * m_sizeCoeff)));
+                                  QString::number(curElement.width * m_sizeCoeff, 'f')));
             } else if (m_closePolygons && i == polygon.size() - 1 && polygon[i] == polygon[0]) {
                 result.append(QString("%1\n").arg(
                                   m_autocadLanguage->commandText(AutocadCommand::Close)));
