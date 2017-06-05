@@ -20,7 +20,7 @@ AutocadConvertorSettings autocadConvertorSettings()
 {
     AutocadConvertorSettings settings;
     settings.autocadLanguageCodeName = "en";
-    settings.sizeCoeff = 0.001;
+    settings.sizeCoeff = 0.000001;
     settings.closePolygons = true;
     return settings;
 }
