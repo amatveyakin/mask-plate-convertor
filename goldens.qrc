@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>goldens/4_a01.source</file>
+    <file>goldens/4_a01.autocad</file>
+    <file>goldens/7_om.source</file>
+    <file>goldens/7_om.autocad</file>
+</qresource>
+</RCC>

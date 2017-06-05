@@ -5,7 +5,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = MaskPlateConvertor
 TEMPLATE = app
 
-RESOURCES = images.qrc
+RESOURCES += goldens.qrc
+RESOURCES += images.qrc
 
 *g++*|*clang*{
   QMAKE_CXXFLAGS += -std=c++14 -Wall -Wextra -Wformat=2 -Woverloaded-virtual -Wshadow -Wnon-virtual-dtor -Werror

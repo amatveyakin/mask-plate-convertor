@@ -2,6 +2,7 @@
 #include <QTextCodec>
 
 #include "appinfo.h"
+#include "conversiontest.h"
 #include "mainwindow.h"
 
 int main(int argc, char* argv[])
@@ -15,6 +16,8 @@ int main(int argc, char* argv[])
 
     QCoreApplication::setOrganizationName(companyName());
     QCoreApplication::setApplicationName(appName());
+
+    runConversionTests();
 
     MainWindow mainWindow;
     mainWindow.show();
