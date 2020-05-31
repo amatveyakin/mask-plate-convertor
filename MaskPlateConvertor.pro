@@ -33,6 +33,11 @@ SOURCES += appinfo.cpp
 HEADERS += autocadconvertor.h
 SOURCES += autocadconvertor.cpp
 
+HEADERS += autocadconvertorsettings.h
+
+HEADERS += autocadsettingsdialog.h
+SOURCES += autocadsettingsdialog.cpp
+
 HEADERS += autocadlanguage.h
 SOURCES += autocadlanguage.cpp
 

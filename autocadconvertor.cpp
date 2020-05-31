@@ -7,7 +7,7 @@
 
 AutocadConvertor::AutocadConvertor(AutocadConvertorSettings settings)
 {
-    m_autocadLanguage = AutocadLanguageFactory::singleton().getLanguage(settings.autocadLanguageCodeName);
+    m_autocadLanguage = AutocadLanguageFactory::singleton().getLanguage(settings.autocadLanguageCode);
     assert(m_autocadLanguage);
     m_sizeCoeff = settings.sizeCoeff;
     m_closePolygons = settings.closePolygons;

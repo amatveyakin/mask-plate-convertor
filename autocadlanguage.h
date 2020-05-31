@@ -7,6 +7,9 @@
 #include <QString>
 #include <QList>
 
+#include "autocadconvertorsettings.h"
+
+
 enum class AutocadCommand
 {
     PLine,
@@ -18,6 +21,7 @@ class AutocadLanguage
 {
 public:
     virtual ~AutocadLanguage() {}
+    virtual AutocadLanguageCode code() = 0;
     virtual QString codeName() = 0;
     virtual QString uiName() = 0;
     virtual QString commandText(AutocadCommand command) = 0;
@@ -29,8 +33,8 @@ public:
     static AutocadLanguageFactory& singleton();
 
     const std::vector<std::unique_ptr<AutocadLanguage>>& allLanguages() const;
-    AutocadLanguage* getLanguage(const QString& codeName) const;
-    AutocadLanguage* defaultLanguage() const;
+    AutocadLanguage* getLanguage(AutocadLanguageCode code) const;
+    AutocadLanguage* getLanguageByName(QString codeName) const;
 
 private:
     AutocadLanguageFactory();

@@ -3,16 +3,11 @@
 
 #include <QString>
 
+#include "autocadconvertorsettings.h"
+
 class AutocadLanguage;
 class Blueprint;
 
-
-struct AutocadConvertorSettings
-{
-    QString autocadLanguageCodeName;
-    double sizeCoeff = 1.;
-    bool closePolygons = false;
-};
 
 class AutocadConvertor
 {

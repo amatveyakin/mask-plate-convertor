@@ -4,6 +4,7 @@
 class AutocadLanguageEnglish : public AutocadLanguage
 {
 public:
+    AutocadLanguageCode code() override { return AutocadLanguageCode::En; }
     QString codeName() override { return "en"; }
     QString uiName() override { return "&Английский"; }
     QString commandText(AutocadCommand command) override {
@@ -19,6 +20,7 @@ public:
 class AutocadLanguageRussian : public AutocadLanguage
 {
 public:
+    AutocadLanguageCode code() override { return AutocadLanguageCode::Ru; }
     QString codeName() override { return "ru"; }
     QString uiName() override { return "&Русский"; }
     QString commandText(AutocadCommand command) override {
@@ -42,18 +44,21 @@ const std::vector<std::unique_ptr<AutocadLanguage>>& AutocadLanguageFactory::all
     return m_languages;
 }
 
-AutocadLanguage* AutocadLanguageFactory::getLanguage(const QString& codeName) const
+AutocadLanguage* AutocadLanguageFactory::getLanguage(AutocadLanguageCode code) const
 {
     for (const auto& lang : m_languages) {
-        if (lang->codeName() == codeName)
+        if (lang->code() == code)
             return lang.get();
     }
     return nullptr;
 }
 
-AutocadLanguage* AutocadLanguageFactory::defaultLanguage() const
-{
-    return m_languages.front().get();
+AutocadLanguage* AutocadLanguageFactory::getLanguageByName(QString codeName) const {
+    for (const auto& lang : m_languages) {
+        if (lang->codeName() == codeName)
+            return lang.get();
+    }
+    return nullptr;
 }
 
 AutocadLanguageFactory::AutocadLanguageFactory()

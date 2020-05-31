@@ -19,7 +19,7 @@ namespace {
 AutocadConvertorSettings autocadConvertorSettings()
 {
     AutocadConvertorSettings settings;
-    settings.autocadLanguageCodeName = "en";
+    settings.autocadLanguageCode = AutocadLanguageCode::En;
     settings.sizeCoeff = 0.000001;
     settings.closePolygons = true;
     return settings;

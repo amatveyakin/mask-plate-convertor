@@ -25,6 +25,7 @@
 
 #include "appinfo.h"
 #include "autocadconvertor.h"
+#include "autocadsettingsdialog.h"
 #include "autocadlanguage.h"
 #include "blueprint.h"
 #include "blueprintview.h"
@@ -61,7 +62,6 @@ MainWindow::MainWindow(QWidget* parentArg)
     setWindowIcon(QIcon(":/images/application-icon.png"));
     setCentralWidget(new QWidget(this));
     statusBar();  // show status bar
-    initAutocadLanguages();
 
     m_logModel = new LogDataModel(this);
 
@@ -111,6 +111,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_findAction = new QAction(QIcon(":/images/edit-find.png"), "&Найти", this);
     m_drawAction = new QAction(QIcon(":/images/development-draw.png"), "&Нарисовать", this);
     m_drawAndConvertAction = new QAction(QIcon(":/images/development-convert.png"), "&Конвертировать", this);
+    m_autocadConvertorSettingsAction = new QAction("На&стройки AutoCAD...", this);
     m_increaseFontSizeAction = new QAction(QIcon(":/images/view-increase-font.png"), "&Увеличить размер шрифта", this);
     m_decreaseFontSizeAction = new QAction(QIcon(":/images/view-decrease-font.png"), "У&меньшить размер шрифта", this);
     m_flipHorizontallyAction = new QAction(QIcon(":/images/view-flip-horizontally.png"), "Отразить по &горизонтали", this);
@@ -173,8 +174,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_developmentMenu->addAction(m_drawAction);
     m_developmentMenu->addAction(m_drawAndConvertAction);
     m_developmentMenu->addSeparator();
-    m_autocadLanguageSubmenu = m_developmentMenu->addMenu("&Язык команд AutoCAD");
-    m_autocadLanguageSubmenu->addActions(m_autocadLanguageActionGroup->actions());
+    m_developmentMenu->addAction(m_autocadConvertorSettingsAction);
 
     m_helpMenu = menuBar()->addMenu("П&омощь");
     m_helpMenu->addAction(m_showAboutAction);
@@ -261,8 +261,10 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(m_blueprintView, SIGNAL(selectedSegmentChanged(SegmentId)), this, SLOT(showSegmentOrigin(SegmentId)));
 
-    connect(m_drawAction,           SIGNAL(triggered()), this, SLOT(draw()));
-    connect(m_drawAndConvertAction, SIGNAL(triggered()), this, SLOT(drawAndConvert()));
+    connect(m_drawAction,                       SIGNAL(triggered()), this, SLOT(draw()));
+    connect(m_drawAndConvertAction,             SIGNAL(triggered()), this, SLOT(drawAndConvert()));
+    connect(m_autocadConvertorSettingsAction,   SIGNAL(triggered()), this, SLOT(autocadConvertorSettingsDialog()));
+
     connect(m_saveImageAction,      SIGNAL(triggered()), this, SLOT(saveImage()));
     connect(m_printImageAction,     SIGNAL(triggered()), this, SLOT(printImage()));
 
@@ -294,22 +296,6 @@ void MainWindow::closeEvent(QCloseEvent* ev)
     }
     else
         ev->ignore();
-}
-
-QString MainWindow::autocadLanguageCodeName() const
-{
-    const QAction* checkedAction = m_autocadLanguageActionGroup->checkedAction();
-    assert(checkedAction);
-    return checkedAction->data().toString();
-}
-
-AutocadConvertorSettings MainWindow::autocadConvertorSettings() const
-{
-    AutocadConvertorSettings settings;
-    settings.autocadLanguageCodeName = autocadLanguageCodeName();
-    settings.sizeCoeff = 0.000001;  // TODO: Make size coeff adjustable; remember to check necessary printing precision
-    settings.closePolygons = true;  // TODO: Make this configurable
-    return settings;
 }
 
 void MainWindow::showProgramProblem(LogDataModel::Severity severity, TextRange range, const QString& message, const CallStack& callStack)
@@ -368,26 +354,13 @@ bool MainWindow::confirmClose()
     abort();
 }
 
-void MainWindow::initAutocadLanguages()
+void MainWindow::autocadConvertorSettingsDialog()
 {
-    m_autocadLanguageActionGroup = new QActionGroup(this);
-    for (const auto& lang : AutocadLanguageFactory::singleton().allLanguages()) {
-        QAction* action = new QAction(lang->uiName(), this);
-        action->setCheckable(true);
-        action->setData(lang->codeName());
-        m_autocadLanguageActionGroup->addAction(action);
+    AutocadSettingsDialog dialog(m_autocadConvertorSettings, this);
+    int ret = dialog.exec();
+    if (ret == QDialog::Accepted) {
+        m_autocadConvertorSettings = dialog.settings();
     }
-}
-
-bool MainWindow::setAutocadLanguage(QString codeName)
-{
-    for (QAction* action : m_autocadLanguageActionGroup->actions()) {
-        if (action->data().toString() == codeName) {
-            action->setChecked(true);
-            return true;
-        }
-    }
-    return false;
 }
 
 void MainWindow::loadSettings()
@@ -403,8 +376,12 @@ void MainWindow::loadSettings()
     m_flipVerticallyAction->setChecked(settings.value("flip_vertically", false).toBool());
     m_showTransitionsAction->setChecked(settings.value("show_transitions", false).toBool());
     m_showSegmentsHighlightAction->setChecked(settings.value("show_segments_highlight", true).toBool());
-    if (!setAutocadLanguage(settings.value("autocad_command_language", "").toString()))
-        setAutocadLanguage(AutocadLanguageFactory::singleton().defaultLanguage()->codeName());
+    const auto& autocadLanguage = AutocadLanguageFactory::singleton().getLanguageByName(
+                settings.value("autocad_command_language", "").toString());
+    if (autocadLanguage != nullptr) {
+        m_autocadConvertorSettings.autocadLanguageCode = autocadLanguage->code();
+    }
+    m_autocadConvertorSettings.sizeCoeff = settings.value("autocad_size_coefficient", 1.0).toDouble();
 
     m_recentFilesNames.clear();
     int recentFilesCount = settings.beginReadArray("recent_documents");
@@ -426,7 +403,9 @@ void MainWindow::saveSettings()
     settings.setValue("flip_vertically", m_flipVerticallyAction->isChecked());
     settings.setValue("show_transitions", m_showTransitionsAction->isChecked());
     settings.setValue("show_segments_highlight", m_showSegmentsHighlightAction->isChecked());
-    settings.setValue("autocad_command_language", autocadLanguageCodeName());
+    settings.setValue("autocad_command_language",
+                      AutocadLanguageFactory::singleton().getLanguage(m_autocadConvertorSettings.autocadLanguageCode)->codeName());
+    settings.setValue("autocad_size_coefficient", m_autocadConvertorSettings.sizeCoeff);
 
     settings.beginWriteArray("recent_documents", m_recentFilesNames.size());
     for (int i = 0; i < m_recentFilesNames.size(); ++i) {
@@ -683,7 +662,7 @@ bool MainWindow::drawAndConvert()
     bool ok = draw();
     if (!ok)
         return false;
-    AutocadConvertor convertor(autocadConvertorSettings());
+    AutocadConvertor convertor(m_autocadConvertorSettings);
     QString output = convertor.blueprintToAutocadCommandLineCommands(*m_blueprint);
     QApplication::clipboard()->setText(output);
     statusBar()->showMessage("Программа сконвертирована (результат в буфере обмена).", statusMessageDuration);

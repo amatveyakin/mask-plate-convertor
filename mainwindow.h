@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QTextFormat>
 
+#include "autocadconvertorsettings.h"
 #include "blueprintbasic.h"
 #include "logdatamodel.h"
 #include "textbasic.h"
@@ -36,6 +37,7 @@ public:
 private:
     QString m_fileName;
     QStringList m_recentFilesNames;
+    AutocadConvertorSettings m_autocadConvertorSettings;
     BlueprintPtr m_blueprint;
     LogDataModel* m_logModel = nullptr;
 
@@ -50,7 +52,6 @@ private:
     QMenu* m_editMenu = nullptr;
     QMenu* m_viewMenu = nullptr;
     QMenu* m_developmentMenu = nullptr;
-    QMenu* m_autocadLanguageSubmenu = nullptr;
     QMenu* m_helpMenu = nullptr;
 
     QAction* m_newAction = nullptr;
@@ -68,7 +69,7 @@ private:
     QAction* m_findAction = nullptr;
     QAction* m_drawAction = nullptr;
     QAction* m_drawAndConvertAction = nullptr;
-    QActionGroup* m_autocadLanguageActionGroup = nullptr;
+    QAction* m_autocadConvertorSettingsAction = nullptr;
     QAction* m_increaseFontSizeAction = nullptr;
     QAction* m_decreaseFontSizeAction = nullptr;
     QAction* m_flipHorizontallyAction = nullptr;
@@ -91,8 +92,7 @@ private:
     bool confirmClose();
 
 private slots:
-    void initAutocadLanguages();
-    bool setAutocadLanguage(QString codeName);
+    void autocadConvertorSettingsDialog();
     void loadSettings();
     void saveSettings();
     void updateWindowTitle();
