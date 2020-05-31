@@ -14,5 +14,6 @@ QString appVersionString();
 QString titleText(const QString& subtitle = QString());
 QString titleErrorText();
 QString aboutText();
+QString readmeText();
 
 #endif // APPINFO_H

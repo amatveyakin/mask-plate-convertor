@@ -79,6 +79,7 @@ private:
     QAction* m_saveImageAction = nullptr;
     QAction* m_printImageAction = nullptr;
     QAction* m_showAboutAction = nullptr;
+    QAction* m_showReadmeAction = nullptr;
 
 protected:
     void closeEvent(QCloseEvent* ev);
@@ -122,6 +123,7 @@ private slots:
     void saveImage();
     void printImage();
     void showAbout();
+    void showReadme();
 };
 
 #endif // MAINWINDOW_H

@@ -121,6 +121,7 @@ MainWindow::MainWindow(QWidget* parentArg)
     m_saveImageAction = new QAction(QIcon(":/images/image-save.png"), "Сохранить &изображение...", this);
     m_printImageAction = new QAction(QIcon(":/images/image-print.png"), "&Распечатать изображение...", this);
     m_showAboutAction = new QAction(QIcon(":/images/help-about.png"), "&О программе...", this);
+    m_showReadmeAction = new QAction("&Readme...", this);
 
     m_flipHorizontallyAction->setCheckable(true);
     m_flipVerticallyAction->setCheckable(true);
@@ -178,6 +179,7 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     m_helpMenu = menuBar()->addMenu("П&омощь");
     m_helpMenu->addAction(m_showAboutAction);
+    m_helpMenu->addAction(m_showReadmeAction);
 
     QToolBar* toolbar = new QToolBar(this);
     toolbar->addAction(m_newAction);
@@ -278,7 +280,8 @@ MainWindow::MainWindow(QWidget* parentArg)
 
     connect(m_logView, SIGNAL(clicked(QModelIndex)), this, SLOT(updateOnLogItemClicked(QModelIndex)));
 
-    connect(m_showAboutAction, SIGNAL(triggered()), this, SLOT(showAbout()));
+    connect(m_showAboutAction,  SIGNAL(triggered()), this, SLOT(showAbout()));
+    connect(m_showReadmeAction, SIGNAL(triggered()), this, SLOT(showReadme()));
 
     updateWindowTitle();
     loadSettings();
@@ -701,4 +704,9 @@ void MainWindow::printImage()
 void MainWindow::showAbout()
 {
   QMessageBox::about(this, QString("О программе %1").arg(appName()), aboutText());
+}
+
+void MainWindow::showReadme()
+{
+  QMessageBox(QMessageBox::Information, "Readme", readmeText(), QMessageBox::Ok, this).exec();
 }
