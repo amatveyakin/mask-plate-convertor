@@ -28,7 +28,7 @@ static inline QString unitsString(SaveImageSettings::Units units)
     case SaveImageSettings::Pixels:         return "px";
     case SaveImageSettings::Millimeters:    return "mm";
     }
-    assert(false);
+    abort();
 }
 
 static inline bool alwaysIntegerUnits(SaveImageSettings::Units units)
@@ -37,7 +37,7 @@ static inline bool alwaysIntegerUnits(SaveImageSettings::Units units)
     case SaveImageSettings::Pixels:         return true;
     case SaveImageSettings::Millimeters:    return false;
     }
-    assert(false);
+    abort();
 }
 
 static inline double pixelsToUnitsCoeff(SaveImageSettings::Units units, int dpi)
@@ -47,7 +47,7 @@ static inline double pixelsToUnitsCoeff(SaveImageSettings::Units units, int dpi)
     case SaveImageSettings::Pixels:         return 1.;
     case SaveImageSettings::Millimeters:    return (1. * inchedToMillimetersCoeff) / dpi;
     }
-    assert(false);
+    abort();
 }
 
 static inline SaveImageSettings::Units extraUnits(SaveImageSettings::Units units)
@@ -56,7 +56,7 @@ static inline SaveImageSettings::Units extraUnits(SaveImageSettings::Units units
     case SaveImageSettings::Pixels:         return SaveImageSettings::Millimeters;
     case SaveImageSettings::Millimeters:    return SaveImageSettings::Pixels;
     }
-    assert(false);
+    abort();
 }
 
 static inline QSize round(QSizeF s)

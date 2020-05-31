@@ -12,6 +12,7 @@ public:
         case AutocadCommand::Width: return "width";
         case AutocadCommand::Close: return "close";
         }
+        abort();
     }
 };
 
@@ -26,6 +27,7 @@ public:
         case AutocadCommand::Width: return "ширина";
         case AutocadCommand::Close: return "замкнуть";
         }
+        abort();
     }
 };
 

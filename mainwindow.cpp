@@ -365,7 +365,7 @@ bool MainWindow::confirmClose()
     case QMessageBox::Cancel:
         return false;
     }
-    assert(false);
+    abort();
 }
 
 void MainWindow::initAutocadLanguages()
